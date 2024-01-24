@@ -1,4 +1,4 @@
-package openaibot
+package localai
 
 import (
 	"context"
@@ -25,7 +25,7 @@ func errorMessage(err error, bot *tgbotapi.BotAPI, user db.User) {
 	// userDatabase[ID] = updateDb
 }
 
-func StartDialogSequence(bot *tgbotapi.BotAPI, chatID int64, promt string, ctx context.Context) {
+func StartDialogSequence(bot *tgbotapi.BotAPI, chatID int64, promt string, ctx context.Context, ai_endpoint string) {
 	mu.Lock()
 	defer mu.Unlock()
 
@@ -38,13 +38,16 @@ func StartDialogSequence(bot *tgbotapi.BotAPI, chatID int64, promt string, ctx c
 		promt,
 	)
 
+	/*
 	req := createComplexChatRequest(promt, gptModel)
 	c := user.AiSession.GptClient
+	*/
 
-	resp, err := c.CreateChatCompletion(ctx, req)
+	resp, err := GenerateCompletion(promt,gptModel,ai_endpoint)
 	if err != nil {
 		errorMessage(err, bot, user)
 	} else {
+		LogResponse(resp)
 		respText := resp.Choices[0].Message.Content
 		msg := tgbotapi.NewMessage(chatID, respText)
 		msg.ParseMode = "MARKDOWN"
@@ -54,4 +57,16 @@ func StartDialogSequence(bot *tgbotapi.BotAPI, chatID int64, promt string, ctx c
 		db.UsersMap[chatID] = user
 	}
 
+}
+
+func LogResponse(resp *ChatResponse) {
+	log.Println("full response obj log: ", resp)
+	log.Println("created: ", resp.Created)
+	log.Println("resp id: ",resp.ID)
+	log.Println("resp model: ", resp.Model)
+	log.Println("resp object: ",resp.Object)
+	log.Println("resp Choices[0]: ", resp.Choices[0])
+	log.Println("resp_usage promt tokens: ", resp.Usage.PromptTokens)
+	log.Println("resp_usage completion tokens: ", resp.Usage.CompletionTokens)
+	log.Println("resp_usage total tokens: ",resp.Usage.TotalTokens)
 }

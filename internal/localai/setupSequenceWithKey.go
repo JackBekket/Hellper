@@ -1,4 +1,4 @@
-package openaibot
+package localai
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	db "github.com/JackBekket/uncensoredgpt_tgbot/internal/database"
-	"github.com/sashabaranov/go-openai"
+	//"github.com/sashabaranov/go-openai"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -19,47 +19,35 @@ func SetupSequenceWithKey(
 	language string,
 	ctx context.Context,
 	local_ap string,
+	ai_endpoint string,
 ) {
 	mu.Lock()
 	defer mu.Unlock()
 	chatID := user.ID
 	gptKey := user.AiSession.GptKey
 	log.Println("user GPT key from session: ", gptKey)
-	u_network := user.Network
-	log.Println("user network from session: ", u_network)
+	//u_network := user.Network
+	//log.Println("user network from session: ", u_network)
 	log.Println("user model from session: ", user.AiSession.GptModel)
-	var client *openai.Client
+	//var client *openai.Client
 	//u_pwd := 
 
 
-	if (u_network == "openai") {
-		log.Println("Setting up sequence with key")
-		log.Println("Network is openai, initiating creating client")
-		client = CreateClient(gptKey)
-	} 
-	if (u_network == "localai") {
-		log.Println("Network is localhost, creating local client")
-		//var err error
-		client_check, err := CreateLocalhostClientWithCheck(local_ap,gptKey)
-		if err != nil {
-			errorMessage(err,bot,user)
-		} 
-		client = client_check
-	}
+
 
 	//client := CreateClient(gptKey) // creating client (but we don't know if it works)
 	//log.Println("Setting up sequence with key")
 	//client := CreateLocalhostClientWithCheck(local_ap,gptKey)
 	log.Println("local_ap: ", local_ap)
-	log.Println("client: ", client)
+	//log.Println("client: ", client)
 	//log.Println("client: ", client.config)
-	user.AiSession.GptClient = *client
+	//user.AiSession.GptClient = *client
 
 	
 
 	switch language {
 	case "English":
-		probe, err := tryLanguage(user, "", 1, ctx)
+		probe, err := tryLanguage(user, "", 1, ctx,ai_endpoint)
 		if err != nil {
 			errorMessage(err, bot, user)
 		} else {
@@ -69,7 +57,7 @@ func SetupSequenceWithKey(
 			db.UsersMap[chatID] = user
 		}
 	case "Russian":
-		probe, err := tryLanguage(user, "", 2, ctx)
+		probe, err := tryLanguage(user, "", 2, ctx,ai_endpoint)
 		if err != nil {
 			errorMessage(err, bot, user)
 		} else {
@@ -79,7 +67,7 @@ func SetupSequenceWithKey(
 			db.UsersMap[chatID] = user
 		}
 	default:
-		probe, err := tryLanguage(user, language, 0, ctx)
+		probe, err := tryLanguage(user, language, 0, ctx,ai_endpoint)
 		if err != nil {
 			errorMessage(err, bot, user)
 		} else {
@@ -92,7 +80,7 @@ func SetupSequenceWithKey(
 }
 
 // LanguageCode: 0 - default, 1 - Russian, 2 - English
-func tryLanguage(user db.User, language string, languageCode int, ctx context.Context) (string, error) {
+func tryLanguage(user db.User, language string, languageCode int, ctx context.Context, ai_endpoint string) (string, error) {
 	var languagePromt string
 
 	switch languageCode {
@@ -106,16 +94,19 @@ func tryLanguage(user db.User, language string, languageCode int, ctx context.Co
 
 	log.Printf("Language: %v\n", languagePromt)
 	model := user.AiSession.GptModel
-	client := user.AiSession.GptClient
-	log.Println("client: ", client)
+	//client := user.AiSession.GptClient
+	//log.Println("client: ", client)
 
+	/*
 	req := createComplexChatRequest(languagePromt, model)
 	log.Printf("request: %v\n", req)
+	*/
 
-	resp, err := client.CreateChatCompletion(ctx, req)
+	resp, err := GenerateCompletion(languagePromt,model,ai_endpoint)
 	if err != nil {
 		return "", err
 	} else {
+		LogResponse(resp)
 		answer := resp.Choices[0].Message.Content
 		return answer, nil
 	}

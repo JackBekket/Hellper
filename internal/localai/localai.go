@@ -1,10 +1,11 @@
-package main
+package localai
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 )
 
@@ -43,8 +44,9 @@ type UsageStatistics struct {
 func main() {
  prompt := "How are you?"
  modelName := "wizard-uncensored-13b"
+ url := "http://localhost:8080/v1/chat/completions"
 
- resp, err := GenerateCompletion(prompt, modelName)
+ resp, err := GenerateCompletion(prompt, modelName, url)
  if err != nil {
   fmt.Println("Error:", err)
   return
@@ -53,8 +55,10 @@ func main() {
  fmt.Println("Assistant's response:", resp.Choices[0].Message.Content)
 }
 
-func GenerateCompletion(prompt, modelName string) (*ChatResponse, error) {
- url := "http://localhost:8080/v1/chat/completions"
+func GenerateCompletion(prompt, modelName string, url string) (*ChatResponse, error) {
+ 
+ 
+ //url := "http://localhost:8080/v1/chat/completions"
 
  // Create the request body
  data := ChatRequest{
@@ -81,6 +85,9 @@ func GenerateCompletion(prompt, modelName string) (*ChatResponse, error) {
  }
  defer resp.Body.Close()
 
+ // log raw response
+ log.Println("raw response: ", resp)
+
  // Read the response body
  body, err := ioutil.ReadAll(resp.Body)
  if err != nil {
@@ -93,6 +100,9 @@ func GenerateCompletion(prompt, modelName string) (*ChatResponse, error) {
  if err != nil {
   return nil, err
  }
+
+ // log unmarshalled response
+ log.Println(chatResp)
 
  return &chatResp, nil
 }
