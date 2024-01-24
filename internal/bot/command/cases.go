@@ -3,7 +3,7 @@ package command
 import (
 	"log"
 
-	"github.com/JackBekket/telegram-gpt/internal/openaibot"
+	"github.com/JackBekket/uncensoredgpt_tgbot/internal/openaibot"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/sashabaranov/go-openai"
 )

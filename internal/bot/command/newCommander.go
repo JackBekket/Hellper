@@ -3,7 +3,7 @@ package command
 import (
 	"context"
 
-	"github.com/JackBekket/telegram-gpt/internal/database"
+	"github.com/JackBekket/uncensoredgpt_tgbot/internal/database"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 

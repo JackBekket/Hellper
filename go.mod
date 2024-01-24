@@ -1,4 +1,4 @@
-module github.com/JackBekket/telegram-gpt
+module github.com/JackBekket/uncensoredgpt_tgbot
 
 go 1.20
 

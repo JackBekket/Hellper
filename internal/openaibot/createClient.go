@@ -5,7 +5,7 @@ import (
 	"log"
 
 	gogpt "github.com/sashabaranov/go-openai"
-	//"github.com/JackBekket/telegram-gpt/internal/bot/env"
+	//"github.com/JackBekket/uncensoredgpt_tgbot/internal/bot/env"
 )
 
 func CreateClient(gptKey string) *gogpt.Client {
