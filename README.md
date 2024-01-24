@@ -1,3 +1,10 @@
+# Uncensored GPT telegram bot
+Originally forked from telegram-gpt due to incompability of standarts between pirates and openAI
+
+
+
+
+
 # telegram-gpt
 Telegram bot to operate with OpenAI chat-GPT
 
