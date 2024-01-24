@@ -26,8 +26,8 @@ func SetupSequenceWithKey(
 	chatID := user.ID
 	gptKey := user.AiSession.GptKey
 	log.Println("user GPT key from session: ", gptKey)
-	u_network := user.Network
-	log.Println("user network from session: ", u_network)
+	//u_network := user.Network
+	//log.Println("user network from session: ", u_network)
 	log.Println("user model from session: ", user.AiSession.GptModel)
 	//var client *openai.Client
 	//u_pwd := 
