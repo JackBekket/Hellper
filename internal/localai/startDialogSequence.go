@@ -47,7 +47,7 @@ func StartDialogSequence(bot *tgbotapi.BotAPI, chatID int64, promt string, ctx c
 	if err != nil {
 		errorMessage(err, bot, user)
 	} else {
-		logResponse(resp)
+		LogResponse(resp)
 		respText := resp.Choices[0].Message.Content
 		msg := tgbotapi.NewMessage(chatID, respText)
 		msg.ParseMode = "MARKDOWN"
@@ -59,7 +59,7 @@ func StartDialogSequence(bot *tgbotapi.BotAPI, chatID int64, promt string, ctx c
 
 }
 
-func logResponse(resp *ChatResponse) {
+func LogResponse(resp *ChatResponse) {
 	log.Println("full response obj log: ", resp)
 	log.Println("created: ", resp.Created)
 	log.Println("resp id: ",resp.ID)

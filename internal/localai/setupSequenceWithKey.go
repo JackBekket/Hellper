@@ -106,6 +106,7 @@ func tryLanguage(user db.User, language string, languageCode int, ctx context.Co
 	if err != nil {
 		return "", err
 	} else {
+		LogResponse(resp)
 		answer := resp.Choices[0].Message.Content
 		return answer, nil
 	}
