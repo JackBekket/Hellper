@@ -1,6 +1,6 @@
 package database
 
-import gogpt "github.com/sashabaranov/go-openai"
+//import gogpt "github.com/sashabaranov/go-openai"
 
 // main database for dialogs, key (int64) is telegram user id
 type User struct {
@@ -15,7 +15,7 @@ type User struct {
 
 type AiSession struct {
 	GptKey    string
-	GptClient gogpt.Client
+	//GptClient gogpt.Client
 	GptModel  string
 }
 

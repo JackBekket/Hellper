@@ -3,9 +3,9 @@ package command
 import (
 	"log"
 
-	"github.com/JackBekket/uncensoredgpt_tgbot/internal/openaibot"
+	"github.com/JackBekket/uncensoredgpt_tgbot/internal/localai"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/sashabaranov/go-openai"
+	//"github.com/sashabaranov/go-openai"
 )
 
 // Message:	case0 - "Input your openAI API key. It can be created at https://platform.openai.com/accousernamet/api-keys".
@@ -21,16 +21,12 @@ func (c *Commander) InputYourAPIKey(updateMessage *tgbotapi.Message) {
 	)
 	c.bot.Send(msg)
 
-	user.DialogStatus = 6
+	user.DialogStatus = 1
 	c.usersDb[chatID] = user
 }
 
 
-// TODO:
-// 1. figure out which dialog status is inputed here and which outputed
-// 2. figure out how to place it in main menu
-// 3. -----
-// 4. this function should render choose network menu
+/*
 func (c *Commander) ChooseNetwork(updateMessage *tgbotapi.Message) {
 	chatID := updateMessage.From.ID
 	user := c.usersDb[chatID]
@@ -56,14 +52,13 @@ func (c *Commander) ChooseNetwork(updateMessage *tgbotapi.Message) {
 	c.usersDb[chatID] = user // commit changes
 
 }
-
+*/
 
 
 // Message: case1 - "Choose model to use. GPT3 is for text-based tasks, Codex for codegeneration.".
 //
 //	update Dialog_Status = 2
 func (c *Commander) ChooseModel(updateMessage *tgbotapi.Message) {
-	ok := false
 	chatID := updateMessage.From.ID
 	//gptKey := updateMessage.Text
 	user := c.usersDb[chatID]
@@ -74,26 +69,9 @@ func (c *Commander) ChooseModel(updateMessage *tgbotapi.Message) {
 	//log.Println("Key promt: ", gptKey)
 	//user.AiSession.GptKey = gptKey // store key in memory
 
-	//TODO get user network and check if it is openai or localai
-	network := user.Network
-
-	//TODO render different menu with different models for openai and localhost
-	if (network == "openai") {
-		c.RenderModelMenuOAI(chatID)
-		ok = true
-	}
-	if (network == "localai") {
-		c.RenderModelMenuLAI(chatID)
-		ok = true
-	}
-
-	if (ok) {
-		user.DialogStatus = 2
-		c.usersDb[chatID] = user
-	} else {
-		user.DialogStatus = 7
-		c.usersDb[chatID] = user
-	}
+	c.RenderModelMenuLAI(chatID)
+	user.DialogStatus = 2
+	c.usersDb[chatID] = user
 
 }
 
@@ -102,18 +80,20 @@ func (c *Commander) HandleModelChoose(updateMessage *tgbotapi.Message) {
 	model_name := updateMessage.Text
 	user := c.usersDb[chatID]
 	switch model_name {
-	case "GPT-3.5":
-		c.ModelGPT3DOT5(updateMessage)
 	case "wizard-uncensored-13b":
 	 	c.attachModel(model_name,chatID)
 		//c.ChangeDialogStatus(chatID,3)
 		user.AiSession.GptModel = model_name
+		c.RenderLanguage(chatID)
+
 		user.DialogStatus = 3
 		c.usersDb[chatID] = user
 	case "wizard-uncensored-30b":
 		c.attachModel(model_name,chatID)
 		//c.ChangeDialogStatus(chatID,3)
 		user.AiSession.GptModel = model_name
+		c.RenderLanguage(chatID)
+
 		user.DialogStatus = 3
 		c.usersDb[chatID] = user
 	default:
@@ -121,6 +101,8 @@ func (c *Commander) HandleModelChoose(updateMessage *tgbotapi.Message) {
 	}
 
 }
+
+
 
 // Message: "Choose language. If you have different languages then listed, then just send 'Hello' at your desired language".
 //
@@ -132,7 +114,9 @@ func (c *Commander) ModelGPT3DOT5(updateMessage *tgbotapi.Message) {
 	chatID := updateMessage.From.ID
 	user := c.usersDb[chatID]
 
-	modelName := openai.GPT3Dot5Turbo // gpt-3.5
+	//modelName := openai.GPT3Dot5Turbo // gpt-3.5
+	modelName := "gpt-3.5"
+
 	user.AiSession.GptModel = modelName
 	msg := tgbotapi.NewMessage(user.ID, "your session model: "+modelName)
 	c.bot.Send(msg)
@@ -149,28 +133,12 @@ func (c *Commander) ModelGPT3DOT5(updateMessage *tgbotapi.Message) {
 	c.usersDb[chatID] = user
 }
 
-// Message: "your session model: Codex".
-//
-//	update Dialog_Status = 4
-func (c *Commander) ModelCodex(updateMessage *tgbotapi.Message) {
-	log.Printf("Model selected: %s\n", updateMessage.Text)
-	chatID := updateMessage.From.ID
-	user := c.usersDb[chatID]
 
-	modelCodex := openai.CodexCodeDavinci002
-	user.AiSession.GptModel = modelCodex
 
-	msg := tgbotapi.NewMessage(user.ID, "your session model :"+modelCodex)
-	c.bot.Send(msg)
 
-	msg = tgbotapi.NewMessage(user.ID, msgTemplates["codex_help"])
-	msg.ParseMode = "MARKDOWN"
-	c.bot.Send(msg)
 
-	user.DialogStatus = 4
-	c.usersDb[chatID] = user
-}
 
+/*
 // ModelGPT and ModelLL codes are the same.
 // TODO
 func (c *Commander) ModelGPT4(updateMessage *tgbotapi.Message) {
@@ -196,6 +164,38 @@ func (c *Commander) ModelGPT4(updateMessage *tgbotapi.Message) {
 	user.DialogStatus = 3
 	c.usersDb[chatID] = user
 }
+
+*/
+
+// render language menu
+func (c *Commander) RenderLanguage(chat_id int64)  {
+		// TODO: Write down user choise
+		//log.Printf("Model selected: %s\n", updateMessage.Text)
+
+		chatID := chat_id
+		//user := c.usersDb[chatID]
+	
+		/*
+		modelName := openai.GPT4 // gpt-4
+		user.AiSession.GptModel = modelName
+		msg := tgbotapi.NewMessage(user.ID, "your session model: "+modelName)
+		c.bot.Send(msg)
+		*/
+
+	
+		msg := tgbotapi.NewMessage(chatID, "Choose a language or send 'Hello' in your desired language.")
+		msg.ReplyMarkup = tgbotapi.NewOneTimeReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton("English"),
+				tgbotapi.NewKeyboardButton("Russian")),
+		)
+		c.bot.Send(msg)
+	
+		//user.DialogStatus = 3
+		//c.usersDb[chatID] = user
+}
+
+
 
 // low level attach model name to user profile
 func (c *Commander) attachModel(model_name string, chatID int64) {
@@ -287,16 +287,16 @@ func (c *Commander) WrongModel(updateMessage *tgbotapi.Message) {
 // Message: "connecting to openAI"
 //
 // update update Dialog_Status = 4, for model GPT-3.5
-func (c *Commander) ConnectingToOpenAiWithLanguage(updateMessage *tgbotapi.Message, lpwd string) {
+func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.Message, lpwd string) {
 	chatID := updateMessage.From.ID
 	language := updateMessage.Text
 	user := c.usersDb[chatID]
 	log.Println("check gpt key exist:", user.AiSession.GptKey)
 
-	msg := tgbotapi.NewMessage(user.ID, "connecting to node")
+	msg := tgbotapi.NewMessage(user.ID, "connecting to local ai node")
 	c.bot.Send(msg)
 	
-	go openaibot.SetupSequenceWithKey(c.bot, user, language, c.ctx, lpwd)
+	go localai.SetupSequenceWithKey(c.bot, user, language, c.ctx, lpwd)
 }
 
 // Generates an image with the /image command.
@@ -306,8 +306,9 @@ func (c *Commander) ConnectingToOpenAiWithLanguage(updateMessage *tgbotapi.Messa
 // update Dialog_Status = 4, for model GPT-3.5
 func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message) {
 	chatID := updateMessage.From.ID
-	user := c.usersDb[chatID]
+	//user := c.usersDb[chatID]
 	switch updateMessage.Command() {
+	/*
 	case "image":
 		msg := tgbotapi.NewMessage(user.ID, "Image link generation...")
 		c.bot.Send(msg)
@@ -315,23 +316,13 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message) {
 		promt := updateMessage.CommandArguments()
 		log.Printf("Command /image arg: %s\n", promt)
 		go openaibot.StartImageSequence(c.bot, updateMessage, chatID, promt, c.ctx)
-
+	*/
 	default:
 		promt := updateMessage.Text
-		go openaibot.StartDialogSequence(c.bot, chatID, promt, c.ctx)
+		go localai.StartDialogSequence(c.bot, chatID, promt, c.ctx)
 	}
 }
 
-// Generates and sends code to the user.
-//
-// At the moment there is no access to the Codex.
-func (c *Commander) CodexSequence(updateMessage *tgbotapi.Message) {
-	chatID := updateMessage.From.ID
-	promt := updateMessage.Text
-	go openaibot.StartCodexSequence(c.bot, chatID, promt, c.ctx)
-	//user.DialogStatus = 0
-	//userDatabase[chatID] = user
-}
 
 
 

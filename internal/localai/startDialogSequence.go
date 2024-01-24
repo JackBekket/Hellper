@@ -1,4 +1,4 @@
-package openaibot
+package localai
 
 import (
 	"context"
@@ -38,10 +38,12 @@ func StartDialogSequence(bot *tgbotapi.BotAPI, chatID int64, promt string, ctx c
 		promt,
 	)
 
+	/*
 	req := createComplexChatRequest(promt, gptModel)
 	c := user.AiSession.GptClient
+	*/
 
-	resp, err := c.CreateChatCompletion(ctx, req)
+	resp, err := GenerateCompletion(promt,gptModel)
 	if err != nil {
 		errorMessage(err, bot, user)
 	} else {
