@@ -19,6 +19,7 @@ func SetupSequenceWithKey(
 	language string,
 	ctx context.Context,
 	local_ap string,
+	ai_endpoint string,
 ) {
 	mu.Lock()
 	defer mu.Unlock()
@@ -46,7 +47,7 @@ func SetupSequenceWithKey(
 
 	switch language {
 	case "English":
-		probe, err := tryLanguage(user, "", 1, ctx)
+		probe, err := tryLanguage(user, "", 1, ctx,ai_endpoint)
 		if err != nil {
 			errorMessage(err, bot, user)
 		} else {
@@ -56,7 +57,7 @@ func SetupSequenceWithKey(
 			db.UsersMap[chatID] = user
 		}
 	case "Russian":
-		probe, err := tryLanguage(user, "", 2, ctx)
+		probe, err := tryLanguage(user, "", 2, ctx,ai_endpoint)
 		if err != nil {
 			errorMessage(err, bot, user)
 		} else {
@@ -66,7 +67,7 @@ func SetupSequenceWithKey(
 			db.UsersMap[chatID] = user
 		}
 	default:
-		probe, err := tryLanguage(user, language, 0, ctx)
+		probe, err := tryLanguage(user, language, 0, ctx,ai_endpoint)
 		if err != nil {
 			errorMessage(err, bot, user)
 		} else {
@@ -79,7 +80,7 @@ func SetupSequenceWithKey(
 }
 
 // LanguageCode: 0 - default, 1 - Russian, 2 - English
-func tryLanguage(user db.User, language string, languageCode int, ctx context.Context) (string, error) {
+func tryLanguage(user db.User, language string, languageCode int, ctx context.Context, ai_endpoint string) (string, error) {
 	var languagePromt string
 
 	switch languageCode {
@@ -101,7 +102,7 @@ func tryLanguage(user db.User, language string, languageCode int, ctx context.Co
 	log.Printf("request: %v\n", req)
 	*/
 
-	resp, err := GenerateCompletion(languagePromt,model)
+	resp, err := GenerateCompletion(languagePromt,model,ai_endpoint)
 	if err != nil {
 		return "", err
 	} else {

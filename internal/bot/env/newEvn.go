@@ -91,3 +91,8 @@ func LoadLocalPD() (string) {
 	token:= env["LOCALHOST_PWD"]
 	return token
 }
+
+func LoadLocalAI_Endpoint() (string) {
+	token:= env["AI_ENDPOINT"]
+	return token
+}

@@ -212,16 +212,7 @@ func (c *Commander) attachModel(model_name string, chatID int64) {
 		c.usersDb[chatID] = user
 }
 
-func (c *Commander) AttachNetworkAndUpdDialog(network string, chatID int64) {
-	c.AttachNetwork(network,chatID)
-	user := c.usersDb[chatID]
 
-	msg := tgbotapi.NewMessage(user.ID, "your session network: "+network)
-	c.bot.Send(msg)
-
-	user.DialogStatus = 1
-	c.usersDb[chatID] = user
-}
 
 // internal for attach api key to a user
 func (c *Commander) AttachKey(gpt_key string, chatID int64) {
@@ -229,14 +220,6 @@ func (c *Commander) AttachKey(gpt_key string, chatID int64) {
 	user := c.usersDb[chatID]
 	user.AiSession.GptKey = gpt_key // store key in memory
 	c.usersDb[chatID] = user
-}
-
-func (c *Commander) AttachNetwork(network string, chatID int64) {
-	//chatID := updateMessage.From.ID
-	user := c.usersDb[chatID]
-	user.Network = network
-	c.usersDb[chatID] = user
-	log.Println("network attached")
 }
 
 
@@ -287,7 +270,7 @@ func (c *Commander) WrongModel(updateMessage *tgbotapi.Message) {
 // Message: "connecting to openAI"
 //
 // update update Dialog_Status = 4, for model GPT-3.5
-func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.Message, lpwd string) {
+func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.Message, lpwd string, ai_endpoint string) {
 	chatID := updateMessage.From.ID
 	language := updateMessage.Text
 	user := c.usersDb[chatID]
@@ -296,7 +279,7 @@ func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.Message, 
 	msg := tgbotapi.NewMessage(user.ID, "connecting to local ai node")
 	c.bot.Send(msg)
 	
-	go localai.SetupSequenceWithKey(c.bot, user, language, c.ctx, lpwd)
+	go localai.SetupSequenceWithKey(c.bot, user, language, c.ctx, lpwd,ai_endpoint)
 }
 
 // Generates an image with the /image command.
@@ -304,7 +287,7 @@ func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.Message, 
 // Generates and sends text to the user.
 //
 // update Dialog_Status = 4, for model GPT-3.5
-func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message) {
+func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint string) {
 	chatID := updateMessage.From.ID
 	//user := c.usersDb[chatID]
 	switch updateMessage.Command() {
@@ -319,7 +302,7 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message) {
 	*/
 	default:
 		promt := updateMessage.Text
-		go localai.StartDialogSequence(c.bot, chatID, promt, c.ctx)
+		go localai.StartDialogSequence(c.bot, chatID, promt, c.ctx, ai_endpoint)
 	}
 }
 

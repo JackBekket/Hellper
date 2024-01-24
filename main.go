@@ -23,6 +23,7 @@ func main() {
 
 	adminData := env.LoadAdminData()
 	local_access_pwd:= env.LoadLocalPD()
+	ai_endpoint := env.LoadLocalAI_Endpoint()
 
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
@@ -74,9 +75,9 @@ func main() {
 				}
 				*/
 			case 3:
-				comm.ConnectingToAiWithLanguage(update.Message,local_access_pwd)
+				comm.ConnectingToAiWithLanguage(update.Message,local_access_pwd,ai_endpoint)
 			case 4:
-				comm.DialogSequence(update.Message)
+				comm.DialogSequence(update.Message,ai_endpoint)
 			case 5:
 				//comm.CodexSequence(update.Message)
 				
