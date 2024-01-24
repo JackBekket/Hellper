@@ -24,6 +24,7 @@ func main() {
 	adminData := env.LoadAdminData()
 	local_access_pwd:= env.LoadLocalPD()
 	ai_endpoint := env.LoadLocalAI_Endpoint()
+	log.Println("ai endpoint is: ", ai_endpoint)
 
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
