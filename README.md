@@ -1,21 +1,58 @@
 # Uncensored GPT telegram bot
 Originally forked from telegram-gpt due to incompability of standarts between pirates and openAI
 
+   ![alt text](https://github.com/JackBekket/UncensoredGPT_tgbot/blob/master/img/local_ai.png)
+   
 
 
+https://github.com/mudler/LocalAI -- original repo of local ai golang node
 
 
-# telegram-gpt
-Telegram bot to operate with OpenAI chat-GPT
+# How to setup bot to work with your models locally with localai?
 
-Now supports chatGPT 3.5 and Codex models for code-generation
+1. download your models:
+```
+mkdir models
+https://huggingface.co/TheBloke/Wizard-Vicuna-13B-Uncensored-GGUF/blob/main/Wizard-Vicuna-13B-Uncensored.Q4_K_M.gguf
+https://huggingface.co/TheBloke/Wizard-Vicuna-30B-Uncensored-GGUF/blob/main/Wizard-Vicuna-30B-Uncensored.Q4_K_M.gguf
+```
+I am using wizard-llm-uncensored with 13b and 30b parameters and I download them into local folder
+Notes:
+1. 30 billion parameters require 22Gb ram minumum, 13b ~= 13Gb RAM min
+2. You can download models directly from hugginface
+3. You need .gguf format and optimised quntisation choice
 
-https://t.me/Ada_chatgpt3_bot
+2. Setup template
+```
+# Use a template from the examples
+cp -rf prompt-templates/getting_started.tmpl models/luna-ai-llama2.tmpl
+```
+**Note** you can find templates at original localai repo and edit them to match with your model
+**TODO:** add templates to wizard llms into this repo
 
-I use https://github.com/sashabaranov/go-openai for interaction with openAI
+3. Run localai at localhost:8080, attach models directory, set context-size and CPU threads
+```
+docker run -p 8080:8080 -v $PWD/models:/models -ti --rm quay.io/go-skynet/local-ai:latest --models-path /models --context-size 700 --threads 4
+```
+you can also build localai from source.
 
+4. Now your local ai node is deployed locally and listen to localhost:8080
+you can check it work like
+```
+curl http://localhost:8080/v1/chat/completions -H "Content-Type: application/json" -d '{
+     "model": "wizard-uncensored-13b",
+     "messages": [{"role": "user", "content": "How are you?"}],
+     "temperature": 0.9
+   }'
+```
 
-Requires your openAI api key
+Now you need to setup telegram bot to point at localhost.
+add to your .env file string
+```
+AI_ENDPOINT=http://localhost:8080/v1/chat/completions
+```
+
+In case if you need to change url/port just change it in .env file
 
 # Example:
 ```
