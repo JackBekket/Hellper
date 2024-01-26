@@ -18,7 +18,7 @@ func SetupSequenceWithKey(
 	user db.User,
 	language string,
 	ctx context.Context,
-	local_ap string,
+	spwd string,
 	ai_endpoint string,
 ) {
 	mu.Lock()
@@ -30,7 +30,9 @@ func SetupSequenceWithKey(
 	//log.Println("user network from session: ", u_network)
 	log.Println("user model from session: ", user.AiSession.GptModel)
 	//var client *openai.Client
-	//u_pwd := 
+	u_pwd := user.AiSession.GptKey
+	log.Println("upwd: ", u_pwd)
+
 
 
 
@@ -38,7 +40,7 @@ func SetupSequenceWithKey(
 	//client := CreateClient(gptKey) // creating client (but we don't know if it works)
 	//log.Println("Setting up sequence with key")
 	//client := CreateLocalhostClientWithCheck(local_ap,gptKey)
-	log.Println("local_ap: ", local_ap)
+	//log.Println("local_ap: ", spwd)
 	//log.Println("client: ", client)
 	//log.Println("client: ", client.config)
 	//user.AiSession.GptClient = *client
@@ -47,7 +49,7 @@ func SetupSequenceWithKey(
 
 	switch language {
 	case "English":
-		probe, err := tryLanguage(user, "", 1, ctx,ai_endpoint)
+		probe, err := tryLanguage(user, "", 1, ctx,ai_endpoint,spwd,u_pwd)
 		if err != nil {
 			errorMessage(err, bot, user)
 		} else {
@@ -57,7 +59,7 @@ func SetupSequenceWithKey(
 			db.UsersMap[chatID] = user
 		}
 	case "Russian":
-		probe, err := tryLanguage(user, "", 2, ctx,ai_endpoint)
+		probe, err := tryLanguage(user, "", 2, ctx,ai_endpoint,spwd,u_pwd)
 		if err != nil {
 			errorMessage(err, bot, user)
 		} else {
@@ -67,7 +69,7 @@ func SetupSequenceWithKey(
 			db.UsersMap[chatID] = user
 		}
 	default:
-		probe, err := tryLanguage(user, language, 0, ctx,ai_endpoint)
+		probe, err := tryLanguage(user, language, 0, ctx,ai_endpoint,spwd,u_pwd)
 		if err != nil {
 			errorMessage(err, bot, user)
 		} else {
@@ -80,7 +82,7 @@ func SetupSequenceWithKey(
 }
 
 // LanguageCode: 0 - default, 1 - Russian, 2 - English
-func tryLanguage(user db.User, language string, languageCode int, ctx context.Context, ai_endpoint string) (string, error) {
+func tryLanguage(user db.User, language string, languageCode int, ctx context.Context, ai_endpoint string, spwd string, upwd string) (string, error) {
 	var languagePromt string
 
 	switch languageCode {
@@ -102,7 +104,7 @@ func tryLanguage(user db.User, language string, languageCode int, ctx context.Co
 	log.Printf("request: %v\n", req)
 	*/
 
-	resp, err := GenerateCompletion(languagePromt,model,ai_endpoint)
+	resp, err := GenerateCompletionWithPWD(languagePromt,model,ai_endpoint,spwd,upwd)
 	if err != nil {
 		return "", err
 	} else {

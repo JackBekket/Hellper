@@ -41,6 +41,15 @@ type UsageStatistics struct {
  TotalTokens     int `json:"total_tokens"`
 }
 
+type WrongPwdError struct {
+    message string
+}
+
+func (e *WrongPwdError) Error() string {
+    return e.message
+}
+
+
 func main() {
  prompt := "How are you?"
  modelName := "wizard-uncensored-13b"
@@ -105,4 +114,18 @@ func GenerateCompletion(prompt, modelName string, url string) (*ChatResponse, er
  log.Println(chatResp)
 
  return &chatResp, nil
+}
+
+func GenerateCompletionWithPWD(prompt, modelName string, url string, s_pwd string, u_pwd string) (*ChatResponse, error) {
+    if (u_pwd != s_pwd) {
+        err := &WrongPwdError{"wrong password"}
+        return nil, err
+    } else {
+        result, err := GenerateCompletion(prompt,modelName,url)
+        if err != nil {
+            return nil, err
+        } else {
+            return result,nil
+        }
+    }
 }

@@ -60,14 +60,14 @@ func (c *Commander) ChooseNetwork(updateMessage *tgbotapi.Message) {
 //	update Dialog_Status = 2
 func (c *Commander) ChooseModel(updateMessage *tgbotapi.Message) {
 	chatID := updateMessage.From.ID
-	//gptKey := updateMessage.Text
+	gptKey := updateMessage.Text
 	user := c.usersDb[chatID]
 	//log.Println("chooseModel function worked")
 
 	// I can't validate key at this stage. The only way to validate key is to send test sequence (see case 3)
 	// Since this part is oftenly get an usernamecaught exeption, we debug what user input as key. It's bad, I know, but usernametil we got key validation we need this part.
-	//log.Println("Key promt: ", gptKey)
-	//user.AiSession.GptKey = gptKey // store key in memory
+	log.Println("Key promt: ", gptKey)
+	user.AiSession.GptKey = gptKey // store key in memory
 
 	c.RenderModelMenuLAI(chatID)
 	user.DialogStatus = 2
