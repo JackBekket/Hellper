@@ -249,8 +249,8 @@ func (c *Commander) RenderModelMenuLAI(chatID int64) {
 	msg := tgbotapi.NewMessage(chatID, msgTemplates["case1"])
 	msg.ReplyMarkup = tgbotapi.NewOneTimeReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("wizard-uncensored-13b"),
-		tgbotapi.NewKeyboardButton("wizard-uncensored-30b")),
+		tgbotapi.NewKeyboardButton("wizard-uncensored-13b")),
+	//	tgbotapi.NewKeyboardButton("wizard-uncensored-30b")),
 	)
 	c.bot.Send(msg)
 }
