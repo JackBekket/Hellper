@@ -9,12 +9,19 @@ require (
 
 require (
 	github.com/sashabaranov/go-openai v1.5.7
-	github.com/stretchr/testify v1.8.2
+	github.com/stretchr/testify v1.8.4
+)
+
+require (
+	github.com/dlclark/regexp2 v1.8.1 // indirect
+	github.com/google/uuid v1.4.0 // indirect
+	github.com/pkoukk/tiktoken-go v0.1.2 // indirect
 )
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect
+	github.com/tmc/langchaingo v0.1.4
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
