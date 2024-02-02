@@ -96,3 +96,8 @@ func LoadLocalAI_Endpoint() (string) {
 	token:= env["AI_ENDPOINT"]
 	return token
 }
+
+func GetAdminToken() (string) {
+	token := env["ADMIN_KEY"]
+	return token
+}
