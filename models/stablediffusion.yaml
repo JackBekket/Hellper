@@ -1,0 +1,4 @@
+backend: stablediffusion
+name: stablediffusion
+parameters:
+  model: stablediffusion_assets

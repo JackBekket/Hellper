@@ -41,6 +41,25 @@ type UsageStatistics struct {
  TotalTokens     int `json:"total_tokens"`
 }
 
+type GenerationResponse struct {
+    Created int64 `json:"created"`
+    ID      string `json:"id"`
+    Data    []GenerationData `json:"data"`
+    Usage   GenerationUsage `json:"usage"`
+}
+
+type GenerationData struct {
+    Embedding interface{} `json:"embedding"`
+    Index     int `json:"index"`
+    URL       string `json:"url"`
+}
+   
+type GenerationUsage struct {
+    PromptTokens      int `json:"prompt_tokens"`
+    CompletionTokens  int `json:"completion_tokens"`
+    TotalTokens       int `json:"total_tokens"`
+}
+
 type WrongPwdError struct {
     message string
 }
@@ -129,3 +148,59 @@ func GenerateCompletionWithPWD(prompt, modelName string, url string, s_pwd strin
         }
     }
 }
+
+
+    func GenerateImageStableDissusion(prompt, size string) (string, error) {
+        url := "http://localhost:8080/v1/images/generations"
+       
+        payload := struct {
+         Prompt string `json:"prompt"`
+         Size   string `json:"size"`
+        }{
+         Prompt: prompt,
+         Size:   size,
+        }
+       
+        payloadBytes, err := json.Marshal(payload)
+        if err != nil {
+         return "", err
+        }
+       
+        resp, err := http.Post(url, "application/json", bytes.NewBuffer(payloadBytes))
+        if err != nil {
+         return "", err
+        }
+        defer resp.Body.Close()
+       
+        if resp.StatusCode != http.StatusOK {
+         return "", fmt.Errorf("Request failed with status code %d", resp.StatusCode)
+        }
+       
+        body, err := ioutil.ReadAll(resp.Body)
+        if err != nil {
+         return "", err
+        }
+       
+        var generationResp GenerationResponse
+        err = json.Unmarshal(body, &generationResp)
+        if err != nil {
+         return "", err
+        }
+       
+        uploadURL, err := uploadToTelegraph(generationResp.Data[0].URL)
+        if err != nil {
+         return "", err
+        }
+       
+        return uploadURL, nil
+       }
+
+
+func uploadToTelegraph(fileURL string) (string, error) {
+        // Implement the logic to upload the file to Telegraph and get the generated link
+        // Here's just a placeholder returning the fileURL as the result
+        return fileURL, nil
+       }
+
+
+    
