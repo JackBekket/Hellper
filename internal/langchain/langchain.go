@@ -76,7 +76,7 @@ func GenerateContentLAI(api_token string, model_name string, promt string) (*llm
 		openai.WithToken(token),
 		openai.WithModel(model_name),
 		//llms.WithOptions()
-		openai.WithBaseURL("http://localhost:8000/v1/"),
+		openai.WithBaseURL("http://localhost:8080/v1/"),
 		openai.WithAPIVersion("v1"),
 	)
 	if err != nil {
@@ -109,8 +109,6 @@ func TestOAI(api_token string)  {
 	llm, err := openai.New(
 		openai.WithToken(token),
 		openai.WithModel("gpt-3.5-turbo"),
-		//llms.WithOptions()
-		//openai.WithBaseURL("http://localhost:8000"),
 	)
 	if err != nil {
 	  log.Fatal(err)
@@ -136,7 +134,7 @@ func GenerateFromSinglePromtLocal(prompt string, model_name string) (string,erro
 	ctx := context.Background()
 	llm, err := openai.New(
 		//openai.WithToken()
-		openai.WithBaseURL("http://localhost:8000"),
+		openai.WithBaseURL("http://localhost:8080"),
 		openai.WithModel(model_name),
 	)
 	if err != nil {
@@ -156,7 +154,6 @@ func GenerateFromSinglePromtOAI(promt string, model_name string, api_token strin
 	ctx := context.Background()
 	llm, err := openai.New(
 		openai.WithToken(api_token),
-		//openai.WithBaseURL("http://localhost:8000"),
 		openai.WithModel(model_name),
 	)
 	if err != nil {
