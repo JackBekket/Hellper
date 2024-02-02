@@ -7,15 +7,20 @@ import (
 	"log"
 
 	//langchain "github.com/tmc/langchaingo"
+	"github.com/JackBekket/uncensoredgpt_tgbot/internal/bot/env"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai"
 )
 
 func main()  {
 	ctx := context.Background()
+	env.Load()
+	//env_data := env.LoadAdminData()
+	token := env.GetAdminToken()
+
 	llm, err := openai.New(
-		//openai.WithToken()
-		openai.WithBaseURL("http://localhost:8000"),
+		openai.WithToken(token),
+		//openai.WithBaseURL("http://localhost:8000"),
 	)
 	if err != nil {
 	  log.Fatal(err)
