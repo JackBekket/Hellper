@@ -76,7 +76,7 @@ func GenerateContentLAI(api_token string, model_name string, promt string) (*llm
 		openai.WithToken(token),
 		openai.WithModel(model_name),
 		//llms.WithOptions()
-		openai.WithBaseURL("http://localhost:8000"),
+		openai.WithBaseURL("http://localhost:8000/v1/"),
 		openai.WithAPIVersion("v1"),
 	)
 	if err != nil {
