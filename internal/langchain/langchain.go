@@ -9,7 +9,10 @@ import (
 	//langchain "github.com/tmc/langchaingo"
 	"github.com/JackBekket/uncensoredgpt_tgbot/internal/bot/env"
 	"github.com/tmc/langchaingo/llms"
+
+	//"github.com/tmc/langchaingo/llms/options"
 	"github.com/tmc/langchaingo/llms/openai"
+	"github.com/tmc/langchaingo/schema"
 )
 
 func main()  {
@@ -20,16 +23,55 @@ func main()  {
 
 	llm, err := openai.New(
 		openai.WithToken(token),
+		openai.WithModel("gpt-3.5-turbo"),
+		//llms.WithOptions()
 		//openai.WithBaseURL("http://localhost:8000"),
 	)
 	if err != nil {
 	  log.Fatal(err)
 	}
-	prompt := "What would be a good company name for a company that makes colorful socks?"
-	completion, err := llms.GenerateFromSinglePrompt(ctx, llm, prompt)
+	content := []llms.MessageContent{
+		llms.TextParts(schema.ChatMessageTypeSystem, "You are a company branding design wizard."),
+		llms.TextParts(schema.ChatMessageTypeHuman, "What would be a good company name a company that makes colorful socks? Write at least 10 options"),
+	}
+
+	completion, err := llm.GenerateContent(ctx, content, llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
+		fmt.Print(string(chunk))
+		return nil
+	}))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(completion)
+}
+
+func TestOAI(api_token string)  {
+	ctx := context.Background()
+	token := api_token
+
+	llm, err := openai.New(
+		openai.WithToken(token),
+		openai.WithModel("gpt-3.5-turbo"),
+		//llms.WithOptions()
+		//openai.WithBaseURL("http://localhost:8000"),
+	)
 	if err != nil {
 	  log.Fatal(err)
 	}
+	content := []llms.MessageContent{
+		llms.TextParts(schema.ChatMessageTypeSystem, "You are a company branding design wizard."),
+		llms.TextParts(schema.ChatMessageTypeHuman, "What would be a good company name a company that makes colorful socks? Write at least 10 options"),
+	}
+
+	completion, err := llm.GenerateContent(ctx, content, llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
+		fmt.Print(string(chunk))
+		return nil
+	}))
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	fmt.Println(completion)
 }
 
