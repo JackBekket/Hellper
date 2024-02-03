@@ -186,6 +186,8 @@ func GenerateCompletionWithPWD(prompt, modelName string, url string, s_pwd strin
         if err != nil {
          return "", err
         }
+        image_url := generationResp.Data[0].URL
+        fmt.Println("image url: ", image_url)
        
         uploadURL, err := uploadToTelegraph(generationResp.Data[0].URL)
         if err != nil {
