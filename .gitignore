@@ -21,3 +21,7 @@
 
 # Go workspace file
 go.work
+
+# LLMs
+*.ggml
+*.gguf
