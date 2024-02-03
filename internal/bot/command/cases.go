@@ -5,7 +5,6 @@ import (
 
 	"github.com/JackBekket/uncensoredgpt_tgbot/internal/localai"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	//"github.com/sashabaranov/go-openai"
 )
 
 // Message:	case0 - "Input your openAI API key. It can be created at https://platform.openai.com/accousernamet/api-keys".
@@ -305,6 +304,32 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint 
 		go localai.StartDialogSequence(c.bot, chatID, promt, c.ctx, ai_endpoint)
 	}
 }
+
+// stable diffusion
+func(c *Commander) GenerateNewImageLAI_SD(promt string, chatID int64, bot *tgbotapi.BotAPI){
+	size := "256x256"
+	filepath,err := localai.GenerateImageStableDissusion(promt,size)
+	if err != nil {
+		//return nil, err
+		log.Println(err)
+	}
+	sendImage(bot,chatID,filepath)
+}
+
+func sendImage(bot *tgbotapi.BotAPI, chatID int64, path string) {
+	// Prepare a photo message
+
+	msg := tgbotapi.NewPhoto(chatID, path)
+   
+	// Set caption for the photo (optional)
+	msg.Caption = "A beautiful image!"
+   
+	// Send the photo message
+	_, err := bot.Send(msg)
+	if err != nil {
+	 log.Println("Failed to send image:", err)
+	}
+   }
 
 
 
