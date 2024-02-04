@@ -60,8 +60,11 @@ func main() {
 				if update.Message.Command() == "image" {
 				 // Send a random image to the user
 				// sendImage(bot, update.Message.Chat.ID)
+				if (update.Message.Text =="") {
+					comm.GenerateNewImageLAI_SD("evangelion, neon, genesis",chatID,bot)
+				} else {
 				comm.GenerateNewImageLAI_SD(update.Message.Text,chatID,bot)
-				}}
+				}}}
 			log.Println("user dialog status:", user.DialogStatus)
 			log.Println(user.ID)
 			log.Println(user.Username)
