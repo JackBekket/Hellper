@@ -313,23 +313,37 @@ func(c *Commander) GenerateNewImageLAI_SD(promt string, chatID int64, bot *tgbot
 		//return nil, err
 		log.Println(err)
 	}
-	sendImage(bot,chatID,filepath)
+	log.Println("filepath: ", filepath)
+	//sendImage(bot,chatID,filepath)
 }
 
 func sendImage(bot *tgbotapi.BotAPI, chatID int64, path string) {
 	// Prepare a photo message
 
-	msg := tgbotapi.NewPhoto(chatID, path)
-   
-	// Set caption for the photo (optional)
-	msg.Caption = "A beautiful image!"
-   
-	// Send the photo message
-	_, err := bot.Send(msg)
+	 // Path to the image/file locally
+	 filePath := "/path/to/image.png" + path
+
+	/*
+	 // Creating a LocalFile object from the local path
+	photoBytes, err := ioutil.ReadFile(filePath)
 	if err != nil {
-	 log.Println("Failed to send image:", err)
+    	log.Println(err)
+				}
+	photoFileBytes := tgbotapi.FileBytes{
+		Name:  "picture",
+		Bytes: photoBytes,
+		}
+	*/
+
+
+	//message, err := bot.Send(tgbotapi.NewPhotoUpload(int64(chatID), photoFileBytes))
+   
+	photo := tgbotapi.NewPhoto(chatID, tgbotapi.FilePath(filePath))
+	if _, err := bot.Send(photo); err != nil {
+	log.Fatalln(err)
 	}
-   }
+
+	}
 
 
 
