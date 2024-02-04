@@ -350,6 +350,7 @@ func sendImage(bot *tgbotapi.BotAPI, chatID int64, path string) {
 	func transformURL(inputURL string) string {
 		// Replace "http://localhost:8080" with "/tmp" using strings.Replace
 		transformedURL := strings.Replace(inputURL, "http://localhost:8080/", "/tmp/", 1)
+		transformedURL = strings.Replace(transformedURL,"/generated-images/","/generated/images/",1)
 	   
 		return transformedURL
 	   }
