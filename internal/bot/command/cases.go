@@ -314,13 +314,14 @@ func(c *Commander) GenerateNewImageLAI_SD(promt string, chatID int64, bot *tgbot
 		//return nil, err
 		log.Println(err)
 	}
-	//log.Println("filepath: ", filepath)
+	log.Println("url_path: ", filepath)
 	sendImage(bot,chatID,filepath)
 }
 
 func sendImage(bot *tgbotapi.BotAPI, chatID int64, path string) {
 	// Prepare a photo message
 	local_path := transformURL(path)
+	log.Println("local path: ", local_path)
 	 // Path to the image/file locally
 	// filePath := "/path/to/image.png" + local_path
 
