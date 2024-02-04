@@ -48,13 +48,26 @@ func main() {
 		if update.Message == nil {
 			continue
 		}
+
 		chatID := update.Message.From.ID
 		user, ok := usersDatabase[chatID]
 		if !ok {
 			comm.CheckAdmin(adminData, update.Message)
 		}
 		if ok {
+			if update.Message.IsCommand() {
+				// Handle the /image command
+				if update.Message.Command() == "image" {
+				 // Send a random image to the user
+				// sendImage(bot, update.Message.Chat.ID)
+				if (update.Message.Text =="") {
+					comm.GenerateNewImageLAI_SD("evangelion, neon, genesis",chatID,bot)
+				} else {
+				comm.GenerateNewImageLAI_SD(update.Message.Text,chatID,bot)
+				}}}
 			log.Println("user dialog status:", user.DialogStatus)
+			log.Println(user.ID)
+			log.Println(user.Username)
 			switch user.DialogStatus {
 			// first check for user status, (for a new user status 0 is set automatically),
 			// then user reply for the first bot message is logged to a database as name AND user status is updated

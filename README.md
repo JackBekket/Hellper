@@ -28,11 +28,10 @@ Notes:
 cp -rf prompt-templates/getting_started.tmpl models/luna-ai-llama2.tmpl
 ```
 **Note** you can find templates at original localai repo and edit them to match with your model
-**TODO:** add templates to wizard llms into this repo
 
-3. Run localai at localhost:8080, attach models directory, set context-size and CPU threads
+3. Run localai at localhost:8080, attach models directory, set context-size and CPU threads. it also attach tmp directory for generated images
 ```
-docker run -p 8080:8080 -v $PWD/models:/models -ti --rm quay.io/go-skynet/local-ai:latest --models-path /models --context-size 700 --threads 4
+docker run -p 8080:8080 -v $PWD/models:/models -v $PWD/tmp/generated/images:/tmp/generated/images -d -ti --rm quay.io/go-skynet/local-ai:latest --models-path /models --context-size 700 --threads 12 
 ```
 you can also build localai from source.
 
@@ -46,6 +45,13 @@ curl http://localhost:8080/v1/chat/completions -H "Content-Type: application/jso
    }'
 ```
 
+```
+curl http://localhost:8080/v1/images/generations -H "Content-Type: application/json" -d '{
+  "prompt": "floating hair, portrait, ((loli)), ((one girl)), cute face, hidden hands, asymmetrical bangs, beautiful detailed eyes, eye shadow, hair ornament, ribbons, bowties, buttons, pleated skirt, (((masterpiece))), ((best quality)), colorful|((part of the head)), ((((mutated hands and fingers)))), deformed, blurry, bad anatomy, disfigured, poorly drawn face, mutation, mutated, extra limb, ugly, poorly drawn hands, missing limb, blurry, floating limbs, disconnected limbs, malformed hands, blur, out of focus, long neck, long body, Octane renderer, lowres, bad anatomy, bad hands, text",
+  "size": "256x256"
+}'
+```
+
 Now you need to setup telegram bot to point at localhost.
 add to your .env file string
 ```
@@ -53,6 +59,8 @@ AI_ENDPOINT=http://localhost:8080/v1/chat/completions
 ```
 
 In case if you need to change url/port just change it in .env file
+
+
 
 # Example:
 ```

@@ -21,3 +21,10 @@
 
 # Go workspace file
 go.work
+
+# LLMs
+*.ggml
+*.gguf
+
+*.png
+*.img

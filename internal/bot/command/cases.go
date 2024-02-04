@@ -2,10 +2,10 @@ package command
 
 import (
 	"log"
+	"strings"
 
 	"github.com/JackBekket/uncensoredgpt_tgbot/internal/localai"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	//"github.com/sashabaranov/go-openai"
 )
 
 // Message:	case0 - "Input your openAI API key. It can be created at https://platform.openai.com/accousernamet/api-keys".
@@ -305,6 +305,55 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint 
 		go localai.StartDialogSequence(c.bot, chatID, promt, c.ctx, ai_endpoint)
 	}
 }
+
+// stable diffusion
+func(c *Commander) GenerateNewImageLAI_SD(promt string, chatID int64, bot *tgbotapi.BotAPI){
+	size := "256x256"
+	filepath,err := localai.GenerateImageStableDissusion(promt,size)
+	if err != nil {
+		//return nil, err
+		log.Println(err)
+	}
+	log.Println("url_path: ", filepath)
+	sendImage(bot,chatID,filepath)
+}
+
+func sendImage(bot *tgbotapi.BotAPI, chatID int64, path string) {
+	// Prepare a photo message
+	local_path := transformURL(path)
+	log.Println("local path: ", local_path)
+	 // Path to the image/file locally
+	// filePath := "/path/to/image.png" + local_path
+
+	/*
+	 // Creating a LocalFile object from the local path
+	photoBytes, err := ioutil.ReadFile(filePath)
+	if err != nil {
+    	log.Println(err)
+				}
+	photoFileBytes := tgbotapi.FileBytes{
+		Name:  "picture",
+		Bytes: photoBytes,
+		}
+	*/
+
+
+	//message, err := bot.Send(tgbotapi.NewPhotoUpload(int64(chatID), photoFileBytes))
+   
+	photo := tgbotapi.NewPhoto(chatID, tgbotapi.FilePath(local_path))
+	if _, err := bot.Send(photo); err != nil {
+	log.Fatalln(err)
+	}
+
+	}
+
+	func transformURL(inputURL string) string {
+		// Replace "http://localhost:8080" with "/tmp" using strings.Replace
+		transformedURL := strings.Replace(inputURL, "http://localhost:8080/", "/tmp/", 1)
+		transformedURL = strings.Replace(transformedURL,"/generated-images/","/generated/images/",1)
+	   
+		return transformedURL
+	   }
 
 
 
