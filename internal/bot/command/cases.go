@@ -2,6 +2,7 @@ package command
 
 import (
 	"log"
+	"strings"
 
 	"github.com/JackBekket/uncensoredgpt_tgbot/internal/localai"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -313,15 +314,15 @@ func(c *Commander) GenerateNewImageLAI_SD(promt string, chatID int64, bot *tgbot
 		//return nil, err
 		log.Println(err)
 	}
-	log.Println("filepath: ", filepath)
-	//sendImage(bot,chatID,filepath)
+	//log.Println("filepath: ", filepath)
+	sendImage(bot,chatID,filepath)
 }
 
 func sendImage(bot *tgbotapi.BotAPI, chatID int64, path string) {
 	// Prepare a photo message
-
+	local_path := transformURL(path)
 	 // Path to the image/file locally
-	 filePath := "/path/to/image.png" + path
+	 filePath := "/path/to/image.png" + local_path
 
 	/*
 	 // Creating a LocalFile object from the local path
@@ -344,6 +345,13 @@ func sendImage(bot *tgbotapi.BotAPI, chatID int64, path string) {
 	}
 
 	}
+
+	func transformURL(inputURL string) string {
+		// Replace "http://localhost:8080" with "/tmp" using strings.Replace
+		transformedURL := strings.Replace(inputURL, "http://localhost:8080/", "/tmp/", 1)
+	   
+		return transformedURL
+	   }
 
 
 
