@@ -310,7 +310,6 @@ func sendImage(bot *tgbotapi.BotAPI, chatID int64, path string) {
 
 	// Path to the image/file locally
 	// filePath := "/path/to/image.png" + local_path
-
 	/*
 			 // Creating a LocalFile object from the local path
 			photoBytes, err := ioutil.ReadFile(filePath)
@@ -322,14 +321,13 @@ func sendImage(bot *tgbotapi.BotAPI, chatID int64, path string) {
 				Bytes: photoBytes,
 				}
 	*/
-
 	//message, err := bot.Send(tgbotapi.NewPhotoUpload(int64(chatID), photoFileBytes))
-
 	/* photo := tgbotapi.NewPhoto(chatID, tgbotapi.FilePath(local_path))
 	if _, err := bot.Send(photo); err != nil {
 	log.Fatalln(err)
 	} */
-
+	msg := tgbotapi.NewMessage(chatID, telegraphLink)
+	bot.Send(msg)
 }
 
 func transformURL(inputURL string) string {

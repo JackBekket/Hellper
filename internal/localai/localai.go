@@ -218,6 +218,6 @@ func UploadToTelegraph(file_name string) string {
 		log.Fatal(err)
 	}
 
-	log.Println(link)
+	link = "telegra.ph" + link
 	return link
 }
