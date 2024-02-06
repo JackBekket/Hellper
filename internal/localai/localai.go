@@ -198,7 +198,7 @@ func GenerateImageStableDissusion(prompt, size string) (string, error) {
 	return image_url.URL, nil
 }
 
-func uploadToTelegraph(file_name string) string {
+func UploadToTelegraph(file_name string) string {
 	// Get the absolute path to the file
 	absFilePath, err := filepath.Abs(filepath.Join("tmp", file_name))
 	if err != nil {

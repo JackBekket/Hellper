@@ -1,7 +1,6 @@
 package command
 
 import (
-	"fmt"
 	"log"
 	"net/url"
 	"path"
@@ -303,9 +302,12 @@ func (c *Commander) GenerateNewImageLAI_SD(promt string, chatID int64, bot *tgbo
 
 func sendImage(bot *tgbotapi.BotAPI, chatID int64, path string) {
 	// Prepare a photo message
-	local_path := transformURL(path)
-	log.Println("local path: ", local_path)
-	log.Println("эшкере", local_path)
+	fileName := transformURL(path)
+	log.Println("local file name: ", fileName)
+
+	telegraphLink := localai.UploadToTelegraph(fileName)
+	log.Println("uploaded to telegraph successfully, link is: ", telegraphLink)
+
 	// Path to the image/file locally
 	// filePath := "/path/to/image.png" + local_path
 
@@ -336,7 +338,5 @@ func transformURL(inputURL string) string {
 
 	// Use path.Base to get the filename from the URL path
 	fileName := path.Base(parsedURL.Path)
-
-	fmt.Println("filename is:", fileName)
 	return fileName
 }
