@@ -3,6 +3,8 @@ package command
 import (
 	"fmt"
 	"log"
+	"net/url"
+	"path"
 
 	"github.com/JackBekket/uncensoredgpt_tgbot/internal/localai"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -330,11 +332,11 @@ func sendImage(bot *tgbotapi.BotAPI, chatID int64, path string) {
 
 func transformURL(inputURL string) string {
 	// Replace "http://localhost:8080" with "/tmp" using strings.Replace
-	//parsedURL, _ := url.Parse(inputURL)
-	fileName := inputURL
-	fmt.Println("transformURL gets it as:", fileName)
-	fmt.Println(fileName)
+	parsedURL, _ := url.Parse(inputURL)
+
 	// Use path.Base to get the filename from the URL path
-	//fileName := path.Base(parsedURL.Path)
+	fileName := path.Base(parsedURL.Path)
+
+	fmt.Println("filename is:", fileName)
 	return fileName
 }
