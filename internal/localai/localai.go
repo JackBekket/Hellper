@@ -187,15 +187,15 @@ func GenerateImageStableDissusion(prompt, size string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	image_url := generationResp.Data[0].URL
-	fmt.Println("image url: ", image_url)
+	image_url := generationResp.Data[0]
+	fmt.Println("image url from localai pkg: ", image_url.URL)
 
-	uploadURL := uploadToTelegraph(generationResp.Data[0].URL)
+	/* uploadURL := uploadToTelegraph(generationResp.Data[0].URL)
 	if err != nil {
 		return "", err
-	}
+	} */
 
-	return uploadURL, nil
+	return image_url.URL, nil
 }
 
 func uploadToTelegraph(file_name string) string {
