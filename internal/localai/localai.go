@@ -198,9 +198,9 @@ func GenerateImageStableDissusion(prompt, size string) (string, error) {
 	return image_url.URL, nil
 }
 
-func UploadToTelegraph(file_name string) string {
+func UploadToTelegraph(fileName string) string {
 	// Get the absolute path to the file
-	absFilePath, err := filepath.Abs(filepath.Join("tmp/generated/images", file_name))
+	absFilePath, err := filepath.Abs(filepath.Join("tmp/generated/images", fileName))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -218,6 +218,17 @@ func UploadToTelegraph(file_name string) string {
 		log.Fatal(err)
 	}
 
+	//uncomment line below for automatic file deletion from local machine
+	//deleteFromTemp(fileName)
+
 	link = "telegra.ph" + link
 	return link
+}
+
+func deleteFromTemp(fileName string) {
+	absFilePath, err := filepath.Abs(filepath.Join("tmp/generated/images", fileName))
+	if err != nil {
+		log.Fatal(err)
+	}
+	os.Remove(absFilePath)
 }
