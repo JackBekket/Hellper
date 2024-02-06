@@ -200,7 +200,7 @@ func GenerateImageStableDissusion(prompt, size string) (string, error) {
 
 func UploadToTelegraph(file_name string) string {
 	// Get the absolute path to the file
-	absFilePath, err := filepath.Abs(filepath.Join("tmp", file_name))
+	absFilePath, err := filepath.Abs(filepath.Join("tmp/generated/images", file_name))
 	if err != nil {
 		log.Fatal(err)
 	}
