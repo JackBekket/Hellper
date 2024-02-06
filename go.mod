@@ -13,11 +13,15 @@ require (
 )
 
 require (
+	github.com/StarkBotsIndustries/telegraph v1.0.0 // indirect
+	github.com/anaskhan96/soup v1.2.5 // indirect
 	github.com/dlclark/regexp2 v1.8.1 // indirect
 	github.com/google/uuid v1.4.0 // indirect
 	github.com/mitchellh/hashstructure v1.1.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pkoukk/tiktoken-go v0.1.2 // indirect
+	golang.org/x/net v0.19.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
 )
 
 require (
