@@ -219,7 +219,7 @@ func UploadToTelegraph(fileName string) string {
 	}
 
 	//uncomment line below for automatic file deletion from local machine
-	//deleteFromTemp(fileName)
+	deleteFromTemp(fileName)
 
 	link = "telegra.ph" + link
 	return link
