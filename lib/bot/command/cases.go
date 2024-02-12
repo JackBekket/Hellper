@@ -277,7 +277,7 @@ func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.Message, 
 		c.bot.Send(msg)
 	} else {
 		log.Println(check)
-		go langchain.SetupSequenceWithKey(c.bot,user,language,c.ctx,lpwd,ai_endpoint)
+		go langchain.SetupSequenceWithKey(c.bot,user,language,context.Background(),lpwd,ai_endpoint)
 	}
 	
 }
