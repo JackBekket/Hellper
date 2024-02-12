@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"path"
 
-	"github.com/JackBekket/uncensoredgpt_tgbot/internal/localai"
+	"github.com/JackBekket/uncensoredgpt_tgbot/lib/localai"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 

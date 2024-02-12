@@ -7,7 +7,7 @@ import (
 	"log"
 
 	//langchain "github.com/tmc/langchaingo"
-	"github.com/JackBekket/uncensoredgpt_tgbot/internal/bot/env"
+	"github.com/JackBekket/uncensoredgpt_tgbot/lib/bot/env"
 	"github.com/tmc/langchaingo/llms"
 
 	//"github.com/tmc/langchaingo/llms/options"

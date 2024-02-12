@@ -3,7 +3,7 @@ package command
 import (
 	"fmt"
 
-	"github.com/JackBekket/uncensoredgpt_tgbot/internal/bot/env"
+	"github.com/JackBekket/uncensoredgpt_tgbot/lib/bot/env"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 

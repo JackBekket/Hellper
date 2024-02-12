@@ -4,9 +4,9 @@ import (
 	"context"
 	"log"
 
-	"github.com/JackBekket/uncensoredgpt_tgbot/internal/bot/command"
-	"github.com/JackBekket/uncensoredgpt_tgbot/internal/bot/env"
-	"github.com/JackBekket/uncensoredgpt_tgbot/internal/database"
+	"github.com/JackBekket/uncensoredgpt_tgbot/lib/bot/command"
+	"github.com/JackBekket/uncensoredgpt_tgbot/lib/bot/env"
+	"github.com/JackBekket/uncensoredgpt_tgbot/lib/database"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
