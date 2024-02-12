@@ -268,20 +268,26 @@ func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.Message, 
 //
 // Generates and sends text to the user.
 //
-// update Dialog_Status = 4, for model GPT-3.5
+// update Dialog_Status = 4, 
 func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint string) {
 	chatID := updateMessage.From.ID
-	//user := c.usersDb[chatID]
+	user := c.usersDb[chatID]
 	switch updateMessage.Command() {
-	/*
+	
 		case "image":
 			msg := tgbotapi.NewMessage(user.ID, "Image link generation...")
 			c.bot.Send(msg)
 
 			promt := updateMessage.CommandArguments()
 			log.Printf("Command /image arg: %s\n", promt)
-			go openaibot.StartImageSequence(c.bot, updateMessage, chatID, promt, c.ctx)
-	*/
+			if (promt == "") {
+				c.GenerateNewImageLAI_SD("evangelion, neon, anime",chatID,c.bot)
+			} else {
+				c.GenerateNewImageLAI_SD(promt,chatID,c.bot)
+			}
+			//go openaibot.StartImageSequence(c.bot, updateMessage, chatID, promt, c.ctx)
+
+	
 	default:
 		promt := updateMessage.Text
 		go localai.StartDialogSequence(c.bot, chatID, promt, c.ctx, ai_endpoint)
