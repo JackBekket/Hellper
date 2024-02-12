@@ -103,7 +103,7 @@ func GenerateContentLAI(api_token string, model_name string, promt string) (*llm
 	//log.Println(llm.)
 
 	content := []llms.MessageContent{
-		llms.TextParts(schema.ChatMessageTypeSystem, "You are a helpfull assistant who execute whatever task human gives you"),
+		llms.TextParts(schema.ChatMessageTypeSystem, "You are a helpfull assistant who help in whatever task human ask you about"),
 		llms.TextParts(schema.ChatMessageTypeHuman, promt),
 	}
 
@@ -186,3 +186,4 @@ func GenerateFromSinglePromtOAI(promt string, model_name string, api_token strin
 	fmt.Println(completion)
 	return completion, nil
 }
+
