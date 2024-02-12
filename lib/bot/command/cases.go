@@ -1,10 +1,12 @@
 package command
 
 import (
+	"context"
 	"log"
 	"net/url"
 	"path"
 
+	"github.com/JackBekket/uncensoredgpt_tgbot/lib/langchain"
 	"github.com/JackBekket/uncensoredgpt_tgbot/lib/localai"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -221,8 +223,8 @@ func (c *Commander) RenderModelMenuOAI(chatID int64) {
 	msg := tgbotapi.NewMessage(chatID, msgTemplates["case1"])
 	msg.ReplyMarkup = tgbotapi.NewOneTimeReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("GPT-3.5")),
-		//tgbotapi.NewKeyboardButton("GPT-4"),
+			tgbotapi.NewKeyboardButton("GPT-3.5"),
+		tgbotapi.NewKeyboardButton("GPT-4")),
 	)
 	c.bot.Send(msg)
 }
@@ -242,16 +244,15 @@ func (c *Commander) WrongModel(updateMessage *tgbotapi.Message) {
 	chatID := updateMessage.From.ID
 	user := c.usersDb[chatID]
 
-	msg := tgbotapi.NewMessage(user.ID, "type GPT-3.5")
+	msg := tgbotapi.NewMessage(user.ID, "type wizard-uncensored-13b")
 	c.bot.Send(msg)
 
 	user.DialogStatus = 2
 	c.usersDb[chatID] = user
 }
 
-// Message: "connecting to openAI"
-//
-// update update Dialog_Status = 4, for model GPT-3.5
+
+// update update Dialog_Status = 4
 func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.Message, lpwd string, ai_endpoint string) {
 	chatID := updateMessage.From.ID
 	language := updateMessage.Text
@@ -261,7 +262,8 @@ func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.Message, 
 	msg := tgbotapi.NewMessage(user.ID, "connecting to local ai node")
 	c.bot.Send(msg)
 
-	go localai.SetupSequenceWithKey(c.bot, user, language, c.ctx, lpwd, ai_endpoint)
+	//go localai.SetupSequenceWithKey(c.bot, user, language, c.ctx, lpwd, ai_endpoint)
+	  go langchain.SetupSequenceWithKey(c.bot,user,language,c.ctx,lpwd,ai_endpoint)
 }
 
 // Generates an image with the /image command.
@@ -290,8 +292,9 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint 
 	
 	default:
 		promt := updateMessage.Text
-		go localai.StartDialogSequence(c.bot, chatID, promt, c.ctx, ai_endpoint)
-	}
+		//go localai.StartDialogSequence(c.bot, chatID, promt, c.ctx, ai_endpoint)
+		go langchain.StartDialogSequence(c.bot,chatID,promt,context.Background(),ai_endpoint)
+	}	
 }
 
 // stable diffusion

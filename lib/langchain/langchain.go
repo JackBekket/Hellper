@@ -1,5 +1,7 @@
+package langchain
+
 //package langchain_controller
-package main
+//package main
 
 import (
 	"context"
@@ -36,6 +38,20 @@ func main()  {
 	}
 
 	fmt.Println(completion.Choices[0].Content)
+
+	/** 
+		1. Russian Revolutionary Front
+	2. People's Liberation Army
+	3. Russian Resistance Movement
+	4. Russian Revolutionary Council
+	5. Russian Revolutionary Alliance
+	6. Russian Revolutionary Party
+	7. Russian Revolutionary Army
+	8. Russian Revolutionary Coalition
+	9. Russian Revolutionary Council
+	10. Russian Revolutionary Front
+	**/
+	
 }
 
 func GenerateContentOAI(api_token string, model_name string, promt string) (*llms.ContentResponse, error) {
