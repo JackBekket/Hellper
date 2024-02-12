@@ -21,6 +21,11 @@ Notes:
 1. 30 billion parameters require 22Gb ram minumum, 13b ~= 13Gb RAM min
 2. You can download models directly from hugginface
 3. You need .gguf format and optimised quntisation choice
+4. Wizard Uncensored LLM's are basically the same wizard-vicuna models but they are was trained at edited dataset, in which was removed biased answers
+5. I am using stable-diffusion for image generation, for more info see localai stablediffusion
+https://localai.io/features/image-generation/
+6. If there are necessity of using embedded generations, you should also download bert model
+https://gpt4all.io/models/gguf/all-MiniLM-L6-v2-f16.gguf
 
 2. Setup template
 ```
@@ -59,6 +64,9 @@ AI_ENDPOINT=http://localhost:8080/v1/chat/completions
 ```
 
 In case if you need to change url/port just change it in .env file
+
+# Build bot
+` go build`
 
 
 
