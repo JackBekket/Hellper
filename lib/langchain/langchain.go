@@ -54,6 +54,8 @@ func main()  {
 	
 }
 
+
+
 func GenerateContentOAI(api_token string, model_name string, promt string) (*llms.ContentResponse, error) {
 	ctx := context.Background()
 	token := api_token
@@ -69,7 +71,7 @@ func GenerateContentOAI(api_token string, model_name string, promt string) (*llm
 	}
 
 	content := []llms.MessageContent{
-		llms.TextParts(schema.ChatMessageTypeSystem, "You are a helpfull assistant who execute whatever task human gives you"),
+		llms.TextParts(schema.ChatMessageTypeSystem, "You are a helpfull assistant who help in whatever task human ask you about"),
 		llms.TextParts(schema.ChatMessageTypeHuman, promt),
 	}
 

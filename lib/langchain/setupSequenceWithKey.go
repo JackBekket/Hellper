@@ -79,6 +79,8 @@ func SetupSequenceWithKey(
 			db.UsersMap[chatID] = user
 		}
 	}
+
+  
 }
 
 // LanguageCode: 0 - default, 1 - Russian, 2 - English

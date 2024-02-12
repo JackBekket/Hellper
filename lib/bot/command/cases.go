@@ -11,6 +11,12 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
+
+
+type WrongPwdError struct {
+	message string
+}
+
 // Message:	case0 - "Input your openAI API key. It can be created at https://platform.openai.com/accousernamet/api-keys".
 //
 //	update DialogStatus = 1
@@ -263,7 +269,17 @@ func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.Message, 
 	c.bot.Send(msg)
 
 	//go localai.SetupSequenceWithKey(c.bot, user, language, c.ctx, lpwd, ai_endpoint)
-	  go langchain.SetupSequenceWithKey(c.bot,user,language,c.ctx,lpwd,ai_endpoint)
+	check,err:= c.CheckLocalPWD(user.AiSession.GptKey,lpwd)
+	if err != nil {
+		user.DialogStatus = 0
+		c.usersDb[chatID] = user
+		msg := tgbotapi.NewMessage(user.ID, "wrong password")
+		c.bot.Send(msg)
+	} else {
+		log.Println(check)
+		go langchain.SetupSequenceWithKey(c.bot,user,language,c.ctx,lpwd,ai_endpoint)
+	}
+	
 }
 
 // Generates an image with the /image command.
@@ -346,4 +362,18 @@ func transformURL(inputURL string) string {
 	// Use path.Base to get the filename from the URL path
 	fileName := path.Base(parsedURL.Path)
 	return fileName
+}
+
+
+func (c *Commander) CheckLocalPWD(upwd string, spwd string) (bool, error) {
+	if upwd != spwd {
+		err := &WrongPwdError{"wrong password"}
+		return false, err
+	} else {
+		return true, nil
+	}
+}
+
+func (e *WrongPwdError) Error() string {
+    return e.message
 }
