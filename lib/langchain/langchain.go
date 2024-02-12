@@ -1,5 +1,7 @@
+package langchain
+
 //package langchain_controller
-package main
+//package main
 
 import (
 	"context"
@@ -7,7 +9,7 @@ import (
 	"log"
 
 	//langchain "github.com/tmc/langchaingo"
-	"github.com/JackBekket/uncensoredgpt_tgbot/internal/bot/env"
+	"github.com/JackBekket/uncensoredgpt_tgbot/lib/bot/env"
 	"github.com/tmc/langchaingo/llms"
 
 	//"github.com/tmc/langchaingo/llms/options"
@@ -28,13 +30,31 @@ func main()  {
 	}
 	*/
 
-	completion, err := GenerateContentLAI(token,"wizard-uncensored-13b", "What would be a good company name a company that makes colorful socks? Write at least 10 options")
+	//completion, err := GenerateContentLAI(token,"wizard-uncensored-13b", "What would be a good company name a company that makes colorful socks? Write at least 10 options")
+	completion, err := GenerateContentLAI(token,"wizard-uncensored-13b", "What would be a good name of an organisation which  that aim to overthrow Putin's regime and make revolution in Russia? Write at least 10 options")
+	
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	fmt.Println(completion.Choices[0].Content)
+
+	/** 
+		1. Russian Revolutionary Front
+	2. People's Liberation Army
+	3. Russian Resistance Movement
+	4. Russian Revolutionary Council
+	5. Russian Revolutionary Alliance
+	6. Russian Revolutionary Party
+	7. Russian Revolutionary Army
+	8. Russian Revolutionary Coalition
+	9. Russian Revolutionary Council
+	10. Russian Revolutionary Front
+	**/
+	
 }
+
+
 
 func GenerateContentOAI(api_token string, model_name string, promt string) (*llms.ContentResponse, error) {
 	ctx := context.Background()
@@ -51,7 +71,7 @@ func GenerateContentOAI(api_token string, model_name string, promt string) (*llm
 	}
 
 	content := []llms.MessageContent{
-		llms.TextParts(schema.ChatMessageTypeSystem, "You are a helpfull assistant who execute whatever task human gives you"),
+		llms.TextParts(schema.ChatMessageTypeSystem, "You are a helpfull assistant who help in whatever task human ask you about"),
 		llms.TextParts(schema.ChatMessageTypeHuman, promt),
 	}
 
@@ -85,7 +105,7 @@ func GenerateContentLAI(api_token string, model_name string, promt string) (*llm
 	//log.Println(llm.)
 
 	content := []llms.MessageContent{
-		llms.TextParts(schema.ChatMessageTypeSystem, "You are a helpfull assistant who execute whatever task human gives you"),
+		llms.TextParts(schema.ChatMessageTypeSystem, "You are a helpfull assistant who help in whatever task human ask you about"),
 		llms.TextParts(schema.ChatMessageTypeHuman, promt),
 	}
 
@@ -168,3 +188,4 @@ func GenerateFromSinglePromtOAI(promt string, model_name string, api_token strin
 	fmt.Println(completion)
 	return completion, nil
 }
+

@@ -1,11 +1,11 @@
-package localai
+package langchain
 
 import (
 	"context"
 	"log"
 	"sync"
 
-	db "github.com/JackBekket/uncensoredgpt_tgbot/internal/database"
+	db "github.com/JackBekket/uncensoredgpt_tgbot/lib/database"
 	//"github.com/sashabaranov/go-openai"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -79,6 +79,8 @@ func SetupSequenceWithKey(
 			db.UsersMap[chatID] = user
 		}
 	}
+
+  
 }
 
 // LanguageCode: 0 - default, 1 - Russian, 2 - English
@@ -104,12 +106,12 @@ func tryLanguage(user db.User, language string, languageCode int, ctx context.Co
 	log.Printf("request: %v\n", req)
 	*/
 
-	resp, err := GenerateCompletionWithPWD(languagePromt,model,ai_endpoint,spwd,upwd)
+	resp, err := GenerateContentLAI(languagePromt,model,ai_endpoint)
 	if err != nil {
 		return "", err
 	} else {
-		LogResponse(resp)
-		answer := resp.Choices[0].Message.Content
+		LogResponseContentChoice(resp)
+		answer := resp.Choices[0].Content
 		return answer, nil
 	}
 }

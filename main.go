@@ -4,9 +4,9 @@ import (
 	"context"
 	"log"
 
-	"github.com/JackBekket/uncensoredgpt_tgbot/internal/bot/command"
-	"github.com/JackBekket/uncensoredgpt_tgbot/internal/bot/env"
-	"github.com/JackBekket/uncensoredgpt_tgbot/internal/database"
+	"github.com/JackBekket/uncensoredgpt_tgbot/lib/bot/command"
+	"github.com/JackBekket/uncensoredgpt_tgbot/lib/bot/env"
+	"github.com/JackBekket/uncensoredgpt_tgbot/lib/database"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
@@ -55,16 +55,18 @@ func main() {
 			comm.CheckAdmin(adminData, update.Message)
 		}
 		if ok {
+			/*
 			if update.Message.IsCommand() {
 				// Handle the /image command
 				if update.Message.Command() == "image" {
 				 // Send a random image to the user
 				// sendImage(bot, update.Message.Chat.ID)
 				if (update.Message.Text =="") {
-					comm.GenerateNewImageLAI_SD("evangelion, neon, genesis",chatID,bot)
+					comm.GenerateNewImageLAI_SD("evangelion, neon, anime",chatID,bot)
 				} else {
 				comm.GenerateNewImageLAI_SD(update.Message.Text,chatID,bot)
 				}}}
+			*/
 			log.Println("user dialog status:", user.DialogStatus)
 			log.Println(user.ID)
 			log.Println(user.Username)
