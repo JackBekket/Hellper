@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"path"
 
+	"github.com/JackBekket/uncensoredgpt_tgbot/lib/langchain"
 	"github.com/JackBekket/uncensoredgpt_tgbot/lib/localai"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -173,12 +174,7 @@ func (c *Commander) RenderLanguage(chat_id int64) {
 	chatID := chat_id
 	//user := c.usersDb[chatID]
 
-	/*
-		modelName := openai.GPT4 // gpt-4
-		user.AiSession.GptModel = modelName
-		msg := tgbotapi.NewMessage(user.ID, "your session model: "+modelName)
-		c.bot.Send(msg)
-	*/
+
 
 	msg := tgbotapi.NewMessage(chatID, "Choose a language or send 'Hello' in your desired language.")
 	msg.ReplyMarkup = tgbotapi.NewOneTimeReplyKeyboard(
@@ -275,8 +271,8 @@ func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.Message, 
 		c.bot.Send(msg)
 	} else {
 		log.Println(check)
-		//go langchain.SetupSequenceWithKey(c.bot,user,language,c.ctx,lpwd,ai_endpoint)
-		go localai.SetupSequenceWithKey(c.bot,user,language,c.ctx,lpwd,ai_endpoint)
+		go langchain.SetupSequenceWithKey(c.bot,user,language,c.ctx,lpwd,ai_endpoint)
+		//go localai.SetupSequenceWithKey(c.bot,user,language,c.ctx,lpwd,ai_endpoint)
 	}
 	
 }
@@ -307,8 +303,8 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint 
 	
 	default:
 		promt := updateMessage.Text
-		go localai.StartDialogSequence(c.bot, chatID, promt, c.ctx, ai_endpoint)
-		//go langchain.StartDialogSequence(c.bot,chatID,promt,c.ctx,ai_endpoint)
+		//go localai.StartDialogSequence(c.bot, chatID, promt, c.ctx, ai_endpoint)
+		go langchain.StartDialogSequence(c.bot,chatID,promt,c.ctx,ai_endpoint)
 	}	
 }
 
