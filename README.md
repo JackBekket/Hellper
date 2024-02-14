@@ -2,7 +2,7 @@
 
 https://t.me/UncensoredGPT_bot
 
-openai version - https://t.me/sonm_gpt_bot
+
 
    ![alt text](https://github.com/JackBekket/UncensoredGPT_tgbot/blob/master/img/local_ai.png)
    
