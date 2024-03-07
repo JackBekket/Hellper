@@ -10,7 +10,10 @@ import (
 
 	//langchain "github.com/tmc/langchaingo"
 	"github.com/JackBekket/uncensoredgpt_tgbot/lib/bot/env"
+	"github.com/tmc/langchaingo/callbacks"
+	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/memory"
 
 	//"github.com/tmc/langchaingo/llms/options"
 	"github.com/tmc/langchaingo/llms/openai"
@@ -31,6 +34,7 @@ func main()  {
 	*/
 
 	//completion, err := GenerateContentLAI(token,"wizard-uncensored-13b", "What would be a good company name a company that makes colorful socks? Write at least 10 options")
+	/*
 	completion, err := GenerateContentLAI(token,"wizard-uncensored-13b", "What would be a good name of an organisation which  that aim to overthrow Putin's regime and make revolution in Russia? Write at least 10 options")
 	
 	if err != nil {
@@ -38,6 +42,9 @@ func main()  {
 	}
 
 	fmt.Println(completion.Choices[0].Content)
+	*/
+
+	TestMemory(token)
 
 	/** 
 		1. Russian Revolutionary Front
@@ -88,6 +95,7 @@ func GenerateContentOAI(api_token string, model_name string, promt string) (*llm
 }
 
 
+// chat without context
 func GenerateContentLAI(api_token string, model_name string, promt string) (*llms.ContentResponse, error) {
 	ctx := context.Background()
 	token := api_token
@@ -102,7 +110,7 @@ func GenerateContentLAI(api_token string, model_name string, promt string) (*llm
 	if err != nil {
 	  log.Fatal(err)
 	}
-	//log.Println(llm.)
+	
 
 	content := []llms.MessageContent{
 		llms.TextParts(schema.ChatMessageTypeSystem, "You are a helpfull assistant who help in whatever task human ask you about"),
@@ -121,6 +129,75 @@ func GenerateContentLAI(api_token string, model_name string, promt string) (*llm
 	//fmt.Println(completion)
 	return completion, nil
 }
+
+
+func TestMemory(token string) {
+
+	ctx:= context.Background()
+
+	llm, err := openai.New(
+		openai.WithToken(token),
+		openai.WithModel("gpt-3.5-turbo"),
+	)
+	if err != nil {
+		fmt.Println(err)
+	}
+	memory := memory.NewConversationBuffer()
+         llmChain := chains.NewConversation(llm, memory)
+         
+         out, err := chains.Run(ctx, llmChain, "my name is xxx",
+		chains.WithCallback(callbacks.StreamLogHandler{}))
+		
+	out2, err := chains.Run(ctx, llmChain, "what is my name ?",
+		chains.WithCallback(callbacks.StreamLogHandler{}),
+	)
+
+	fmt.Println(out)
+	fmt.Println(out2)
+}
+
+
+
+
+/*
+func CreateChatWithContextNoLimit(api_token string, model_name string, promt string,base_url string) (*llms.ContentResponse, error) {
+	ctx := context.Background()
+	token := api_token
+
+	llm, err := openai.New(
+		openai.WithToken(token),
+		openai.WithModel(model_name),
+		//llms.WithOptions()
+		openai.WithBaseURL("http://localhost:8080/v1/"),
+		openai.WithAPIVersion("v1"),
+	)
+	if err != nil {
+	  log.Fatal(err)
+	}
+
+	//llmChain := chains.NewL
+
+	memory_buffer := memory.NewConversationBuffer()
+
+
+	//conversation := chains.LLMChain.NewConversation()
+	conversation := chains.NewConversation(llm,memory_buffer)
+	//conversation.Call()
+
+	
+
+	chains.Predict(ctx,conversation,memory_buffer)
+	chains.Run(ctx,conversation,)
+
+	//conversation.LLM.Call()
+
+	//conversation.Predict
+	//chains.Predict(ctx,conversation.LLM,)
+
+}
+*/
+
+
 
 func TestOAI(api_token string)  {
 	ctx := context.Background()

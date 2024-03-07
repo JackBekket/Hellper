@@ -1,5 +1,7 @@
 package langchain
 
+//package main
+
 import (
 	"context"
 	"log"
