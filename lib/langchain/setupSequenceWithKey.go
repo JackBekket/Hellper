@@ -107,7 +107,7 @@ func tryLanguage(user db.User, language string, languageCode int, ctx context.Co
 	log.Printf("request: %v\n", req)
 	*/
 
-	resp, err := GenerateContentLAI(languagePromt,model,ai_endpoint)
+	resp, err := GenerateContentLAI(ai_endpoint,model,languagePromt)
 	if err != nil {
 		return "", err
 	} else {
