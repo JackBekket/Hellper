@@ -2,6 +2,8 @@
 
 https://t.me/UncensoredGPT_bot
 
+currently protected by password, if you need password (and I know you), you can DM me in Telegram or at my email
+
 
 
    ![alt text](https://github.com/JackBekket/UncensoredGPT_tgbot/blob/master/img/local_ai.png)
