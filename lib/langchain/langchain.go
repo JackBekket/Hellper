@@ -20,6 +20,13 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
+/** DEV NOTE
+	 OAI -- openAI, LAI -- localAI
+	 if your IDE says it won't compile just try to build from terminal first
+	 if it says there no methods "Run" or "Predict" in LLM class -- it is IDE bug, just compile it from terminal
+**/
+
+
 func main()  {
 	//ctx := context.Background()
 	env.Load()
@@ -62,8 +69,7 @@ func main()  {
 }
 
 
-// OAI -- openAI, LAI -- localAI
-// if your IDE says it won't compile just try to build from terminal first
+
 
 
 func GenerateContentOAI(api_token string, model_name string, promt string) (*llms.ContentResponse, error) {
@@ -197,8 +203,13 @@ func CreateChatWithContextNoLimit(api_token string, model_name string) (string, 
 	memory_buffer.SaveContext(ctx,inputValues1,outputValues1)
 	memory_buffer.SaveContext(ctx,inputValues2,outputValues2)
 
-	memory_buffer.ChatHistory.AddUserMessage(ctx,"my name is Bekket btw")
-
+	//memory_buffer.ChatHistory.AddUserMessage(ctx,"Hi!")
+	//memory_buffer.ChatHistory.AddAIMessage(ctx,"What's up")
+	//memory_buffer.ChatHistory.AddUserMessage(ctx, "Not much, just hanging")
+	//memory_buffer.ChatHistory.AddAIMessage(ctx,"Cool")
+	memory_buffer.ChatHistory.AddUserMessage(ctx, "I am working at my new exiting golang AI project called 'Andromeda'")
+	memory_buffer.ChatHistory.AddUserMessage(ctx, "My name is Bekket btw")
+	
 
 	/*
 	memory.save_context({"input": "Hi"},
@@ -219,7 +230,7 @@ func CreateChatWithContextNoLimit(api_token string, model_name string) (string, 
 	}
 	*/
 
-	result, err := chains.Run(ctx,conversation,"what is my name ?")
+	result, err := chains.Run(ctx,conversation,"what is my name and what project am I currently working on?")
 	if err != nil {
 		return "", err
 	}
