@@ -1,6 +1,6 @@
-//package langchain
+package langchain
 
-package main
+//package main
 
 import (
 	"context"
@@ -8,7 +8,6 @@ import (
 	"sync"
 
 	db "github.com/JackBekket/uncensoredgpt_tgbot/lib/database"
-	//"github.com/sashabaranov/go-openai"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
