@@ -1,7 +1,7 @@
-package langchain
+//package langchain
 
 //package langchain_controller
-//package main
+package main
 
 import (
 	"context"
@@ -44,7 +44,7 @@ func main()  {
 	fmt.Println(completion.Choices[0].Content)
 	*/
 
-	TestMemory(token)
+	CreateChatWithContextNoLimit(token,"gpt-3.5-turbo")
 
 	/** 
 		1. Russian Revolutionary Front
@@ -61,6 +61,9 @@ func main()  {
 	
 }
 
+
+// OAI -- openAI, LAI -- localAI
+// if your IDE says it won't compile just try to build from terminal first
 
 
 func GenerateContentOAI(api_token string, model_name string, promt string) (*llms.ContentResponse, error) {
@@ -131,6 +134,8 @@ func GenerateContentLAI(api_token string, model_name string, promt string) (*llm
 }
 
 
+
+// TODO: Remove this or transfer into tests
 func TestMemory(token string) {
 
 	ctx:= context.Background()
@@ -159,8 +164,8 @@ func TestMemory(token string) {
 
 
 
-/*
-func CreateChatWithContextNoLimit(api_token string, model_name string, promt string,base_url string) (*llms.ContentResponse, error) {
+
+func CreateChatWithContextNoLimit(api_token string, model_name string) (string, error) {
 	ctx := context.Background()
 	token := api_token
 
@@ -168,8 +173,8 @@ func CreateChatWithContextNoLimit(api_token string, model_name string, promt str
 		openai.WithToken(token),
 		openai.WithModel(model_name),
 		//llms.WithOptions()
-		openai.WithBaseURL("http://localhost:8080/v1/"),
-		openai.WithAPIVersion("v1"),
+		//openai.WithBaseURL("http://localhost:8080/v1/"),
+		//openai.WithAPIVersion("v1"),
 	)
 	if err != nil {
 	  log.Fatal(err)
@@ -180,25 +185,56 @@ func CreateChatWithContextNoLimit(api_token string, model_name string, promt str
 	memory_buffer := memory.NewConversationBuffer()
 
 
+	//test data
+	 // First dialogue pair
+	inputValues1 := map[string]any{"input": "Hi"}
+	outputValues1 := map[string]any{"output": "What's up"}
+
+	 // Second dialogue pair
+	inputValues2 := map[string]any{"input": "Not much, just hanging"}
+	outputValues2 := map[string]any{"output": "Cool"}
+
+	memory_buffer.SaveContext(ctx,inputValues1,outputValues1)
+	memory_buffer.SaveContext(ctx,inputValues2,outputValues2)
+
+	memory_buffer.ChatHistory.AddUserMessage(ctx,"my name is Bekket btw")
+
+
+	/*
+	memory.save_context({"input": "Hi"},
+                   {"output": "What's up"})
+	memory.save_context({"input": "Not much, just hanging"},
+                   {"output": "Cool"})
+	*/
+
+
 	//conversation := chains.LLMChain.NewConversation()
 	conversation := chains.NewConversation(llm,memory_buffer)
-	//conversation.Call()
-
 	
 
-	chains.Predict(ctx,conversation,memory_buffer)
-	chains.Run(ctx,conversation,)
+	/*
+	result,err := chains.Predict(ctx,conversation,memory_buffer)
+	if err != nil {
+		return "", err
+	}
+	*/
 
-	//conversation.LLM.Call()
+	result, err := chains.Run(ctx,conversation,"what is my name ?")
+	if err != nil {
+		return "", err
+	}
 
-	//conversation.Predict
-	//chains.Predict(ctx,conversation.LLM,)
 
+	log.Println(result)
+	return result,err
+	//chains.Run(ctx,conversation,)
 }
-*/
 
 
 
+
+
+// TODO: remove or transfer this into tests
 func TestOAI(api_token string)  {
 	ctx := context.Background()
 	token := api_token
@@ -227,6 +263,9 @@ func TestOAI(api_token string)  {
 }
 
 
+
+// TODO: make one function for both OAI & LAI, add baseUrl as argument
+// Main function for generating from single promt (without memory and context)
 func GenerateFromSinglePromtLocal(prompt string, model_name string) (string,error) {
 	ctx := context.Background()
 	llm, err := openai.New(
