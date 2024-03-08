@@ -1,12 +1,13 @@
 package langchain
 
+//package main
+
 import (
 	"context"
 	"log"
 	"sync"
 
 	db "github.com/JackBekket/uncensoredgpt_tgbot/lib/database"
-	//"github.com/sashabaranov/go-openai"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -106,7 +107,7 @@ func tryLanguage(user db.User, language string, languageCode int, ctx context.Co
 	log.Printf("request: %v\n", req)
 	*/
 
-	resp, err := GenerateContentLAI(languagePromt,model,ai_endpoint)
+	resp, err := GenerateContentLAI(ai_endpoint,model,languagePromt)
 	if err != nil {
 		return "", err
 	} else {
