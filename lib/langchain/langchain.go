@@ -8,8 +8,9 @@ import (
 	"fmt"
 	"log"
 
-	//langchain "github.com/tmc/langchaingo"
 	"github.com/JackBekket/uncensoredgpt_tgbot/lib/bot/env"
+	db "github.com/JackBekket/uncensoredgpt_tgbot/lib/database"
+
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/memory"
@@ -24,13 +25,6 @@ import (
 	 if your IDE says it won't compile just try to build from terminal first
 	 if it says there no methods "Run" or "Predict" in LLM class -- it is IDE bug, just compile it from terminal
 **/
-
-
-type ChatSession struct {
-    ConversationBuffer *memory.ConversationBuffer
-    DialogThread *chains.LLMChain
-}
-
 
 // I use it for fast testing
 func main()  {
@@ -247,7 +241,7 @@ func TestChatWithContextNoLimit(api_token string, model_name string) (string, er
 
 
 // Initialize New Dialog thread with User with no limitation for token usage (may fail, use with limit)
-func InitializeNewChatWithContextNoLimit(api_token string, model_name string) (*ChatSession, error)  {
+func InitializeNewChatWithContextNoLimit(api_token string, model_name string) (*db.ChatSession, error)  {
 	//ctx := context.Background()
 
     llm, err := openai.New(
@@ -261,7 +255,7 @@ func InitializeNewChatWithContextNoLimit(api_token string, model_name string) (*
     memoryBuffer := memory.NewConversationBuffer()
     conversation := chains.NewConversation(llm, memoryBuffer)
 
-    return &ChatSession{
+    return &db.ChatSession{
         ConversationBuffer: memoryBuffer,
         DialogThread: &conversation,
     }, nil
@@ -269,7 +263,7 @@ func InitializeNewChatWithContextNoLimit(api_token string, model_name string) (*
 
 
 // Continue Dialog with memory included, so user can chat with remembering context of previouse messages
-func ContinueChatWithContextNoLimit(session *ChatSession, prompt string) (string, error) {
+func ContinueChatWithContextNoLimit(session *db.ChatSession, prompt string) (string, error) {
 	ctx := context.Background()
     result, err := chains.Run(ctx, session.DialogThread, prompt)
     if err != nil {

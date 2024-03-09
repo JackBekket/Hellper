@@ -42,11 +42,21 @@ func StartDialogSequence(bot *tgbotapi.BotAPI, chatID int64, promt string, ctx c
 		promt,
 	)
 
-	/*
-	req := createComplexChatRequest(promt, gptModel)
-	c := user.AiSession.GptClient
-	*/
+	thread := user.AiSession.DialogThread
 
+	resp, err := ContinueChatWithContextNoLimit(&thread,promt)
+	if err != nil {
+		errorMessage(err,bot,user)
+	} else {
+		msg := tgbotapi.NewMessage(chatID, resp)
+		msg.ParseMode = "MARKDOWN"
+		bot.Send(msg)
+
+		user.DialogStatus = 4
+		db.UsersMap[chatID] = user
+	}
+
+	/*
 	resp, err := GenerateContentLAI(promt,gptModel,ai_endpoint)
 	if err != nil {
 		errorMessage(err, bot, user)
@@ -60,6 +70,9 @@ func StartDialogSequence(bot *tgbotapi.BotAPI, chatID int64, promt string, ctx c
 		user.DialogStatus = 4
 		db.UsersMap[chatID] = user
 	}
+	*/
+
+
 
 }
 

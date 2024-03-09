@@ -30,21 +30,17 @@ func SetupSequenceWithKey(
 	//u_network := user.Network
 	//log.Println("user network from session: ", u_network)
 	log.Println("user model from session: ", user.AiSession.GptModel)
-	//var client *openai.Client
+
 	u_pwd := user.AiSession.GptKey
 	log.Println("upwd: ", u_pwd)
 
-
-
-
-
-	//client := CreateClient(gptKey) // creating client (but we don't know if it works)
-	//log.Println("Setting up sequence with key")
-	//client := CreateLocalhostClientWithCheck(local_ap,gptKey)
-	//log.Println("local_ap: ", spwd)
-	//log.Println("client: ", client)
-	//log.Println("client: ", client.config)
-	//user.AiSession.GptClient = *client
+	// Initializing empty dialog thread
+	thread, err := InitializeNewChatWithContextNoLimit(gptKey,user.AiSession.GptModel)
+	if err != nil {
+		log.Println(err)
+	}
+	user.AiSession.DialogThread = *thread
+	db.UsersMap[chatID] = user // we need to store empty buffer *before* starting dialog
 
 	
 
@@ -98,15 +94,17 @@ func tryLanguage(user db.User, language string, languageCode int, ctx context.Co
 	}
 
 	log.Printf("Language: %v\n", languagePromt)
-	model := user.AiSession.GptModel
-	//client := user.AiSession.GptClient
-	//log.Println("client: ", client)
+	//model := user.AiSession.GptModel
+	thread := user.AiSession.DialogThread
+
+	resp, err := ContinueChatWithContextNoLimit(&thread,languagePromt)
+	if err != nil {
+		return "", err
+	} else {
+		return resp, nil
+	}
 
 	/*
-	req := createComplexChatRequest(languagePromt, model)
-	log.Printf("request: %v\n", req)
-	*/
-
 	resp, err := GenerateContentLAI(ai_endpoint,model,languagePromt)
 	if err != nil {
 		return "", err
@@ -115,4 +113,5 @@ func tryLanguage(user db.User, language string, languageCode int, ctx context.Co
 		answer := resp.Choices[0].Content
 		return answer, nil
 	}
+	*/
 }
