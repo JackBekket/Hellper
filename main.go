@@ -20,6 +20,7 @@ func main() {
 	if err != nil {
 		log.Panic(err)
 	}
+	log.Println("TG token is: ", token)
 
 	adminData := env.LoadAdminData()
 	local_access_pwd:= env.LoadLocalPD()
