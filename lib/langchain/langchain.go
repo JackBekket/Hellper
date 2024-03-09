@@ -67,7 +67,7 @@ func main()  {
 	10. Russian Revolutionary Front
 	**/
 
-	session, err := InitializeNewChatWithContextNoLimit(token,model_name)
+	session, err := InitializeNewChatWithContextNoLimit(token,model_name,"localai")
 	if err != nil {
 		log.Println(err)
 	}
@@ -241,24 +241,45 @@ func TestChatWithContextNoLimit(api_token string, model_name string) (string, er
 
 
 // Initialize New Dialog thread with User with no limitation for token usage (may fail, use with limit)
-func InitializeNewChatWithContextNoLimit(api_token string, model_name string) (*db.ChatSession, error)  {
+func InitializeNewChatWithContextNoLimit(api_token string, model_name string, base_url string) (*db.ChatSession, error)  {
 	//ctx := context.Background()
 
-    llm, err := openai.New(
-        openai.WithToken(api_token),
-        openai.WithModel(model_name),
-    )
-    if err != nil {
-        return nil, err
-    }
+	if base_url == "" {
+		llm, err := openai.New(
+			openai.WithToken(api_token),
+			openai.WithModel(model_name),
+		)
+		if err != nil {
+			return nil, err
+		}
 
-    memoryBuffer := memory.NewConversationBuffer()
-    conversation := chains.NewConversation(llm, memoryBuffer)
+		memoryBuffer := memory.NewConversationBuffer()
+		conversation := chains.NewConversation(llm, memoryBuffer)
+	
+		return &db.ChatSession{
+			ConversationBuffer: memoryBuffer,
+			DialogThread: &conversation,
+		}, nil
+	} else {
+		llm, err := openai.New(
+			openai.WithToken(api_token),
+			openai.WithModel(model_name),
+			openai.WithBaseURL("http://localhost:8080"),
+			openai.WithAPIVersion("v1"),
+		)
+		if err != nil {
+			return nil, err
+		}
+	
+		memoryBuffer := memory.NewConversationBuffer()
+		conversation := chains.NewConversation(llm, memoryBuffer)
+	
+		return &db.ChatSession{
+			ConversationBuffer: memoryBuffer,
+			DialogThread: &conversation,
+		}, nil
+	}
 
-    return &db.ChatSession{
-        ConversationBuffer: memoryBuffer,
-        DialogThread: &conversation,
-    }, nil
 }
 
 

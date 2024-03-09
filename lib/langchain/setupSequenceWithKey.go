@@ -35,7 +35,7 @@ func SetupSequenceWithKey(
 	log.Println("upwd: ", u_pwd)
 
 	// Initializing empty dialog thread
-	thread, err := InitializeNewChatWithContextNoLimit(gptKey,user.AiSession.GptModel)
+	thread, err := InitializeNewChatWithContextNoLimit(gptKey,user.AiSession.GptModel,ai_endpoint)
 	if err != nil {
 		log.Println(err)
 	}
@@ -52,7 +52,7 @@ func SetupSequenceWithKey(
 		} else {
 			msg := tgbotapi.NewMessage(chatID, probe)
 			bot.Send(msg)
-			user.DialogStatus = 4
+			user.DialogStatus = 6
 			db.UsersMap[chatID] = user
 		}
 	case "Russian":
@@ -62,7 +62,7 @@ func SetupSequenceWithKey(
 		} else {
 			msg := tgbotapi.NewMessage(chatID, probe)
 			bot.Send(msg)
-			user.DialogStatus = 4
+			user.DialogStatus = 6
 			db.UsersMap[chatID] = user
 		}
 	default:
@@ -72,7 +72,7 @@ func SetupSequenceWithKey(
 		} else {
 			msg := tgbotapi.NewMessage(chatID, probe)
 			bot.Send(msg)
-			user.DialogStatus = 4
+			user.DialogStatus = 6
 			db.UsersMap[chatID] = user
 		}
 	}

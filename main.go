@@ -55,18 +55,7 @@ func main() {
 			comm.CheckAdmin(adminData, update.Message)
 		}
 		if ok {
-			/*
-			if update.Message.IsCommand() {
-				// Handle the /image command
-				if update.Message.Command() == "image" {
-				 // Send a random image to the user
-				// sendImage(bot, update.Message.Chat.ID)
-				if (update.Message.Text =="") {
-					comm.GenerateNewImageLAI_SD("evangelion, neon, anime",chatID,bot)
-				} else {
-				comm.GenerateNewImageLAI_SD(update.Message.Text,chatID,bot)
-				}}}
-			*/
+
 			log.Println("user dialog status:", user.DialogStatus)
 			log.Println(user.ID)
 			log.Println(user.Username)
@@ -74,28 +63,19 @@ func main() {
 			// first check for user status, (for a new user status 0 is set automatically),
 			// then user reply for the first bot message is logged to a database as name AND user status is updated
 			case 0:
-				comm.InputYourAPIKey(update.Message) // input key then net then model
+				comm.ChooseNetwork(update.Message)
 			case 1:
-				comm.ChooseModel(update.Message)
-
+				comm.HandleNetworkChoose(update.Message)
 			case 2:
-				comm.HandleModelChoose(update.Message)
-				/*
-				switch update.Message.Text {
-				case "GPT-3.5":
-					comm.ModelGPT3DOT5(update.Message)
-				// case "GPT-4":
-				// 	comm.ModelGPT4(update.Message)
-				default:
-					comm.WrongModel(update.Message)
-				}
-				*/
+				comm.InputYourAPIKey(update.Message) 
 			case 3:
-				comm.ConnectingToAiWithLanguage(update.Message,local_access_pwd,ai_endpoint)
+				comm.ChooseModel(update.Message)
 			case 4:
-				comm.DialogSequence(update.Message,ai_endpoint)
+				comm.HandleModelChoose(update.Message)
 			case 5:
-				//comm.CodexSequence(update.Message)
+				comm.ConnectingToAiWithLanguage(update.Message,local_access_pwd,ai_endpoint)	
+			case 6: 
+				comm.DialogSequence(update.Message,ai_endpoint)
 				
 			}
 

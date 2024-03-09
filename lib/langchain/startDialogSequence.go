@@ -52,7 +52,7 @@ func StartDialogSequence(bot *tgbotapi.BotAPI, chatID int64, promt string, ctx c
 		msg.ParseMode = "MARKDOWN"
 		bot.Send(msg)
 
-		user.DialogStatus = 4
+		user.DialogStatus = 6
 		db.UsersMap[chatID] = user
 	}
 
