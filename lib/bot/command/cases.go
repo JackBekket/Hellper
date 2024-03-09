@@ -75,6 +75,7 @@ func (c *Commander) HandleNetworkChoose(updateMessage *tgbotapi.Message) {
 
 		user.DialogStatus = 2
 		c.usersDb[chatID] = user
+		c.InputYourAPIKey(updateMessage)
 	case "localai":
 
 		user.Network = network
@@ -83,8 +84,9 @@ func (c *Commander) HandleNetworkChoose(updateMessage *tgbotapi.Message) {
 
 		user.DialogStatus = 2
 		c.usersDb[chatID] = user
+		c.InputYourAPIKey(updateMessage)
 	default:
-		c.WrongModel(updateMessage)
+		c.WrongNetwork(updateMessage)
 	}
 
 }
@@ -101,7 +103,7 @@ func (c *Commander) ChooseModel(updateMessage *tgbotapi.Message) {
 	network := user.Network
 
 
-	
+
 	// I can't validate key at this stage. The only way to validate key is to send test sequence (see case 3)
 	// Since this part is oftenly get an usernamecaught exeption, we debug what user input as key. It's bad, I know, but usernametil we got key validation we need this part.
 	log.Println("Key promt: ", gptKey)
