@@ -18,7 +18,6 @@ type WrongPwdError struct {
 
 // Message:	case0 - "Input your openAI API key. It can be created at https://platform.openai.com/accousernamet/api-keys".
 //  DialogStatus 2 -> 3
-//	update DialogStatus = 1
 func (c *Commander) InputYourAPIKey(updateMessage *tgbotapi.Message) {
 	chatID := updateMessage.From.ID
 	user := c.usersDb[chatID]
