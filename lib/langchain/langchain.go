@@ -53,7 +53,7 @@ func main()  {
 	fmt.Println(completion.Choices[0].Content)
 	*/
 
-	TestChatWithContextNoLimit(token,"gpt-3.5-turbo")
+	TestChatWithContextNoLimit(token,"wizard-uncensored-13b")
 
 	/** 
 		1. Russian Revolutionary Front
@@ -167,8 +167,8 @@ func TestChatWithContextNoLimit(api_token string, model_name string) (string, er
 		openai.WithToken(token),
 		openai.WithModel(model_name),
 		//llms.WithOptions()
-		//openai.WithBaseURL("http://localhost:8080/v1/"),
-		//openai.WithAPIVersion("v1"),
+		openai.WithBaseURL("http://localhost:8080/v1/"),
+		openai.WithAPIVersion("v1"),
 	)
 	if err != nil {
 	  log.Fatal(err)
