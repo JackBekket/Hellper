@@ -53,14 +53,14 @@ func main()  {
 	fmt.Println(completion.Choices[0].Content)
 	*/
 
-	TestChatWithContextNoLimit(token,model_name)		// works with both OAI and LAI
+	//TestChatWithContextNoLimit(token,model_name)		// works with both OAI and LAI
 
 	
 
 
 	// works only for OAI for unknown reason BUG!
-	/*
-	session, err := InitializeNewChatWithContextNoLimit(token,model_name,"localai")
+	
+	session, err := InitializeNewChatWithContextNoLimit(token,model_name,"")
 	if err != nil {
 		log.Println(err)
 	}
@@ -75,7 +75,7 @@ func main()  {
 		log.Println(err)
 	}
 	fmt.Println(res2)
-	*/
+	
 }
 
 
