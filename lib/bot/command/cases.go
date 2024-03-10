@@ -300,7 +300,7 @@ func (c *Commander) WrongNetwork(updateMessage *tgbotapi.Message) {
 	msg := tgbotapi.NewMessage(user.ID, "type openai or localai")
 	c.bot.Send(msg)
 
-	user.DialogStatus = 3
+	user.DialogStatus = 0
 	c.usersDb[chatID] = user
 }
 
