@@ -28,12 +28,12 @@ import (
 
 // I use it for fast testing
 func main()  {
-	//ctx := context.Background()
+	ctx := context.Background()
 	env.Load()
 	//env_data := env.LoadAdminData()
 	token := env.GetAdminToken()
-	//model_name := "gpt-3.5-turbo"	// using openai for tests
-	model_name := "wizard-uncensored-13b"
+	model_name := "gpt-3.5-turbo"	// using openai for tests
+	//model_name := "wizard-uncensored-13b"
 
 	/*
 	completion,err := GenerateContentOAI(token,"gpt-3.5-turbo","What would be a good company name a company that makes colorful socks? Write at least 10 options")
@@ -60,7 +60,7 @@ func main()  {
 
 	// works only for OAI for unknown reason BUG!
 	
-	session, err := InitializeNewChatWithContextNoLimit(token,model_name,"localai")
+	session, err := InitializeNewChatWithContextNoLimit(token,model_name,"")
 	if err != nil {
 		log.Println(err)
 	}
@@ -75,6 +75,22 @@ func main()  {
 		log.Println(err)
 	}
 	fmt.Println(res2)
+
+	memory := session.ConversationBuffer
+
+	log.Println("check if it's stored in messages, printing messages:")
+	history, err := memory.ChatHistory.Messages(ctx)
+	if err != nil {
+		log.Println(err)
+	}
+	//log.Println(history)
+	total_turns := len(history)
+	log.Println("total number of turns: ", total_turns)
+	// Iterate over each message and print
+    log.Println("Printing messages:")
+    for _, msg := range history {
+        log.Println(msg.GetContent())
+    }
 	
 }
 
