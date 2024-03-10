@@ -32,7 +32,8 @@ func main()  {
 	env.Load()
 	//env_data := env.LoadAdminData()
 	token := env.GetAdminToken()
-	model_name := "gpt-3.5-turbo"	// using openai for tests
+	//model_name := "gpt-3.5-turbo"	// using openai for tests
+	model_name := "wizard-uncensored-13b"
 
 	/*
 	completion,err := GenerateContentOAI(token,"gpt-3.5-turbo","What would be a good company name a company that makes colorful socks? Write at least 10 options")
@@ -67,7 +68,7 @@ func main()  {
 	10. Russian Revolutionary Front
 	**/
 
-	session, err := InitializeNewChatWithContextNoLimit(token,model_name,"")
+	session, err := InitializeNewChatWithContextNoLimit(token,model_name,"localai")
 	if err != nil {
 		log.Println(err)
 	}
