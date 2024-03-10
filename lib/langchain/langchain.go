@@ -65,18 +65,22 @@ func main()  {
 		log.Println(err)
 	}
 
-	res1,err := ContinueChatWithContextNoLimit(session,"Hello, my name is Bekket, how are you?")
+	memory := session.ConversationBuffer
+	memory.ChatHistory.AddUserMessage(ctx,"Hello, my name is Bekket, how are you?")
+	memory.ChatHistory.AddAIMessage(ctx,"Hello Bekket, I am doing well. How are you?")
+
+	res1,err := ContinueChatWithContextNoLimit(session,"I am working on a new project called 'Andromeda', do you like this project name?")
 	if err != nil {
 		log.Println(err)
 	}
 	fmt.Println(res1)
-	res2, err := ContinueChatWithContextNoLimit(session,"What is my name?")
+	res2, err := ContinueChatWithContextNoLimit(session,"What is my name and what project am I currently working on?")
 	if err != nil {
 		log.Println(err)
 	}
 	fmt.Println(res2)
 
-	memory := session.ConversationBuffer
+	
 
 	log.Println("check if it's stored in messages, printing messages:")
 	history, err := memory.ChatHistory.Messages(ctx)
@@ -164,7 +168,7 @@ func GenerateContentLAI(api_token string, model_name string, promt string) (*llm
 
 
 // chat with context without limitation of token to use
-//  use it only to fast testing, REMOVE before production
+//  use it only to fast testing
 func TestChatWithContextNoLimit(api_token string, model_name string) (string, error) {
 	ctx := context.Background()
 	token := api_token
