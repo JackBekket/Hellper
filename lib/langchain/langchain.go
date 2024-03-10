@@ -32,7 +32,7 @@ func main()  {
 	env.Load()
 	//env_data := env.LoadAdminData()
 	token := env.GetAdminToken()
-	//model_name := "gpt-3.5-turbo"	// using openai for tests
+	model_name := "gpt-3.5-turbo"	// using openai for tests
 	//model_name := "wizard-uncensored-13b"
 
 	/*
@@ -42,7 +42,7 @@ func main()  {
 	}
 	*/
 
-	//completion, err := GenerateContentLAI(token,"wizard-uncensored-13b", "What would be a good company name a company that makes colorful socks? Write at least 10 options")
+	
 	/*
 	completion, err := GenerateContentLAI(token,"wizard-uncensored-13b", "What would be a good name of an organisation which  that aim to overthrow Putin's regime and make revolution in Russia? Write at least 10 options")
 	
@@ -53,22 +53,12 @@ func main()  {
 	fmt.Println(completion.Choices[0].Content)
 	*/
 
-	TestChatWithContextNoLimit(token,"wizard-uncensored-13b")
+	TestChatWithContextNoLimit(token,model_name)		// works with both OAI and LAI
 
-	/** 
-		1. Russian Revolutionary Front
-	2. People's Liberation Army
-	3. Russian Resistance Movement
-	4. Russian Revolutionary Council
-	5. Russian Revolutionary Alliance
-	6. Russian Revolutionary Party
-	7. Russian Revolutionary Army
-	8. Russian Revolutionary Coalition
-	9. Russian Revolutionary Council
-	10. Russian Revolutionary Front
-	**/
+	
 
 
+	// works only for OAI for unknown reason BUG!
 	/*
 	session, err := InitializeNewChatWithContextNoLimit(token,model_name,"localai")
 	if err != nil {
@@ -167,8 +157,8 @@ func TestChatWithContextNoLimit(api_token string, model_name string) (string, er
 		openai.WithToken(token),
 		openai.WithModel(model_name),
 		//llms.WithOptions()
-		openai.WithBaseURL("http://localhost:8080/v1/"),
-		openai.WithAPIVersion("v1"),
+		//openai.WithBaseURL("http://localhost:8080/v1/"),	// comment this and next line to call OAI, if not then call to LAI
+		//openai.WithAPIVersion("v1"),
 	)
 	if err != nil {
 	  log.Fatal(err)
