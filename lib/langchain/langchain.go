@@ -67,7 +67,7 @@ func main()  {
 	10. Russian Revolutionary Front
 	**/
 
-	session, err := InitializeNewChatWithContextNoLimit(token,model_name,"openai")
+	session, err := InitializeNewChatWithContextNoLimit(token,model_name,"")
 	if err != nil {
 		log.Println(err)
 	}
