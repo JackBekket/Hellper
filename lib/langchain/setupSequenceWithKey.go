@@ -34,14 +34,16 @@ func SetupSequenceWithKey(
 	u_pwd := user.AiSession.GptKey
 	log.Println("upwd: ", u_pwd)
 
+
+	/*
 	// Initializing empty dialog thread
-	thread, err := InitializeNewChatWithContextNoLimit(gptKey,user.AiSession.GptModel)
+	thread, err := InitializeNewChatWithContextNoLimit(gptKey,user.AiSession.GptModel,ai_endpoint)
 	if err != nil {
 		log.Println(err)
 	}
 	user.AiSession.DialogThread = *thread
 	db.UsersMap[chatID] = user // we need to store empty buffer *before* starting dialog
-
+	*/
 	
 
 	switch language {
@@ -50,9 +52,11 @@ func SetupSequenceWithKey(
 		if err != nil {
 			errorMessage(err, bot, user)
 		} else {
-			msg := tgbotapi.NewMessage(chatID, probe)
+
+			msg := tgbotapi.NewMessage(chatID, "connected")
 			bot.Send(msg)
-			user.DialogStatus = 4
+			user.DialogStatus = 6
+			user.AiSession.DialogThread = *probe
 			db.UsersMap[chatID] = user
 		}
 	case "Russian":
@@ -60,9 +64,10 @@ func SetupSequenceWithKey(
 		if err != nil {
 			errorMessage(err, bot, user)
 		} else {
-			msg := tgbotapi.NewMessage(chatID, probe)
+			msg := tgbotapi.NewMessage(chatID, "connected")
 			bot.Send(msg)
-			user.DialogStatus = 4
+			user.AiSession.DialogThread = *probe
+			user.DialogStatus = 6
 			db.UsersMap[chatID] = user
 		}
 	default:
@@ -70,9 +75,10 @@ func SetupSequenceWithKey(
 		if err != nil {
 			errorMessage(err, bot, user)
 		} else {
-			msg := tgbotapi.NewMessage(chatID, probe)
+			msg := tgbotapi.NewMessage(chatID, "connnected")
 			bot.Send(msg)
-			user.DialogStatus = 4
+			user.AiSession.DialogThread = *probe
+			user.DialogStatus = 6
 			db.UsersMap[chatID] = user
 		}
 	}
@@ -81,28 +87,46 @@ func SetupSequenceWithKey(
 }
 
 // LanguageCode: 0 - default, 1 - Russian, 2 - English
-func tryLanguage(user db.User, language string, languageCode int, ctx context.Context, ai_endpoint string, spwd string, upwd string) (string, error) {
+func tryLanguage(user db.User, language string, languageCode int, ctx context.Context, ai_endpoint string, spwd string, upwd string) (*db.ChatSession, error) {
 	var languagePromt string
+	var languageResponse string
 
 	switch languageCode {
 	case 1:
 		languagePromt = "Hi, Do you speak english?"
+		languageResponse = "Yes, I do, how can I help you today?"
 	case 2:
 		languagePromt = "Привет, ты говоришь по-русски?"
+		languageResponse = "Да, я говорю по русски, чем я могу помочь тебе сегодня?"
 	default:
 		languagePromt = language
 	}
-
 	log.Printf("Language: %v\n", languagePromt)
-	//model := user.AiSession.GptModel
-	thread := user.AiSession.DialogThread
 
-	resp, err := ContinueChatWithContextNoLimit(&thread,languagePromt)
+	gptKey := user.AiSession.GptKey
+	model := user.AiSession.GptModel
+	//chatID := user.ID
+
+	// Initializing empty dialog thread
+	thread, err := InitializeNewChatWithContextNoLimit(gptKey,model,ai_endpoint,languagePromt,languageResponse)
+		if err != nil {
+			log.Println(err)
+			return nil,err
+		}
+	//user.AiSession.DialogThread = *thread
+	//db.UsersMap[chatID] = user // we need to store empty buffer *before* starting dialog
+
+	return thread, nil
+	
+	
+	/*
+	resp, err := ContinueChatWithContextNoLimit(thread,languagePromt)
 	if err != nil {
 		return "", err
 	} else {
 		return resp, nil
 	}
+	*/
 
 	/*
 	resp, err := GenerateContentLAI(ai_endpoint,model,languagePromt)

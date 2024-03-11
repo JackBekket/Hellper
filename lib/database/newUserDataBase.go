@@ -25,6 +25,7 @@ type AiSession struct {
 	GptModel  string
 	AI_Type	  int8
 	DialogThread ChatSession
+	Base_url  string
 }
 
 type ChatSession struct {
