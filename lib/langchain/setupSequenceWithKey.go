@@ -34,6 +34,8 @@ func SetupSequenceWithKey(
 	u_pwd := user.AiSession.GptKey
 	log.Println("upwd: ", u_pwd)
 
+
+	/*
 	// Initializing empty dialog thread
 	thread, err := InitializeNewChatWithContextNoLimit(gptKey,user.AiSession.GptModel,ai_endpoint)
 	if err != nil {
@@ -41,7 +43,7 @@ func SetupSequenceWithKey(
 	}
 	user.AiSession.DialogThread = *thread
 	db.UsersMap[chatID] = user // we need to store empty buffer *before* starting dialog
-
+	*/
 	
 
 	switch language {

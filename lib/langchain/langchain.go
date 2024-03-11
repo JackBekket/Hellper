@@ -35,39 +35,19 @@ func main()  {
 	//model_name := "gpt-3.5-turbo"	// using openai for tests
 	model_name := "wizard-uncensored-13b"
 
-	/*
-	completion,err := GenerateContentOAI(token,"gpt-3.5-turbo","What would be a good company name a company that makes colorful socks? Write at least 10 options")
-	if err != nil {
-		log.Println(err)
-	}
-	*/
-
-	
-	/*
-	completion, err := GenerateContentLAI(token,"wizard-uncensored-13b", "What would be a good name of an organisation which  that aim to overthrow Putin's regime and make revolution in Russia? Write at least 10 options")
-	
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	fmt.Println(completion.Choices[0].Content)
-	*/
 
 	//TestChatWithContextNoLimit(token,model_name)		// works with both OAI and LAI
 
-	
-
-
 	// works only for OAI for unknown reason BUG!
 	
-	session, err := InitializeNewChatWithContextNoLimit(token,model_name,"localai")
+	session, err := InitializeNewChatWithContextNoLimit(token,model_name,"localai","Hello, my name is Bekket")
 	if err != nil {
 		log.Println(err)
 	}
 
 	memory := session.ConversationBuffer
-	memory.ChatHistory.AddUserMessage(ctx,"Hello, my name is Bekket, how are you?")
-	memory.ChatHistory.AddAIMessage(ctx,"Hello Bekket, I am doing well. How are you?")
+	//memory.ChatHistory.AddUserMessage(ctx,"Hello, my name is Bekket, how are you?")
+	//memory.ChatHistory.AddAIMessage(ctx,"Hello Bekket, I am doing well. How are you?")
 
 	res1,err := ContinueChatWithContextNoLimit(session,"I am working on a new project called 'Andromeda', do you like this project name?")
 	if err != nil {
@@ -253,9 +233,9 @@ func TestChatWithContextNoLimit(api_token string, model_name string) (string, er
 }
 
 
-// Initialize New Dialog thread with User with no limitation for token usage (may fail, use with limit)
-func InitializeNewChatWithContextNoLimit(api_token string, model_name string, base_url string) (*db.ChatSession, error)  {
-	//ctx := context.Background()
+// Initialize New Dialog thread with User with no limitation for token usage (may fail, use with limit)  initial_promt is first user message, (workaround for bug with LAI context)
+func InitializeNewChatWithContextNoLimit(api_token string, model_name string, base_url string,initial_promt string) (*db.ChatSession, error)  {
+	ctx := context.Background()
 
 	if base_url == "" {
 		llm, err := openai.New(
@@ -285,6 +265,7 @@ func InitializeNewChatWithContextNoLimit(api_token string, model_name string, ba
 		}
 	
 		memoryBuffer := memory.NewConversationBuffer()
+		memoryBuffer.ChatHistory.AddUserMessage(ctx,initial_promt)
 		conversation := chains.NewConversation(llm, memoryBuffer)
 	
 		return &db.ChatSession{
