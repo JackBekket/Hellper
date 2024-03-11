@@ -40,14 +40,14 @@ func main()  {
 
 	// works only for OAI for unknown reason BUG!
 	
-	session, err := InitializeNewChatWithContextNoLimit(token,model_name,"localai","Hello, my name is Bekket")
+	session, err := InitializeNewChatWithContextNoLimit(token,model_name,"localai","Hello, my name is Bekket","Hello Bekket, I am doing well. How are you?")
 	if err != nil {
 		log.Println(err)
 	}
 
 	memory := session.ConversationBuffer
 	//memory.ChatHistory.AddUserMessage(ctx,"Hello, my name is Bekket, how are you?")
-	memory.ChatHistory.AddAIMessage(ctx,"Hello Bekket, I am doing well. How are you?")
+	//memory.ChatHistory.AddAIMessage(ctx,"Hello Bekket, I am doing well. How are you?")
 
 	res1,err := ContinueChatWithContextNoLimit(session,"I am working on a new project called 'Andromeda', do you like this project name?")
 	if err != nil {
@@ -234,7 +234,7 @@ func TestChatWithContextNoLimit(api_token string, model_name string) (string, er
 
 
 // Initialize New Dialog thread with User with no limitation for token usage (may fail, use with limit)  initial_promt is first user message, (workaround for bug with LAI context)
-func InitializeNewChatWithContextNoLimit(api_token string, model_name string, base_url string,initial_promt string) (*db.ChatSession, error)  {
+func InitializeNewChatWithContextNoLimit(api_token string, model_name string, base_url string,user_initial_promt string,ai_initial_promt string) (*db.ChatSession, error)  {
 	ctx := context.Background()
 
 	if base_url == "" {
@@ -265,7 +265,8 @@ func InitializeNewChatWithContextNoLimit(api_token string, model_name string, ba
 		}
 	
 		memoryBuffer := memory.NewConversationBuffer()
-		memoryBuffer.ChatHistory.AddUserMessage(ctx,initial_promt)
+		memoryBuffer.ChatHistory.AddUserMessage(ctx,user_initial_promt)
+		memoryBuffer.ChatHistory.AddAIMessage(ctx,ai_initial_promt)
 		conversation := chains.NewConversation(llm, memoryBuffer)
 	
 		return &db.ChatSession{

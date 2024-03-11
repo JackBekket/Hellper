@@ -89,12 +89,15 @@ func SetupSequenceWithKey(
 // LanguageCode: 0 - default, 1 - Russian, 2 - English
 func tryLanguage(user db.User, language string, languageCode int, ctx context.Context, ai_endpoint string, spwd string, upwd string) (*db.ChatSession, error) {
 	var languagePromt string
+	var languageResponse string
 
 	switch languageCode {
 	case 1:
 		languagePromt = "Hi, Do you speak english?"
+		languageResponse = "Yes, I do, how can I help you today?"
 	case 2:
 		languagePromt = "Привет, ты говоришь по-русски?"
+		languageResponse = "Да, я говорю по русски, чем я могу помочь тебе сегодня?"
 	default:
 		languagePromt = language
 	}
@@ -105,7 +108,7 @@ func tryLanguage(user db.User, language string, languageCode int, ctx context.Co
 	//chatID := user.ID
 
 	// Initializing empty dialog thread
-	thread, err := InitializeNewChatWithContextNoLimit(gptKey,model,ai_endpoint,languagePromt)
+	thread, err := InitializeNewChatWithContextNoLimit(gptKey,model,ai_endpoint,languagePromt,languageResponse)
 		if err != nil {
 			log.Println(err)
 			return nil,err
