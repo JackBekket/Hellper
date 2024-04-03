@@ -39,9 +39,17 @@ cp -rf prompt-templates/getting_started.tmpl models/luna-ai-llama2.tmpl
 **Note** you can find templates at original localai repo and edit them to match with your model
 
 3. Run localai at localhost:8080, attach models directory, set context-size and CPU threads. it also attach tmp directory for generated images
+
+CPU setup
 ```
-docker run -p 8080:8080 -v $PWD/models:/models -v $PWD/tmp/generated/images:/tmp/generated/images -d -ti --rm quay.io/go-skynet/local-ai:latest --models-path /models --context-size 700 --threads 12 
+docker run -p 8080:8080 --name local-ai -v $PWD/models:/build/models -v $PWD/tmp/generated/images:/tmp/generated/images -ti  localai/localai:latest-aio-cpu --models-path /models --context-size 700 --threads 8 
 ```
+NVIDIA GPU setup
+```
+docker run -p 8080:8080 --gpus all --name local-ai -e DEBUG=true -v $PWD/models:/build/models -v $PWD/tmp/generated/images:/tmp/generated/images -ti  localai/localai:latest-aio-gpu-nvidia-cuda-12 --context-size 700 --threads 8 
+```
+you can use `-e DEBUG=true` for debug/verbose mode, `-d` instead of `-ti` for deatached mode, and so on. Also make sure that you have installed CUDA and nvidia-smi for containers, and your docker is installed as `apt-get install docker.io` (not from snap!)
+
 you can also build localai from source.
 
 4. Now your local ai node is deployed locally and listen to localhost:8080
