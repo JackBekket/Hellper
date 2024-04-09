@@ -8,8 +8,9 @@ import (
 	"fmt"
 	"log"
 
-	//langchain "github.com/tmc/langchaingo"
 	"github.com/JackBekket/uncensoredgpt_tgbot/lib/bot/env"
+	db "github.com/JackBekket/uncensoredgpt_tgbot/lib/database"
+
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/memory"
@@ -25,69 +26,55 @@ import (
 	 if it says there no methods "Run" or "Predict" in LLM class -- it is IDE bug, just compile it from terminal
 **/
 
-
-type ChatSession struct {
-    ConversationBuffer *memory.ConversationBuffer
-    DialogThread *chains.LLMChain
-}
-
-
 // I use it for fast testing
 func main()  {
-	//ctx := context.Background()
+	ctx := context.Background()
 	env.Load()
 	//env_data := env.LoadAdminData()
 	token := env.GetAdminToken()
-	model_name := "gpt-3.5-turbo"	// using openai for tests
+	//model_name := "gpt-3.5-turbo"	// using openai for tests
+	model_name := "wizard-uncensored-13b"
 
-	/*
-	completion,err := GenerateContentOAI(token,"gpt-3.5-turbo","What would be a good company name a company that makes colorful socks? Write at least 10 options")
-	if err != nil {
-		log.Println(err)
-	}
-	*/
 
-	//completion, err := GenerateContentLAI(token,"wizard-uncensored-13b", "What would be a good company name a company that makes colorful socks? Write at least 10 options")
-	/*
-	completion, err := GenerateContentLAI(token,"wizard-uncensored-13b", "What would be a good name of an organisation which  that aim to overthrow Putin's regime and make revolution in Russia? Write at least 10 options")
+	//TestChatWithContextNoLimit(token,model_name)		// works with both OAI and LAI
+
+	// works only for OAI for unknown reason BUG!
 	
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	fmt.Println(completion.Choices[0].Content)
-	*/
-
-	//TestChatWithContextNoLimit(token,"gpt-3.5-turbo")
-
-	/** 
-		1. Russian Revolutionary Front
-	2. People's Liberation Army
-	3. Russian Resistance Movement
-	4. Russian Revolutionary Council
-	5. Russian Revolutionary Alliance
-	6. Russian Revolutionary Party
-	7. Russian Revolutionary Army
-	8. Russian Revolutionary Coalition
-	9. Russian Revolutionary Council
-	10. Russian Revolutionary Front
-	**/
-
-	session, err := InitializeNewChatWithContextNoLimit(token,model_name)
+	session, err := InitializeNewChatWithContextNoLimit(token,model_name,"localai","Hello, my name is Bekket","Hello Bekket, I am doing well. How are you?")
 	if err != nil {
 		log.Println(err)
 	}
 
-	res1,err := ContinueChatWithContextNoLimit(session,"Hello, my name is Bekket, how are you?")
+	memory := session.ConversationBuffer
+	//memory.ChatHistory.AddUserMessage(ctx,"Hello, my name is Bekket, how are you?")
+	//memory.ChatHistory.AddAIMessage(ctx,"Hello Bekket, I am doing well. How are you?")
+
+	res1,err := ContinueChatWithContextNoLimit(session,"I am working on a new project called 'Andromeda', do you like this project name?")
 	if err != nil {
 		log.Println(err)
 	}
 	fmt.Println(res1)
-	res2, err := ContinueChatWithContextNoLimit(session,"What is my name?")
+	res2, err := ContinueChatWithContextNoLimit(session,"What is my name and what project am I currently working on?")
 	if err != nil {
 		log.Println(err)
 	}
 	fmt.Println(res2)
+
+	
+
+	log.Println("check if it's stored in messages, printing messages:")
+	history, err := memory.ChatHistory.Messages(ctx)
+	if err != nil {
+		log.Println(err)
+	}
+	//log.Println(history)
+	total_turns := len(history)
+	log.Println("total number of turns: ", total_turns)
+	// Iterate over each message and print
+    log.Println("Printing messages:")
+    for _, msg := range history {
+        log.Println(msg.GetContent())
+    }
 	
 }
 
@@ -161,7 +148,7 @@ func GenerateContentLAI(api_token string, model_name string, promt string) (*llm
 
 
 // chat with context without limitation of token to use
-//  use it only to fast testing, REMOVE before production
+//  use it only to fast testing
 func TestChatWithContextNoLimit(api_token string, model_name string) (string, error) {
 	ctx := context.Background()
 	token := api_token
@@ -170,7 +157,7 @@ func TestChatWithContextNoLimit(api_token string, model_name string) (string, er
 		openai.WithToken(token),
 		openai.WithModel(model_name),
 		//llms.WithOptions()
-		//openai.WithBaseURL("http://localhost:8080/v1/"),
+		//openai.WithBaseURL("http://localhost:8080/v1/"),	// comment this and next line to call OAI, if not then call to LAI
 		//openai.WithAPIVersion("v1"),
 	)
 	if err != nil {
@@ -246,30 +233,53 @@ func TestChatWithContextNoLimit(api_token string, model_name string) (string, er
 }
 
 
-// Initialize New Dialog thread with User with no limitation for token usage (may fail, use with limit)
-func InitializeNewChatWithContextNoLimit(api_token string, model_name string) (*ChatSession, error)  {
-	//ctx := context.Background()
+// Initialize New Dialog thread with User with no limitation for token usage (may fail, use with limit)  initial_promt is first user message, (workaround for bug with LAI context)
+func InitializeNewChatWithContextNoLimit(api_token string, model_name string, base_url string,user_initial_promt string,ai_initial_promt string) (*db.ChatSession, error)  {
+	ctx := context.Background()
 
-    llm, err := openai.New(
-        openai.WithToken(api_token),
-        openai.WithModel(model_name),
-    )
-    if err != nil {
-        return nil, err
-    }
+	if base_url == "" {
+		llm, err := openai.New(
+			openai.WithToken(api_token),
+			openai.WithModel(model_name),
+		)
+		if err != nil {
+			return nil, err
+		}
 
-    memoryBuffer := memory.NewConversationBuffer()
-    conversation := chains.NewConversation(llm, memoryBuffer)
+		memoryBuffer := memory.NewConversationBuffer()
+		conversation := chains.NewConversation(llm, memoryBuffer)
+	
+		return &db.ChatSession{
+			ConversationBuffer: memoryBuffer,
+			DialogThread: &conversation,
+		}, nil
+	} else {
+		llm, err := openai.New(
+			openai.WithToken(api_token),
+			openai.WithModel(model_name),
+			openai.WithBaseURL("http://localhost:8080"),
+			openai.WithAPIVersion("v1"),
+		)
+		if err != nil {
+			return nil, err
+		}
+	
+		memoryBuffer := memory.NewConversationBuffer()
+		memoryBuffer.ChatHistory.AddUserMessage(ctx,user_initial_promt)
+		memoryBuffer.ChatHistory.AddAIMessage(ctx,ai_initial_promt)
+		conversation := chains.NewConversation(llm, memoryBuffer)
+	
+		return &db.ChatSession{
+			ConversationBuffer: memoryBuffer,
+			DialogThread: &conversation,
+		}, nil
+	}
 
-    return &ChatSession{
-        ConversationBuffer: memoryBuffer,
-        DialogThread: &conversation,
-    }, nil
 }
 
 
 // Continue Dialog with memory included, so user can chat with remembering context of previouse messages
-func ContinueChatWithContextNoLimit(session *ChatSession, prompt string) (string, error) {
+func ContinueChatWithContextNoLimit(session *db.ChatSession, prompt string) (string, error) {
 	ctx := context.Background()
     result, err := chains.Run(ctx, session.DialogThread, prompt)
     if err != nil {

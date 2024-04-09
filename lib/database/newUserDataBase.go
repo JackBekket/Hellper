@@ -1,6 +1,11 @@
 package database
 
-//import gogpt "github.com/sashabaranov/go-openai"
+import (
+	"github.com/tmc/langchaingo/chains"
+	"github.com/tmc/langchaingo/memory"
+)
+
+//import "github.com/JackBekket/uncensoredgpt_tgbot/lib/langchain"
 
 // main database for dialogs, key (int64) is telegram user id
 type User struct {
@@ -13,10 +18,19 @@ type User struct {
 	local_ai_pass string
 }
 
+
+
 type AiSession struct {
 	GptKey    string
-	//GptClient gogpt.Client
 	GptModel  string
+	AI_Type	  int8
+	DialogThread ChatSession
+	Base_url  string
+}
+
+type ChatSession struct {
+    ConversationBuffer *memory.ConversationBuffer
+    DialogThread *chains.LLMChain
 }
 
 var UsersMap = make(map[int64]User)
