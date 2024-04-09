@@ -31,26 +31,48 @@ https://localai.io/features/image-generation/
 6. If there are necessity of using embedded generations, you should also download bert model
 https://gpt4all.io/models/gguf/all-MiniLM-L6-v2-f16.gguf
 
-2. Setup template
+2. Setup model template
 ```
-# Use a template from the examples
-cp -rf prompt-templates/getting_started.tmpl models/luna-ai-llama2.tmpl
+# Use a template from the examples local-ai
+# https://localai.io/docs/getting-started/customize-model/
+# Here is template code for wizard-uncensored 13 billion:
+name: wizard-uncensored-13b
+f16: false # true to GPU acceleration
+cuda: false # true to GPU acceleration
+gpu_layers: 10 # this model have max 40 layers, 15-20 is reccomended for half-load at NVIDIA 4060 TiTan (more layers -- more VRAM required), (i guess 0 is no GPU)
+parameters:
+  model: wizard-uncensored-13b.gguf
+#backend: diffusers
+template:
+
+  chat: &template |
+    Instruct: {{.Input}}
+    Output:
+  # Modify the prompt template here ^^^ as per your requirements
+  completion: *template
 ```
+
 **Note** you can find templates at original localai repo and edit them to match with your model
+**Note** there is currently a bug with GPU's load -- it will try to load all accessible layers to your GPU and fail if not enough memory. In this case you should adjust number of layers to fit your GPU if needed. 
+This file should be placed in models directory as yaml
+
 
 3. Run localai at localhost:8080, attach models directory, set context-size and CPU threads. it also attach tmp directory for generated images
 
 CPU setup
 ```
-docker run -p 8080:8080 --name local-ai -v $PWD/models:/build/models -v $PWD/tmp/generated/images:/tmp/generated/images -ti  localai/localai:latest-aio-cpu --models-path /models --context-size 700 --threads 8 
+docker run -p 8080:8080 --name local-ai -v $PWD/models:/models -v $PWD/tmp/generated/images:/tmp/generated/images -ti  localai/localai:latest-aio-cpu --models-path /models --context-size 700 --threads 8 
 ```
 NVIDIA GPU setup
 ```
-docker run -p 8080:8080 --gpus all --name local-ai -e DEBUG=true -v $PWD/models:/build/models -v $PWD/tmp/generated/images:/tmp/generated/images -ti  localai/localai:latest-aio-gpu-nvidia-cuda-12 --context-size 700 --threads 8 
+docker run -p 8080:8080 --gpus all --name local-ai -e DEBUG=true -v $PWD/models:/models -v $PWD/tmp/generated/images:/tmp/generated/images -ti  localai/localai:latest-aio-gpu-nvidia-cuda-12 --models-path /models --context-size 700 --threads 8 
 ```
 you can use `-e DEBUG=true` for debug/verbose mode, `-d` instead of `-ti` for deatached mode, and so on. Also make sure that you have installed CUDA and nvidia-smi for containers, and your docker is installed as `apt-get install docker.io` (not from snap!)
 
 you can also build localai from source.
+
+3.1. Troubleshooting with GPU
+
 
 4. Now your local ai node is deployed locally and listen to localhost:8080
 you can check it work like
