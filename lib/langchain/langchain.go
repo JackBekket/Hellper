@@ -178,8 +178,8 @@ func TestChatWithContextNoLimit(api_token string, model_name string) (string, er
 		openai.WithToken(token),
 		openai.WithModel(model_name),
 		//llms.WithOptions()
-		//openai.WithBaseURL("http://localhost:8080/v1/"),	// comment this and next line to call OAI, if not then call to LAI
-		//openai.WithAPIVersion("v1"),
+		openai.WithBaseURL("http://localhost:8080/v1/"),	// comment this and next line to call OAI, if not then call to LAI
+		openai.WithAPIVersion("v1"),
 	)
 	if err != nil {
 	  log.Fatal(err)
