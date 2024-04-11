@@ -23,7 +23,7 @@ import (
 /** DEV NOTE
 	 OAI -- openAI, LAI -- localAI
 	 if your IDE says it won't compile just try to build from terminal first
-	 if it says there no methods "Run" or "Predict" in LLM class -- it is IDE bug, just compile it from terminal
+	 if it says there no methods "Run" or "Predict" in LLM class -- it is weird bug, just compile it from terminal
 **/
 
 // I use it for fast testing
@@ -40,34 +40,32 @@ func main()  {
 	//ai_initial_promt := "Hello Bekket, seems like a great name, because it is associated with cosmos!"
 	//check_promt := "What is my name and what project am I currently working on?"
 
+	/*
 	result, err :=TestChatWithContextNoLimit(token,model_name)		// works with both OAI and LAI
 	if err != nil {
 		log.Println(err)
 	}
-
 	fmt.Println(result)
-
+	*/
 
 	// works only for OAI for unknown reason BUG!
 	
 
-	/*
+	
 	session, err := InitializeNewChatWithContextNoLimit(token,model_name,"localai","Hello, my name is Bekket","Hello Bekket, I am doing well. How are you?")
 	if err != nil {
 		log.Println(err)
 	}
-	*/
-
-	//memory := session.ConversationBuffer
-
-
-
-
-	//memory.ChatHistory.AddUserMessage(ctx,"Hello, my name is Bekket, how are you?")
-	//memory.ChatHistory.AddAIMessage(ctx,"Hello Bekket, I am doing well. How are you?")
-
+	
 
 	/*
+	memory := session.ConversationBuffer
+
+	memory.ChatHistory.AddUserMessage(ctx,"Hello, my name is Bekket, how are you?")
+	memory.ChatHistory.AddAIMessage(ctx,"Hello Bekket, I am doing well. How are you?")
+	*/
+
+	
 	res1,err := ContinueChatWithContextNoLimit(session,"I am working on a new project called 'Andromeda', do you like this project name?")
 	if err != nil {
 		log.Println(err)
@@ -78,7 +76,7 @@ func main()  {
 		log.Println(err)
 	}
 	fmt.Println(res2)
-	*/
+	
 	
 
 	/*
@@ -168,6 +166,7 @@ func GenerateContentLAI(api_token string, model_name string, promt string) (*llm
 
 
 
+// DEBUG NOTE -- this thing work
 // chat with context without limitation of token to use
 //  use it only to fast testing
 func TestChatWithContextNoLimit(api_token string, model_name string) (string, error) {
