@@ -58,16 +58,16 @@ func main()  {
 	}
 	
 
-	/*
+	
 	memory := session.ConversationBuffer
 
-	memory.ChatHistory.AddUserMessage(ctx,"Hello, my name is Bekket, how are you?")
-	memory.ChatHistory.AddAIMessage(ctx,"Hello Bekket, I am doing well. How are you?")
-	*/
+	memory.ChatHistory.AddUserMessage(ctx,"I am working on a new project called 'Andromeda'")
+	//memory.ChatHistory.AddAIMessage(ctx,"Hello Bekket, I am doing well. How are you?")
+	
 
 	
 	//res1,err := ContinueChatWithContextNoLimit(session,"I am working on a new project called 'Andromeda', do you like this project name?")
-	res1,err := ContinueChatWithContextNoLimit(session,"What is my name?")
+	res1,err := ContinueChatWithContextNoLimit(session,"What is name of my project and what is my name?")
 	if err != nil {
 		log.Println(err)
 	}
@@ -84,7 +84,7 @@ func main()  {
 	
 
 	
-	memory := session.ConversationBuffer
+	//memory := session.ConversationBuffer
 	log.Println("check if it's stored in messages, printing messages:")
 	history, err := memory.ChatHistory.Messages(ctx)
 	if err != nil {
