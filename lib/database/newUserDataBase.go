@@ -29,7 +29,7 @@ type AiSession struct {
 }
 
 type ChatSession struct {
-    ConversationBuffer *memory.ConversationBuffer
+    ConversationBuffer memory.ConversationBuffer
     DialogThread *chains.LLMChain
 }
 
