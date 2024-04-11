@@ -83,7 +83,7 @@ func main()  {
 	*/
 	
 
-	
+	/*
 	//memory := session.ConversationBuffer
 	log.Println("check if it's stored in messages, printing messages:")
 	history, err := memory.ChatHistory.Messages(ctx)
@@ -98,7 +98,7 @@ func main()  {
     for _, msg := range history {
         log.Println(msg.GetContent())
     }
-	
+	*/
 	
 }
 
