@@ -28,7 +28,7 @@ import (
 
 // I use it for fast testing
 func main()  {
-	ctx := context.Background()
+	//ctx := context.Background()
 	env.Load()
 	//env_data := env.LoadAdminData()
 	token := env.GetAdminToken()
@@ -36,11 +36,17 @@ func main()  {
 	model_name := "wizard-uncensored-13b"
 
 
-	user_initial_promt := "Hello, my name is Bekket, I am working on a new project called 'Andromeda', do you like this project name?"
-	ai_initial_promt := "Hello Bekket, seems like a great name, because it is associated with cosmos!"
-	check_promt := "What is my name and what project am I currently working on?"
+	//user_initial_promt := "Hello, my name is Bekket, I am working on a new project called 'Andromeda', do you like this project name?"
+	//ai_initial_promt := "Hello Bekket, seems like a great name, because it is associated with cosmos!"
+	//check_promt := "What is my name and what project am I currently working on?"
 
-	//TestChatWithContextNoLimit(token,model_name)		// works with both OAI and LAI
+	result, err :=TestChatWithContextNoLimit(token,model_name)		// works with both OAI and LAI
+	if err != nil {
+		log.Println(err)
+	}
+
+	fmt.Println(result)
+
 
 	// works only for OAI for unknown reason BUG!
 	
@@ -55,22 +61,8 @@ func main()  {
 	//memory := session.ConversationBuffer
 
 
-		llm, err := openai.New(
-			openai.WithToken(token),
-			openai.WithModel(model_name),
-			openai.WithBaseURL("http://localhost:8080"),
-			openai.WithAPIVersion("v1"),
-		)
-		if err != nil {
-			log.Println(err)
-		} 
-	
-		memoryBuffer := memory.NewConversationBuffer()
-		memoryBuffer.ChatHistory.AddUserMessage(ctx,user_initial_promt)
-		memoryBuffer.ChatHistory.AddAIMessage(ctx,ai_initial_promt)
-		conversation := chains.NewConversation(llm, memoryBuffer)
-		chains.Run(ctx,conversation,check_promt)
-	
+
+
 	//memory.ChatHistory.AddUserMessage(ctx,"Hello, my name is Bekket, how are you?")
 	//memory.ChatHistory.AddAIMessage(ctx,"Hello Bekket, I am doing well. How are you?")
 
@@ -89,8 +81,9 @@ func main()  {
 	*/
 	
 
+	/*
 	log.Println("check if it's stored in messages, printing messages:")
-	history, err := memoryBuffer.ChatHistory.Messages(ctx)
+	history, err := memory.ChatHistory.Messages(ctx)
 	if err != nil {
 		log.Println(err)
 	}
@@ -102,6 +95,7 @@ func main()  {
     for _, msg := range history {
         log.Println(msg.GetContent())
     }
+	*/
 	
 }
 
