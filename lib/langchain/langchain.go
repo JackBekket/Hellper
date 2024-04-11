@@ -66,20 +66,24 @@ func main()  {
 	*/
 
 	
-	res1,err := ContinueChatWithContextNoLimit(session,"I am working on a new project called 'Andromeda', do you like this project name?")
+	//res1,err := ContinueChatWithContextNoLimit(session,"I am working on a new project called 'Andromeda', do you like this project name?")
+	res1,err := ContinueChatWithContextNoLimit(session,"What is my name?")
 	if err != nil {
 		log.Println(err)
 	}
 	fmt.Println(res1)
+
+
+	/*
 	res2, err := ContinueChatWithContextNoLimit(session,"What is my name and what project am I currently working on?")
 	if err != nil {
 		log.Println(err)
 	}
 	fmt.Println(res2)
-	
+	*/
 	
 
-	/*
+	
 	log.Println("check if it's stored in messages, printing messages:")
 	history, err := memory.ChatHistory.Messages(ctx)
 	if err != nil {
@@ -93,7 +97,7 @@ func main()  {
     for _, msg := range history {
         log.Println(msg.GetContent())
     }
-	*/
+	
 	
 }
 
