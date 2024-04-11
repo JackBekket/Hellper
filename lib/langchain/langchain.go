@@ -50,7 +50,7 @@ func main()  {
 
 	
 	
-
+	//bug
 	
 	session, err := InitializeNewChatWithContextNoLimit(token,model_name,"localai","Hello, my name is Bekket","Hello Bekket, I am doing well. How are you?")
 	if err != nil {
@@ -67,7 +67,7 @@ func main()  {
 
 	
 	//res1,err := ContinueChatWithContextNoLimit(session,"I am working on a new golang project called 'Andromeda', do you like this project name?")
-	res1,err := ContinueChatWithContextNoLimit(session,"What is my name?")
+	res1,err := ContinueChatWithContextNoLimit(session,"What is my projecy name and what is my name?")
 	if err != nil {
 		log.Println(err)
 	}
