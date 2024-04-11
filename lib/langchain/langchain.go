@@ -66,21 +66,21 @@ func main()  {
 	
 
 	
-	//res1,err := ContinueChatWithContextNoLimit(session,"I am working on a new project called 'Andromeda', do you like this project name?")
-	res1,err := ContinueChatWithContextNoLimit(session,"What is name of my project and what is my name?")
+	res1,err := ContinueChatWithContextNoLimit(session,"I am working on a new golang project called 'Andromeda', do you like this project name?")
+	//res1,err := ContinueChatWithContextNoLimit(session,"What is name of my project and what is my name?")
 	if err != nil {
 		log.Println(err)
 	}
-	fmt.Println(res1)
+	fmt.Println("answer 1",res1)
 
 
-	/*
+	
 	res2, err := ContinueChatWithContextNoLimit(session,"What is my name and what project am I currently working on?")
 	if err != nil {
 		log.Println(err)
 	}
-	fmt.Println(res2)
-	*/
+	fmt.Println("answer2",res2)
+	
 	
 
 	/*
