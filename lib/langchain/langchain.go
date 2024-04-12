@@ -67,8 +67,8 @@ func main()  {
 
 	
 	//res1,err := ContinueChatWithContextNoLimit(session,"I am working on a new golang project called 'Andromeda', do you like this project name?")
-	//res1,err := ContinueChatWithContextNoLimit(session,"What is my project name and what is my name?")
-	res1,err := ContinueChatWithContextNoLimit(session,"What is my name?")
+	res1,err := ContinueChatWithContextNoLimit(session,"What is my project name and what is my name?")
+	//res1,err := ContinueChatWithContextNoLimit(session,"What is my name?")
 	if err != nil {
 		log.Println(err)
 	}
