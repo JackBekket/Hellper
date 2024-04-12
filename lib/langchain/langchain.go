@@ -28,7 +28,7 @@ import (
 
 // I use it for fast testing
 func main()  {
-	ctx := context.Background()
+	//ctx := context.Background()
 	env.Load()
 	//env_data := env.LoadAdminData()
 	token := env.GetAdminToken()
@@ -40,18 +40,18 @@ func main()  {
 	//ai_initial_promt := "Hello Bekket, seems like a great name, because it is associated with cosmos!"
 	//check_promt := "What is my name and what project am I currently working on?"
 
-	/*
+	
 	result, err :=TestChatWithContextNoLimit(token,model_name)		// works with both OAI and LAI
 	if err != nil {
 		log.Println(err)
 	}
 	fmt.Println(result)
-	*/
+	
 
 	
 	
 	//bug
-	
+	/*
 	session, err := InitializeNewChatWithContextNoLimit(token,model_name,"localai","Hello, my name is Bekket","Hello Bekket, I am doing well. How are you?")
 	if err != nil {
 		log.Println(err)
@@ -59,9 +59,9 @@ func main()  {
 	
 
 	
-	memory := session.ConversationBuffer		// tha'ts a weird thing, Initialize and Continue works in pair only if I get memory buffer in here
+	//memory := session.ConversationBuffer		// tha'ts a weird thing, Initialize and Continue works in pair only if I get memory buffer in here
 
-	memory.ChatHistory.AddUserMessage(ctx,"I am working on a new project called 'Andromeda'")
+	//memory.ChatHistory.AddUserMessage(ctx,"I am working on a new project called 'Andromeda'")
 	//memory.ChatHistory.AddAIMessage(ctx,"I like it!")
 	
 
@@ -73,7 +73,7 @@ func main()  {
 		log.Println(err)
 	}
 	fmt.Println("answer 1",res1)
-	
+	*/
 
 	
 	// bug in sequential chain
