@@ -28,7 +28,7 @@ import (
 
 // I use it for fast testing
 func main()  {
-	//ctx := context.Background()
+	ctx := context.Background()
 	env.Load()
 	//env_data := env.LoadAdminData()
 	token := env.GetAdminToken()
