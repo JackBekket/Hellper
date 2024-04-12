@@ -30,7 +30,7 @@ type AiSession struct {
 
 type ChatSession struct {
     ConversationBuffer memory.ConversationBuffer
-    DialogThread *chains.LLMChain
+    DialogThread chains.LLMChain
 }
 
 var UsersMap = make(map[int64]User)
