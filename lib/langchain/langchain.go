@@ -77,13 +77,13 @@ func main()  {
 
 	
 	// bug in sequential chain
-	
+	/*	
 	res2, err := ContinueChatWithContextNoLimit(session,"What is the name of the project I currently working on?")
 	if err != nil {
 		log.Println(err)
 	}
 	fmt.Println("answer2",res2)
-	
+	*/
 	
 
 	/*
