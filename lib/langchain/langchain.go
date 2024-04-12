@@ -28,7 +28,7 @@ import (
 
 // I use it for fast testing
 func main()  {
-	//ctx := context.Background()
+	ctx := context.Background()
 	env.Load()
 	//env_data := env.LoadAdminData()
 	token := env.GetAdminToken()
@@ -59,9 +59,9 @@ func main()  {
 	
 
 	
-	//memory := session.ConversationBuffer		// tha'ts a weird thing, Initialize and Continue works in pair only if I get memory buffer in here
+	memory := session.ConversationBuffer		// tha'ts a weird thing, Initialize and Continue works in pair only if I get memory buffer in here
 
-	//memory.ChatHistory.AddUserMessage(ctx,"I am working on a new project called 'Andromeda'")
+	memory.ChatHistory.AddUserMessage(ctx,"I am working on a new project called 'Andromeda'")
 	//memory.ChatHistory.AddAIMessage(ctx,"I like it!")
 	
 
