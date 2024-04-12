@@ -36,8 +36,8 @@ func main()  {
 	model_name := "wizard-uncensored-13b"
 
 
-	user_initial_promt := "Hello, my name is Bekket, I am working on a new project called 'Andromeda', do you like this project name?"
-	ai_initial_promt := "Hello Bekket, seems like a great name, because it is associated with cosmos!"
+	user_initial_promt := "Hello, my name is Bekket, I am working on a new project called 'Andromeda'."
+	ai_initial_promt := "Hello Bekket, seems like a great name for a project!"
 	//check_promt := "What is my name and what project am I currently working on?"
 
 	/*
