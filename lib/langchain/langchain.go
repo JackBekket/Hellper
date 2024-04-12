@@ -59,10 +59,10 @@ func main()  {
 	
 
 	
-	//memory := session.ConversationBuffer		// tha'ts a weird thing, Initialize and Continue works in pair only if I get memory buffer in here
+	memory := session.ConversationBuffer		// tha'ts a weird thing, Initialize and Continue works in pair only if I get memory buffer in here
 
-	//memory.ChatHistory.AddUserMessage(ctx,"I am working on a new project called 'Andromeda'")
-	//memory.ChatHistory.AddAIMessage(ctx,"Hello Bekket, I am doing well. How are you?")
+	memory.ChatHistory.AddUserMessage(ctx,"I am working on a new project called 'Andromeda'")
+	memory.ChatHistory.AddAIMessage(ctx,"I like it!")
 	
 
 	
