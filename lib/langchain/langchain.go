@@ -67,7 +67,7 @@ func main()  {
 
 	
 	//res1,err := ContinueChatWithContextNoLimit(session,"I am working on a new golang project called 'Andromeda', do you like this project name?")
-	res1,err := ContinueChatWithContextNoLimit(session,"What is my name(not the name of the project), I mentioned?")
+	res1,err := ContinueChatWithContextNoLimit(session,"What's my name and what is a name of my project?")
 	//res1,err := ContinueChatWithContextNoLimit(session,"What is my name?")
 	if err != nil {
 		log.Println(err)
@@ -77,13 +77,13 @@ func main()  {
 
 	
 	// bug in sequential chain
-	
+	/*
 	res2, err := ContinueChatWithContextNoLimit(session,"What is the name of the project I currently working on?")
 	if err != nil {
 		log.Println(err)
 	}
 	fmt.Println("answer2",res2)
-	
+	*/
 	
 
 	/*
