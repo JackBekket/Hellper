@@ -1,7 +1,7 @@
 name: wizard-uncensored-13b
 f16: false # true to GPU acceleration
 cuda: false # true to GPU acceleration
-gpu_layers: 15 # this model have max 40 layers, 15-20 is reccomended for half-load at NVIDIA 4060 TiTan (more layers -- more VRAM required), (i guess 0 is no GPU)
+gpu_layers: 10 # this model have max 40 layers, 15-20 is reccomended for half-load at NVIDIA 4060 TiTan (more layers -- more VRAM required), (i guess 0 is no GPU)
 parameters:
   model: wizard-uncensored-13b.gguf
 #backend: diffusers
