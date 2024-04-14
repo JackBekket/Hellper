@@ -286,13 +286,13 @@ func RunChain(session *db.ChatSession, prompt string) (string,*db.ChatSession, e
 }
 
 // Continue Dialog with memory included, so user can chat with remembering context of previouse messages
-func ContinueChatWithContextNoLimit(session *db.ChatSession, prompt string) (string, error) {
+func ContinueChatWithContextNoLimit(session *db.ChatSession, prompt string) (string,*db.ChatSession, error) {
 	ctx := context.Background()
     result, err := chains.Run(ctx, session.DialogThread, prompt)
     if err != nil {
-        return "", err
+        return "",nil, err
     }
-    return result, nil
+    return result, session,nil
 }
 
 
