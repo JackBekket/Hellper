@@ -29,8 +29,8 @@ type AiSession struct {
 }
 
 type ChatSession struct {
-    ConversationBuffer *memory.ConversationBuffer
-    DialogThread *chains.LLMChain
+    ConversationBuffer memory.ConversationBuffer
+    DialogThread chains.LLMChain
 }
 
 var UsersMap = make(map[int64]User)

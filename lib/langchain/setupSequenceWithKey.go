@@ -48,34 +48,34 @@ func SetupSequenceWithKey(
 
 	switch language {
 	case "English":
-		probe, err := tryLanguage(user, "", 1, ctx,ai_endpoint,spwd,u_pwd)
+		response,probe, err := tryLanguage(user, "", 1, ctx,ai_endpoint,spwd,u_pwd)
 		if err != nil {
 			errorMessage(err, bot, user)
 		} else {
 
-			msg := tgbotapi.NewMessage(chatID, "connected")
+			msg := tgbotapi.NewMessage(chatID, response)
 			bot.Send(msg)
 			user.DialogStatus = 6
 			user.AiSession.DialogThread = *probe
 			db.UsersMap[chatID] = user
 		}
 	case "Russian":
-		probe, err := tryLanguage(user, "", 2, ctx,ai_endpoint,spwd,u_pwd)
+		response,probe, err := tryLanguage(user, "", 2, ctx,ai_endpoint,spwd,u_pwd)
 		if err != nil {
 			errorMessage(err, bot, user)
 		} else {
-			msg := tgbotapi.NewMessage(chatID, "connected")
+			msg := tgbotapi.NewMessage(chatID, response)
 			bot.Send(msg)
 			user.AiSession.DialogThread = *probe
 			user.DialogStatus = 6
 			db.UsersMap[chatID] = user
 		}
 	default:
-		probe, err := tryLanguage(user, language, 0, ctx,ai_endpoint,spwd,u_pwd)
+		response,probe, err := tryLanguage(user, language, 0, ctx,ai_endpoint,spwd,u_pwd)
 		if err != nil {
 			errorMessage(err, bot, user)
 		} else {
-			msg := tgbotapi.NewMessage(chatID, "connnected")
+			msg := tgbotapi.NewMessage(chatID, response)
 			bot.Send(msg)
 			user.AiSession.DialogThread = *probe
 			user.DialogStatus = 6
@@ -87,36 +87,38 @@ func SetupSequenceWithKey(
 }
 
 // LanguageCode: 0 - default, 1 - Russian, 2 - English
-func tryLanguage(user db.User, language string, languageCode int, ctx context.Context, ai_endpoint string, spwd string, upwd string) (*db.ChatSession, error) {
+func tryLanguage(user db.User, language string, languageCode int, ctx context.Context, ai_endpoint string, spwd string, upwd string) (string,*db.ChatSession, error) {
 	var languagePromt string
-	var languageResponse string
+	//var languageResponse string
+	model := user.AiSession.GptModel
 
 	switch languageCode {
 	case 1:
 		languagePromt = "Hi, Do you speak english?"
-		languageResponse = "Yes, I do, how can I help you today?"
+		//languageResponse = "Yes, I do, how can I help you today?"
 	case 2:
 		languagePromt = "Привет, ты говоришь по-русски?"
-		languageResponse = "Да, я говорю по русски, чем я могу помочь тебе сегодня?"
+		//languageResponse = "Да, я говорю по русски, чем я могу помочь тебе сегодня?"
 	default:
 		languagePromt = language
 	}
 	log.Printf("Language: %v\n", languagePromt)
 
 	gptKey := user.AiSession.GptKey
-	model := user.AiSession.GptModel
+	//model := user.AiSession.GptModel
 	//chatID := user.ID
 
 	// Initializing empty dialog thread
-	thread, err := InitializeNewChatWithContextNoLimit(gptKey,model,ai_endpoint,languagePromt,languageResponse)
+	result,thread, err := StartNewChat(gptKey,model,ai_endpoint,languagePromt)
 		if err != nil {
 			log.Println(err)
-			return nil,err
+			return "",nil,err
 		}
+
 	//user.AiSession.DialogThread = *thread
 	//db.UsersMap[chatID] = user // we need to store empty buffer *before* starting dialog
 
-	return thread, nil
+	return result,thread, nil
 	
 	
 	/*
