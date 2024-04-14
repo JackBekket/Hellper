@@ -1,14 +1,13 @@
-//package langchain
+package langchain
 
 //package langchain_controller
-package main
+//package main
 
 import (
 	"context"
 	"fmt"
 	"log"
 
-	"github.com/JackBekket/uncensoredgpt_tgbot/lib/bot/env"
 	db "github.com/JackBekket/uncensoredgpt_tgbot/lib/database"
 
 	"github.com/tmc/langchaingo/chains"
@@ -26,6 +25,11 @@ import (
 	 if it says there no methods "Run" or "Predict" in LLM class -- it is weird bug, just compile it from terminal
 **/
 
+/*
+	you can get conversation logs by docker logs -f local-ai
+	(if you run local-ai in DEBUG mode)
+*/
+/*
 // I use it for fast testing
 func main()  {
 	//ctx := context.Background()
@@ -35,76 +39,30 @@ func main()  {
 	//model_name := "gpt-3.5-turbo"	// using openai for tests
 	model_name := "wizard-uncensored-13b"
 
-
 	user_initial_promt := "Hello, my name is Bekket, I am working on a new project called 'Andromeda'."
-	//ai_initial_promt := "Hello Bekket, seems like a great name for a project!"
-	//check_promt := "What is my name and what project am I currently working on?"
 
-	/*
 	result, err :=TestChatWithContextNoLimit(token,model_name)		// works with both OAI and LAI
 	if err != nil {
 		log.Println(err)
 	}
 	fmt.Println(result)
-	*/
 
-	
-	
-	//bug
-	
+
 	session, err := StartNewChat(token,model_name,"localai",user_initial_promt,)
 	if err != nil {
 		log.Println(err)
 	}
-	
-
-	
-	//memory := session.ConversationBuffer		// tha'ts a weird thing, Initialize and Continue works in pair only if I get memory buffer in here
-
-	//memory.ChatHistory.AddUserMessage(ctx,"I am working on a new project called 'Andromeda'")
-	//memory.ChatHistory.AddAIMessage(ctx,"I like it!")
-	
-
-	
-	//res1,err := ContinueChatWithContextNoLimit(session,"I am working on a new golang project called 'Andromeda', do you like this project name?")
 	res1,err := ContinueChatWithContextNoLimit(session,"What's my name and what is the name of the project I currently working on?")
-	//res1,err := ContinueChatWithContextNoLimit(session,"What is my name?")
 	if err != nil {
 		log.Println(err)
 	}
 	fmt.Println("answer 1",res1)
-	
 
-	
-	// bug in sequential chain
-	
-	res2, err := ContinueChatWithContextNoLimit(session,"What is the name of the project I currently working on?")
-	if err != nil {
-		log.Println(err)
-	}
-	fmt.Println("answer2",res2)
-	
-	
 
-	/*
-	//memory := session.ConversationBuffer
-	log.Println("check if it's stored in messages, printing messages:")
-	history, err := memory.ChatHistory.Messages(ctx)
-	if err != nil {
-		log.Println(err)
-	}
-	//log.Println(history)
-	total_turns := len(history)
-	log.Println("total number of turns: ", total_turns)
-	// Iterate over each message and print
-    log.Println("Printing messages:")
-    for _, msg := range history {
-        log.Println(msg.GetContent())
-    }
-	*/
-	
+
+
 }
-
+*/
 
 // TODO: make universal function to OAI and LOI, add base_url as argument probably
 func GenerateContentOAI(api_token string, model_name string, promt string) (*llms.ContentResponse, error) {
@@ -311,20 +269,20 @@ func StartNewChat(api_token string, model_name string, base_url string,user_init
 	if err1 != nil {
 		return nil, err1
 	}
-	_,err,post_session :=RunChain(session,user_initial_promt)
+	_,post_session,err :=RunChain(session,user_initial_promt)
 	if err != nil {
 	return nil, err
 	}
 	return post_session,nil
 }
 
-func RunChain(session *db.ChatSession, prompt string) (string, error,*db.ChatSession) {
+func RunChain(session *db.ChatSession, prompt string) (string,*db.ChatSession, error) {
 	ctx := context.Background()
     result, err := chains.Run(ctx, session.DialogThread, prompt)
     if err != nil {
-        return "", err, nil
+        return "", nil, err
     }
-    return result, nil, session
+    return result, session, nil
 }
 
 // Continue Dialog with memory included, so user can chat with remembering context of previouse messages
