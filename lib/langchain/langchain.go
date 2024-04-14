@@ -37,7 +37,7 @@ func main()  {
 
 
 	user_initial_promt := "Hello, my name is Bekket, I am working on a new project called 'Andromeda'."
-	ai_initial_promt := "Hello Bekket, seems like a great name for a project!"
+	//ai_initial_promt := "Hello Bekket, seems like a great name for a project!"
 	//check_promt := "What is my name and what project am I currently working on?"
 
 	/*
@@ -52,7 +52,7 @@ func main()  {
 	
 	//bug
 	
-	session, err := InitializeNewChatWithContextNoLimit(token,model_name,"localai",user_initial_promt,ai_initial_promt)
+	session, err := StartNewChat(token,model_name,"localai",user_initial_promt,)
 	if err != nil {
 		log.Println(err)
 	}
@@ -262,8 +262,8 @@ func TestChatWithContextNoLimit(api_token string, model_name string) (string, er
 
 
 // Initialize New Dialog thread with User with no limitation for token usage (may fail, use with limit)  initial_promt is first user message, (workaround for bug with LAI context)
-func InitializeNewChatWithContextNoLimit(api_token string, model_name string, base_url string,user_initial_promt string,ai_initial_promt string) (*db.ChatSession, error)  {
-	ctx := context.Background()
+func InitializeNewChatWithContextNoLimit(api_token string, model_name string, base_url string,user_initial_promt string) (*db.ChatSession, error)  {
+	//ctx := context.Background()
 
 	if base_url == "" {
 		llm, err := openai.New(
@@ -275,8 +275,8 @@ func InitializeNewChatWithContextNoLimit(api_token string, model_name string, ba
 		}
 
 		memoryBuffer := memory.NewConversationBuffer()
-		conversation := chains.NewConversation(llm, memoryBuffer)
-	
+		conversation := chains.NewConversation(llm, memoryBuffer)	// create new conversation, which means langchain is modify initial promt in this moment. It is important, that your own template at local-ai side is also modifiyng template, so there might be a template collision.
+
 		return &db.ChatSession{
 			ConversationBuffer: *memoryBuffer,
 			DialogThread: conversation,
@@ -293,9 +293,10 @@ func InitializeNewChatWithContextNoLimit(api_token string, model_name string, ba
 		}
 	
 		memoryBuffer := memory.NewConversationBuffer()
-		memoryBuffer.ChatHistory.AddUserMessage(ctx,user_initial_promt)
-		memoryBuffer.ChatHistory.AddAIMessage(ctx,ai_initial_promt)
-		conversation := chains.NewConversation(llm, memoryBuffer)
+		//memoryBuffer.ChatHistory.AddUserMessage(ctx,user_initial_promt)
+
+		conversation := chains.NewConversation(llm, memoryBuffer)	// create new conversation, which means langchain is modify initial promt in this moment. It is important, that your own template at local-ai side is also modifiyng template, so there might be a template collision.
+		
 	
 		return &db.ChatSession{
 			ConversationBuffer: *memoryBuffer,
@@ -305,6 +306,26 @@ func InitializeNewChatWithContextNoLimit(api_token string, model_name string, ba
 
 }
 
+func StartNewChat(api_token string, model_name string, base_url string,user_initial_promt string) (*db.ChatSession, error) {
+	session, err1 :=InitializeNewChatWithContextNoLimit(api_token, model_name, base_url,user_initial_promt)
+	if err1 != nil {
+		return nil, err1
+	}
+	_,err,post_session :=RunChain(session,user_initial_promt)
+	if err != nil {
+	return nil, err
+	}
+	return post_session,nil
+}
+
+func RunChain(session *db.ChatSession, prompt string) (string, error,*db.ChatSession) {
+	ctx := context.Background()
+    result, err := chains.Run(ctx, session.DialogThread, prompt)
+    if err != nil {
+        return "", err, nil
+    }
+    return result, nil, session
+}
 
 // Continue Dialog with memory included, so user can chat with remembering context of previouse messages
 func ContinueChatWithContextNoLimit(session *db.ChatSession, prompt string) (string, error) {
