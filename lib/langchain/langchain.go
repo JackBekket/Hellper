@@ -264,16 +264,16 @@ func InitializeNewChatWithContextNoLimit(api_token string, model_name string, ba
 
 }
 
-func StartNewChat(api_token string, model_name string, base_url string,user_initial_promt string) (*db.ChatSession, error) {
+func StartNewChat(api_token string, model_name string, base_url string,user_initial_promt string) (string,*db.ChatSession, error) {
 	session, err1 :=InitializeNewChatWithContextNoLimit(api_token, model_name, base_url,user_initial_promt)
 	if err1 != nil {
-		return nil, err1
+		return "",nil, err1
 	}
-	_,post_session,err :=RunChain(session,user_initial_promt)
+	result,post_session,err :=RunChain(session,user_initial_promt)
 	if err != nil {
-	return nil, err
+	return "",nil, err
 	}
-	return post_session,nil
+	return result,post_session,nil
 }
 
 func RunChain(session *db.ChatSession, prompt string) (string,*db.ChatSession, error) {
