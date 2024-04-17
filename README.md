@@ -2,7 +2,8 @@
 
 
 
-
+# We are under heavy development!
+it may work unexpectedly
 
 
    ![alt text](https://github.com/JackBekket/UncensoredGPT_tgbot/blob/master/img/local_ai.png)
