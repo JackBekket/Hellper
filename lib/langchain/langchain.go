@@ -64,61 +64,43 @@ func main()  {
 }
 */
 
-// TODO: make universal function to OAI and LOI, add base_url as argument probably
-func GenerateContentOAI(api_token string, model_name string, promt string) (*llms.ContentResponse, error) {
-	ctx := context.Background()
-	token := api_token
-
-	llm, err := openai.New(
-		openai.WithToken(token),
-		openai.WithModel(model_name),
-		//llms.WithOptions()
-		//openai.WithBaseURL("http://localhost:8000"),
-	)
-	if err != nil {
-	  log.Fatal(err)
-	}
-
-	content := []llms.MessageContent{
-		llms.TextParts(schema.ChatMessageTypeSystem, "You are a helpfull assistant who help in whatever task human ask you about"),
-		llms.TextParts(schema.ChatMessageTypeHuman, promt),
-	}
-
-	completion, err := llm.GenerateContent(ctx, content, llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
-		fmt.Print(string(chunk))
-		return nil
-	}))
-	if err != nil {
-		//log.Fatal(err)
-		return nil, err
-	}
-	return completion, nil
-}
-
-
 // chat without context
-func GenerateContentLAI(api_token string, model_name string, promt string) (*llms.ContentResponse, error) {
+func GenerateContent(api_token string, model_name string, promt string, network string) (*llms.ContentResponse, error) {
 	ctx := context.Background()
 	token := api_token
-
-	llm, err := openai.New(
-		openai.WithToken(token),
-		openai.WithModel(model_name),
-		//llms.WithOptions()
-		openai.WithBaseURL("http://localhost:8080/v1/"),
-		openai.WithAPIVersion("v1"),
-	)
-	if err != nil {
-	  log.Fatal(err)
+	var llm_ *openai.LLM
+	if network == "localai" {
+		//base_url = "http://localhost:8080/v1/"
+		llm, err := openai.New(
+			openai.WithToken(token),
+			openai.WithModel(model_name),
+			//llms.WithOptions()
+			openai.WithBaseURL("http://localhost:8080/v1/"),
+			openai.WithAPIVersion("v1"),
+		) 
+		if err != nil {
+			return nil, err
+		}
+		llm_ = llm
 	}
-	
+	if network == "openai" {
+		//base_url
+		llm, err := openai.New(
+			openai.WithToken(token),
+			openai.WithModel(model_name),
+		)
+		if err != nil {
+			return nil, err
+		}
+		llm_ = llm
+	}
 
 	content := []llms.MessageContent{
 		llms.TextParts(schema.ChatMessageTypeSystem, "You are a helpfull assistant who help in whatever task human ask you about"),
 		llms.TextParts(schema.ChatMessageTypeHuman, promt),
 	}
 
-	completion, err := llm.GenerateContent(ctx, content, llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
+	completion, err := llm_.GenerateContent(ctx, content, llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
 		fmt.Print(string(chunk))
 		return nil
 	}))
@@ -131,10 +113,36 @@ func GenerateContentLAI(api_token string, model_name string, promt string) (*llm
 }
 
 
+
+	// Example using call with few inputs
+	/*
+		translatePrompt := prompts.NewPromptTemplate(
+		"Translate the following text from {{.inputLanguage}} to {{.outputLanguage}}. {{.text}}",
+		[]string{"inputLanguage", "outputLanguage", "text"},
+	)
+	llmChain = chains.NewLLMChain(llm, translatePrompt)
+
+	// Otherwise the call function must be used.
+	outputValues, err := chains.Call(ctx, llmChain, map[string]any{
+		"inputLanguage":  "English",
+		"outputLanguage": "French",
+		"text":           "I love programming.",
+	})
+	if err != nil {
+		return err
+	}
+
+	out, ok := outputValues[llmChain.OutputKey].(string)
+	if !ok {
+		return fmt.Errorf("invalid chain return")
+	}
+	fmt.Println(out)
+	*/
 
 // DEBUG NOTE -- this thing work
 // chat with context without limitation of token to use
 //  use it only to fast testing
+/*
 func TestChatWithContextNoLimit(api_token string, model_name string) (string, error) {
 	ctx := context.Background()
 	token := api_token
@@ -173,30 +181,7 @@ func TestChatWithContextNoLimit(api_token string, model_name string) (string, er
 		return "", err
 	}
 
-	// Example using call with few inputs
-	/*
-		translatePrompt := prompts.NewPromptTemplate(
-		"Translate the following text from {{.inputLanguage}} to {{.outputLanguage}}. {{.text}}",
-		[]string{"inputLanguage", "outputLanguage", "text"},
-	)
-	llmChain = chains.NewLLMChain(llm, translatePrompt)
 
-	// Otherwise the call function must be used.
-	outputValues, err := chains.Call(ctx, llmChain, map[string]any{
-		"inputLanguage":  "English",
-		"outputLanguage": "French",
-		"text":           "I love programming.",
-	})
-	if err != nil {
-		return err
-	}
-
-	out, ok := outputValues[llmChain.OutputKey].(string)
-	if !ok {
-		return fmt.Errorf("invalid chain return")
-	}
-	fmt.Println(out)
-	*/
 
 	log.Println("AI answer:")
 	log.Println(result)
@@ -217,7 +202,7 @@ func TestChatWithContextNoLimit(api_token string, model_name string) (string, er
 
 	return result,err
 }
-
+*/
 
 // Initialize New Dialog thread with User with no limitation for token usage (may fail, use with limit)  initial_promt is first user message, (workaround for bug with LAI context)
 func InitializeNewChatWithContextNoLimit(api_token string, model_name string, base_url string,user_initial_promt string) (*db.ChatSession, error)  {
@@ -301,42 +286,47 @@ func ContinueChatWithContextNoLimit(session *db.ChatSession, prompt string) (str
 
 // TODO: make one function for both OAI & LAI, add baseUrl as argument
 // Main function for generating from single promt (without memory and context)
-func GenerateFromSinglePromtLocal(prompt string, model_name string) (string,error) {
+func GenerateFromSinglePromt(promt string, model_name string,api_token string,network string) (string,error) {
 	ctx := context.Background()
-	llm, err := openai.New(
-		//openai.WithToken()
-		openai.WithBaseURL("http://localhost:8080"),
-		openai.WithModel(model_name),
-	)
-	if err != nil {
-	  log.Fatal(err)
-	}
-	
-	completion, err := llms.GenerateFromSinglePrompt(ctx, llm, prompt)
-	if err != nil {
-	 // log.Fatal(err)
-	 return "", err
-	}
-	fmt.Println(completion)
-	return completion, nil
-}
+	var result string
+	if network == "local" {
+		llm, err := openai.New(
+			//openai.WithToken()
+			openai.WithBaseURL("http://localhost:8080"),
+			openai.WithModel(model_name),
+		)
+		if err != nil {
+		  log.Fatal(err)
+		}
 
-func GenerateFromSinglePromtOAI(promt string, model_name string, api_token string) (string , error) {
-	ctx := context.Background()
-	llm, err := openai.New(
-		openai.WithToken(api_token),
-		openai.WithModel(model_name),
-	)
-	if err != nil {
-	  log.Fatal(err)
+		completion, err := llms.GenerateFromSinglePrompt(ctx, llm, promt)
+		if err != nil {
+		 // log.Fatal(err)
+		 return "", err
+		}
+		fmt.Println(completion)
+		result = completion
+		return completion, nil
+	}
+	if network == "openai" {
+		llm, err := openai.New(
+			openai.WithToken(api_token),
+			openai.WithModel(model_name),
+		)
+		if err != nil {
+		  log.Fatal(err)
+		}
+		
+		completion, err := llms.GenerateFromSinglePrompt(ctx, llm, promt)
+		if err != nil {
+		 // log.Fatal(err)
+		 return "", err
+		}
+		fmt.Println(completion)
+		result = completion
+		return completion, nil
 	}
 	
-	completion, err := llms.GenerateFromSinglePrompt(ctx, llm, promt)
-	if err != nil {
-	 // log.Fatal(err)
-	 return "", err
-	}
-	fmt.Println(completion)
-	return completion, nil
+	return result,nil
 }
 

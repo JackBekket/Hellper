@@ -37,13 +37,6 @@ func (c *Commander) InputYourAPIKey(updateMessage *tgbotapi.Message) {
 func (c *Commander) ChooseNetwork(updateMessage *tgbotapi.Message) {
 	chatID := updateMessage.From.ID
 	user := c.usersDb[chatID]
-
-
-	//gptKey := updateMessage.Text
-	//c.AttachKey(gptKey,chatID)		// save gpt key
-	//user.AiSession.GptKey = gptKey
-
-
 	// render menu
 	msg := tgbotapi.NewMessage(user.ID, msgTemplates["ch_network"])
 	msg.ReplyMarkup = tgbotapi.NewOneTimeReplyKeyboard(
@@ -54,7 +47,7 @@ func (c *Commander) ChooseNetwork(updateMessage *tgbotapi.Message) {
 	)
 	c.bot.Send(msg)
 
-	user.DialogStatus = 1	 // TODO: change it  // this is output dialog status
+	user.DialogStatus = 1	  // this is output dialog status
 	c.usersDb[chatID] = user // commit changes
 
 }
@@ -70,8 +63,6 @@ func (c *Commander) HandleNetworkChoose(updateMessage *tgbotapi.Message) {
 
 		user.Network = network
 		user.AiSession.AI_Type = 0
-		//c.RenderLanguage(chatID)
-
 		user.DialogStatus = 2
 		c.usersDb[chatID] = user
 		c.InputYourAPIKey(updateMessage)
@@ -79,8 +70,6 @@ func (c *Commander) HandleNetworkChoose(updateMessage *tgbotapi.Message) {
 
 		user.Network = network
 		user.AiSession.AI_Type = 1
-		//c.RenderLanguage(chatID)
-
 		user.DialogStatus = 2
 		c.usersDb[chatID] = user
 		c.InputYourAPIKey(updateMessage)
@@ -92,16 +81,13 @@ func (c *Commander) HandleNetworkChoose(updateMessage *tgbotapi.Message) {
 
 
 
-// Message: case1 - "Choose model to use. GPT3 is for text-based tasks, Codex for codegeneration.".
-//
+
 //	update Dialog_Status 3 -> 4
 func (c *Commander) ChooseModel(updateMessage *tgbotapi.Message) {
 	chatID := updateMessage.From.ID
 	gptKey := updateMessage.Text	// handling previouse message
 	user := c.usersDb[chatID]
 	network := user.Network
-
-
 
 	// I can't validate key at this stage. The only way to validate key is to send test sequence (see case 3)
 	// Since this part is oftenly get an usernamecaught exeption, we debug what user input as key. It's bad, I know, but usernametil we got key validation we need this part.
@@ -292,7 +278,7 @@ func (c *Commander) WrongModel(updateMessage *tgbotapi.Message) {
 	c.usersDb[chatID] = user
 }
 
-// update Dialog_Status = 3
+// update Dialog_Status = 0
 func (c *Commander) WrongNetwork(updateMessage *tgbotapi.Message) {
 	chatID := updateMessage.From.ID
 	user := c.usersDb[chatID]
