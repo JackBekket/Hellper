@@ -66,9 +66,11 @@ docker run -p 8080:8080 --name local-ai -v $PWD/models:/models -v $PWD/tmp/gener
 ```
 NVIDIA GPU setup
 ```
-docker run -p 8080:8080 --gpus all --name local-ai -e DEBUG=true -v $PWD/models:/models -v $PWD/tmp/generated/images:/tmp/generated/images -ti  localai/localai:latest-aio-gpu-nvidia-cuda-12 --models-path /models --context-size 700 --threads 8 
+docker run -p 8080:8080 --gpus all --name local-ai -e DEBUG=true -v $PWD/models:/models -v $PWD/tmp/generated/images:/tmp/generated/images -v $PWD/configuration:/configuration -d  localai/localai:latest-aio-gpu-nvidia-cuda-12 --models-path /models --context-size 1024 --threads 8 
 ```
 you can use `-e DEBUG=true` for debug/verbose mode, `-d` instead of `-ti` for deatached mode, and so on. Also make sure that you have installed CUDA and nvidia-smi for containers, and your docker is installed as `apt-get install docker.io` (not from snap!)
+
+you can also create your own api keys for access and share it to other people. keys should be listed in api_keys.json file under configuration directory
 
 you can also build localai from source.
 
