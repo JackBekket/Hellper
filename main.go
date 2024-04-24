@@ -23,7 +23,7 @@ func main() {
 	log.Println("TG token is: ", token)
 
 	adminData := env.LoadAdminData()
-	local_access_pwd:= env.LoadLocalPD()
+	//local_access_pwd:= env.LoadLocalPD()
 	ai_endpoint := env.LoadLocalAI_Endpoint()
 	log.Println("ai endpoint is: ", ai_endpoint)
 
@@ -74,7 +74,7 @@ func main() {
 			case 4:
 				comm.HandleModelChoose(update.Message)
 			case 5:
-				comm.ConnectingToAiWithLanguage(update.Message,local_access_pwd,ai_endpoint)	
+				comm.ConnectingToAiWithLanguage(update.Message, ai_endpoint)	
 			case 6: 
 				comm.DialogSequence(update.Message,ai_endpoint)
 				
