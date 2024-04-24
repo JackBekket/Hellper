@@ -292,7 +292,7 @@ func (c *Commander) WrongNetwork(updateMessage *tgbotapi.Message) {
 
 
 // update update Dialog_Status 5 -> 6
-func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.Message, lpwd string, ai_endpoint string) {
+func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.Message, ai_endpoint string) {
 	chatID := updateMessage.From.ID
 	language := updateMessage.Text
 	user := c.usersDb[chatID]
@@ -304,23 +304,15 @@ func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.Message, 
 	c.bot.Send(msg)
 
 	//go localai.SetupSequenceWithKey(c.bot, user, language, c.ctx, lpwd, ai_endpoint)
-	check,err:= c.CheckLocalPWD(user.AiSession.GptKey,lpwd)
-	if err != nil {
-		user.DialogStatus = 0
-		c.usersDb[chatID] = user
-		msg := tgbotapi.NewMessage(user.ID, "wrong password")
-		c.bot.Send(msg)
-	} else {
-		log.Println(check)
 
 		if network == "localai" {
-			go langchain.SetupSequenceWithKey(c.bot,user,language,c.ctx,lpwd,ai_endpoint)
+			go langchain.SetupSequenceWithKey(c.bot,user,language,c.ctx,ai_endpoint)
 		} else {
 
-		go langchain.SetupSequenceWithKey(c.bot,user,language,c.ctx,lpwd,"")
+		go langchain.SetupSequenceWithKey(c.bot,user,language,c.ctx,"")
 		//go localai.SetupSequenceWithKey(c.bot,user,language,c.ctx,lpwd,ai_endpoint)
 		}
-	}
+	
 	
 }
 

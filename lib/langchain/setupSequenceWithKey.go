@@ -19,7 +19,6 @@ func SetupSequenceWithKey(
 	user db.User,
 	language string,
 	ctx context.Context,
-	spwd string,
 	ai_endpoint string,
 ) {
 	mu.Lock()
@@ -30,9 +29,6 @@ func SetupSequenceWithKey(
 	//u_network := user.Network
 	//log.Println("user network from session: ", u_network)
 	log.Println("user model from session: ", user.AiSession.GptModel)
-
-	u_pwd := user.AiSession.GptKey
-	log.Println("upwd: ", u_pwd)
 
 
 	/*
@@ -48,7 +44,7 @@ func SetupSequenceWithKey(
 
 	switch language {
 	case "English":
-		response,probe, err := tryLanguage(user, "", 1, ctx,ai_endpoint,spwd,u_pwd)
+		response,probe, err := tryLanguage(user, "", 1, ctx,ai_endpoint)
 		if err != nil {
 			errorMessage(err, bot, user)
 		} else {
@@ -60,7 +56,7 @@ func SetupSequenceWithKey(
 			db.UsersMap[chatID] = user
 		}
 	case "Russian":
-		response,probe, err := tryLanguage(user, "", 2, ctx,ai_endpoint,spwd,u_pwd)
+		response,probe, err := tryLanguage(user, "", 2, ctx,ai_endpoint)
 		if err != nil {
 			errorMessage(err, bot, user)
 		} else {
@@ -71,7 +67,7 @@ func SetupSequenceWithKey(
 			db.UsersMap[chatID] = user
 		}
 	default:
-		response,probe, err := tryLanguage(user, language, 0, ctx,ai_endpoint,spwd,u_pwd)
+		response,probe, err := tryLanguage(user, language, 0, ctx,ai_endpoint)
 		if err != nil {
 			errorMessage(err, bot, user)
 		} else {
@@ -87,7 +83,7 @@ func SetupSequenceWithKey(
 }
 
 // LanguageCode: 0 - default, 1 - Russian, 2 - English
-func tryLanguage(user db.User, language string, languageCode int, ctx context.Context, ai_endpoint string, spwd string, upwd string) (string,*db.ChatSession, error) {
+func tryLanguage(user db.User, language string, languageCode int, ctx context.Context, ai_endpoint string) (string,*db.ChatSession, error) {
 	var languagePromt string
 	//var languageResponse string
 	model := user.AiSession.GptModel
