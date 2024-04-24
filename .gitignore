@@ -10,7 +10,7 @@
 *.env
 *.secret
 api_keys.json
-./config/api_keys.json
+./configuration/api_keys.json
 
 # Test binary, built with `go test -c`
 *.test
