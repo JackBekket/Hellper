@@ -5,16 +5,11 @@ import (
 	"net/url"
 	"path"
 
+	db "github.com/JackBekket/uncensoredgpt_tgbot/lib/database"
 	"github.com/JackBekket/uncensoredgpt_tgbot/lib/langchain"
 	"github.com/JackBekket/uncensoredgpt_tgbot/lib/localai"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
-
-
-
-type WrongPwdError struct {
-	message string
-}
 
 // Message:	case0 - "Input your openAI API key. It can be created at https://platform.openai.com/accousernamet/api-keys".
 //  DialogStatus 2 -> 3
@@ -339,7 +334,11 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint 
 			}
 			//go openaibot.StartImageSequence(c.bot, updateMessage, chatID, promt, c.ctx)
 
-	
+		case "restart":
+			msg := tgbotapi.NewMessage(user.ID, "Restarting session...")
+			c.bot.Send(msg)
+			userDb := db.UsersMap
+			delete(userDb, user.ID)
 	default:
 		promt := updateMessage.Text
 		//go localai.StartDialogSequence(c.bot, chatID, promt, c.ctx, ai_endpoint)
@@ -399,15 +398,3 @@ func transformURL(inputURL string) string {
 }
 
 
-func (c *Commander) CheckLocalPWD(upwd string, spwd string) (bool, error) {
-	if upwd != spwd {
-		err := &WrongPwdError{"wrong password"}
-		return false, err
-	} else {
-		return true, nil
-	}
-}
-
-func (e *WrongPwdError) Error() string {
-    return e.message
-}
