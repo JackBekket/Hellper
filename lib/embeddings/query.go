@@ -10,7 +10,7 @@ import (
 	"github.com/tmc/langchaingo/vectorstores"
 )
 
-func RagSearch(question string, numOfResults int) (string,error) {
+func RagSearch(question string, numOfResults int) (result string,err error) {
 
 	store, err := GetVectorStore()
 
@@ -30,7 +30,7 @@ func RagSearch(question string, numOfResults int) (string,error) {
 		return "",err
 	}
 
-	result, err := chains.Run(
+	result, err = chains.Run(
 		context.Background(),
 		chains.NewRetrievalQAFromLLM(
 			llm,
@@ -49,14 +49,14 @@ func RagSearch(question string, numOfResults int) (string,error) {
 
 }
 
-func SemanticSearch(searchQuery string, maxResults int) ([]schema.Document,error) {
+func SemanticSearch(searchQuery string, maxResults int) (searchResults []schema.Document, err error) {
 
 	store, err := GetVectorStore()
 	if err != nil {
 		return nil,err
 	}
 
-	searchResults, err := store.SimilaritySearch(context.Background(), searchQuery, maxResults)
+	searchResults, err = store.SimilaritySearch(context.Background(), searchQuery, maxResults)
 
 	if err != nil {
 		return nil,err
