@@ -5,12 +5,15 @@ import (
 	"fmt"
 	"net/http"
 
+	"log"
+
 	"github.com/tmc/langchaingo/documentloaders"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/textsplitter"
 )
 
-func loadDocs() error {
+/*
+func LoadDocs() error {
 
 	fmt.Println("loading data from")
 
@@ -33,10 +36,11 @@ func loadDocs() error {
 
 	return nil
 }
+*/
 
-
+/*
 func getSampleDocs() ([]schema.Document){
-		
+
 		docs:= []schema.Document{
 			{
 				PageContent: "Tokyo",
@@ -132,6 +136,49 @@ func getSampleDocs() ([]schema.Document){
 
 		return docs
 }
+*/
+
+
+func LoadDocsToStore(docs []schema.Document)  {
+	fmt.Println("loading data from")
+
+	store, err := GetVectorStore()
+
+	if err != nil {
+		log.Panic(err)
+	}
+	//docs := getSampleDocs()
+
+	fmt.Println("no. of documents to be loaded", len(docs))
+
+	_, err = store.AddDocuments(context.Background(), docs)
+
+	if err != nil {
+		log.Panic(err)
+	}
+
+	fmt.Println("data successfully loaded into vector store")
+
+	log.Println(err)
+}
+
+/*
+func GetTextDocs() {
+	var docs []schema.Document
+
+    for _, data := range fileData {
+        doc := schema.Document{
+            PageContent: data.Content,
+            Metadata: map[string]interface{}{
+                "date": data.Date,
+            },
+        }
+        docs = append(docs, doc)
+    }
+
+    return docs
+}
+*/
 
 func getDocs(source string) ([]schema.Document, error) {
 	resp, err := http.Get(source)
