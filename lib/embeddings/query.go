@@ -6,15 +6,16 @@ import (
 
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/llms/openai"
+	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
 )
 
-func RagSearch(question string, numOfResults int) error {
+func RagSearch(question string, numOfResults int) (string,error) {
 
 	store, err := GetVectorStore()
 
 	if err != nil {
-		return err
+		return "",err
 	}
 
 
@@ -26,7 +27,7 @@ func RagSearch(question string, numOfResults int) error {
     //openai.WithEmbeddingModel("text-embedding-ada-002"),
 	)
 	if err != nil {
-		return err
+		return "",err
 	}
 
 	result, err := chains.Run(
@@ -39,26 +40,26 @@ func RagSearch(question string, numOfResults int) error {
 		chains.WithMaxTokens(2048),
 	)
 	if err != nil {
-		return err
+		return "",err
 	}
 
 	fmt.Println("====final answer====\n", result)
 
-	return nil
+	return result,nil
 
 }
 
-func SemanticSearch(searchQuery string, maxResults int) error {
+func SemanticSearch(searchQuery string, maxResults int) ([]schema.Document,error) {
 
 	store, err := GetVectorStore()
 	if err != nil {
-		return err
+		return nil,err
 	}
 
 	searchResults, err := store.SimilaritySearch(context.Background(), searchQuery, maxResults)
 
 	if err != nil {
-		return err
+		return nil,err
 	}
 
 	fmt.Println("============== similarity search results ==============")
@@ -70,6 +71,6 @@ func SemanticSearch(searchQuery string, maxResults int) error {
 
 	}
 
-	return nil
+	return searchResults,nil
 
 }
