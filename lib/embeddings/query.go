@@ -19,7 +19,7 @@ func RagSearch(question string, numOfResults int) (result string,err error) {
 	}
 
 
-	// Create an embeddings client using the OpenAI API. Requires environment variable OPENAI_API_KEY to be set.
+	// Create an embeddings client using the. Requires environment variable OPENAI_API_KEY to be set.
 	llm, err := openai.New(
 		openai.WithBaseURL("http://localhost:8080/v1/"),
 		openai.WithAPIVersion("v1"),
