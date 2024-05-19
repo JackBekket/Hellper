@@ -94,13 +94,13 @@ func (c *Commander) RAG(chatID int64, promt string, maxResults int) {
 	store,err := embeddings.GetVectorStore(api_token)
 	if err != nil {
 		//return nil, err
-		msg := tgbotapi.NewMessage(user.ID, "error occured: " + err.Error())
+		msg := tgbotapi.NewMessage(user.ID, "error occured when getting store: " + err.Error())
 		c.bot.Send(msg)
 	}
 
 	result, err := embeddings.Rag(promt,1,store)
 	if err != nil {
-		msg := tgbotapi.NewMessage(user.ID, "error occured: " + err.Error())
+		msg := tgbotapi.NewMessage(user.ID, "error occured when calling RAG: " + err.Error())
 		c.bot.Send(msg)
 	}
 	msg := tgbotapi.NewMessage(user.ID, result)
