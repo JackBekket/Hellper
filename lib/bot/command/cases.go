@@ -17,6 +17,7 @@ func (c *Commander) InputYourAPIKey(updateMessage *tgbotapi.Message) {
 	chatID := updateMessage.From.ID
 	user := c.usersDb[chatID]
 
+
 	msg := tgbotapi.NewMessage(
 		user.ID,
 		msgTemplates["case0"],
@@ -32,6 +33,7 @@ func (c *Commander) InputYourAPIKey(updateMessage *tgbotapi.Message) {
 func (c *Commander) ChooseNetwork(updateMessage *tgbotapi.Message) {
 	chatID := updateMessage.From.ID
 	user := c.usersDb[chatID]
+	c.HelpCommandMessage(updateMessage)
 	// render menu
 	msg := tgbotapi.NewMessage(user.ID, msgTemplates["ch_network"])
 	msg.ReplyMarkup = tgbotapi.NewOneTimeReplyKeyboard(
@@ -321,7 +323,7 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint 
 	chatID := updateMessage.From.ID
 	user := c.usersDb[chatID]
 
-	c.HelpCommandMessage(updateMessage)
+	
 
 
 	switch updateMessage.Command() {
