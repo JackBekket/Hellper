@@ -297,6 +297,7 @@ func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.Message, 
 
 	msg := tgbotapi.NewMessage(user.ID, "connecting to ai node")
 	c.bot.Send(msg)
+	
 
 	//go localai.SetupSequenceWithKey(c.bot, user, language, c.ctx, lpwd, ai_endpoint)
 
@@ -319,6 +320,10 @@ func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.Message, 
 func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint string) {
 	chatID := updateMessage.From.ID
 	user := c.usersDb[chatID]
+
+	c.HelpCommandMessage(updateMessage)
+
+
 	switch updateMessage.Command() {
 	
 		case "image":
