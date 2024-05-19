@@ -2,9 +2,11 @@ package command
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/JackBekket/uncensoredgpt_tgbot/lib/embeddings"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/joho/godotenv"
 )
 
 /**
@@ -54,8 +56,21 @@ func (c *Commander) HelpCommandMessage(updateMessage *tgbotapi.Message)  {
 
 func (c *Commander) SearchDocuments(chatID int64, promt string, maxResults int) {
 	//chatID := updateMessage.From.ID
+	_ = godotenv.Load()
+
+	conn_pg_link := os.Getenv("PG_LINK")
+	db_conn := conn_pg_link
 	user := c.usersDb[chatID]
-	results, err := embeddings.SemanticSearch(promt,maxResults)
+	api_token := user.AiSession.GptKey
+	store,err := embeddings.GetVectorStore(api_token,db_conn)
+	if err != nil {
+		//return nil, err
+		msg := tgbotapi.NewMessage(user.ID, "error occured: " + err.Error())
+		c.bot.Send(msg)
+	}
+
+
+	results, err := embeddings.SemanticSearch(promt,maxResults,store)
 	if err != nil {
 		//return nil, err
 		msg := tgbotapi.NewMessage(user.ID, "error occured: " + err.Error())
@@ -81,14 +96,33 @@ func (c *Commander) SearchDocuments(chatID int64, promt string, maxResults int) 
 // Retrival-Augmented Generation
 func (c *Commander) RAG(chatID int64, promt string, maxResults int) {
 	user := c.usersDb[chatID]
+	_ = godotenv.Load()
 
-	result, err := embeddings.RagSearch(promt,1)
+	conn_pg_link := os.Getenv("PG_LINK")
+	db_conn := conn_pg_link
+	api_token := user.AiSession.GptKey
+	store,err := embeddings.GetVectorStore(api_token,db_conn)
 	if err != nil {
-		msg := tgbotapi.NewMessage(user.ID, "error occured: " + err.Error())
+		//return nil, err
+		msg := tgbotapi.NewMessage(user.ID, "error occured when getting store: " + err.Error())
+		c.bot.Send(msg)
+	}
+
+	result, err := embeddings.Rag(promt,1,api_token,store)
+	if err != nil {
+		msg := tgbotapi.NewMessage(user.ID, "error occured when calling RAG: " + err.Error())
 		c.bot.Send(msg)
 	}
 	msg := tgbotapi.NewMessage(user.ID, result)
 	c.bot.Send(msg)
 }
 
+
+
+/*
+// high-level instruct under base template without langchain templating
+func (c *Commander) Instruct (chatID int64, promt string) {
+	langchain.GenerateContentInstruction()
+}
+*/
 

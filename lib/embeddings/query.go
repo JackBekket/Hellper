@@ -10,21 +10,15 @@ import (
 	"github.com/tmc/langchaingo/vectorstores"
 )
 
-func RagSearch(question string, numOfResults int) (result string,err error) {
-
-	store, err := GetVectorStore()
-
-	if err != nil {
-		return "",err
-	}
-
+func Rag(question string, numOfResults int,api_token string,store vectorstores.VectorStore) (result string,err error) {
 
 	// Create an embeddings client using the. Requires environment variable OPENAI_API_KEY to be set.
 	llm, err := openai.New(
 		openai.WithBaseURL("http://localhost:8080/v1/"),
 		openai.WithAPIVersion("v1"),
+		openai.WithToken(api_token),
     	openai.WithModel("wizard-uncensored-13b"),
-    //openai.WithEmbeddingModel("text-embedding-ada-002"),
+    	//openai.WithEmbeddingModel("text-embedding-ada-002"),
 	)
 	if err != nil {
 		return "",err
@@ -49,12 +43,16 @@ func RagSearch(question string, numOfResults int) (result string,err error) {
 
 }
 
-func SemanticSearch(searchQuery string, maxResults int) (searchResults []schema.Document, err error) {
+func SemanticSearch(searchQuery string, maxResults int, store vectorstores.VectorStore) (searchResults []schema.Document, err error) {
+	//var store vectorstores.VectorStore
 
+
+	/*
 	store, err := GetVectorStore()
 	if err != nil {
 		return nil,err
 	}
+	*/
 
 	searchResults, err = store.SimilaritySearch(context.Background(), searchQuery, maxResults)
 
@@ -74,3 +72,4 @@ func SemanticSearch(searchQuery string, maxResults int) (searchResults []schema.
 	return searchResults,nil
 
 }
+

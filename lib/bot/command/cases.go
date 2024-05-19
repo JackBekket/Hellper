@@ -17,6 +17,7 @@ func (c *Commander) InputYourAPIKey(updateMessage *tgbotapi.Message) {
 	chatID := updateMessage.From.ID
 	user := c.usersDb[chatID]
 
+
 	msg := tgbotapi.NewMessage(
 		user.ID,
 		msgTemplates["case0"],
@@ -32,6 +33,7 @@ func (c *Commander) InputYourAPIKey(updateMessage *tgbotapi.Message) {
 func (c *Commander) ChooseNetwork(updateMessage *tgbotapi.Message) {
 	chatID := updateMessage.From.ID
 	user := c.usersDb[chatID]
+	c.HelpCommandMessage(updateMessage)
 	// render menu
 	msg := tgbotapi.NewMessage(user.ID, msgTemplates["ch_network"])
 	msg.ReplyMarkup = tgbotapi.NewOneTimeReplyKeyboard(
@@ -297,6 +299,7 @@ func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.Message, 
 
 	msg := tgbotapi.NewMessage(user.ID, "connecting to ai node")
 	c.bot.Send(msg)
+	
 
 	//go localai.SetupSequenceWithKey(c.bot, user, language, c.ctx, lpwd, ai_endpoint)
 
@@ -319,6 +322,10 @@ func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.Message, 
 func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint string) {
 	chatID := updateMessage.From.ID
 	user := c.usersDb[chatID]
+
+	
+
+
 	switch updateMessage.Command() {
 	
 		case "image":
@@ -343,10 +350,16 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint 
 			c.HelpCommandMessage(updateMessage)
 		case "search_doc":
 			promt := updateMessage.CommandArguments()
-			c.SearchDocuments(chatID,promt,10)
+			c.SearchDocuments(chatID,promt,3)
 		case "rag":
 			promt := updateMessage.CommandArguments()
 			c.RAG(chatID,promt,1)
+		case "instruct" :
+			// this is calling local-ai within base template (and without langhain injections)
+			promt := updateMessage.CommandArguments()
+			model_name := user.AiSession.GptModel
+			api_token := user.AiSession.GptKey
+			langchain.GenerateContentInstruction(promt,model_name,api_token,user.Network)
 	default:
 		promt := updateMessage.Text
 		//go localai.StartDialogSequence(c.bot, chatID, promt, c.ctx, ai_endpoint)
