@@ -60,7 +60,7 @@ func main()  {
 */
 
 /*
-// chat without context
+// return ContentResponse instead of single string result
 func GenerateContent(api_token string, model_name string, promt string, network string) (*llms.ContentResponse, error) {
 	ctx := context.Background()
 	token := api_token
@@ -166,8 +166,6 @@ func InitializeNewChatWithContextNoLimit(api_token string, model_name string, ba
 		}
 	
 		memoryBuffer := memory.NewConversationBuffer()
-		
-
 		conversation := chains.NewConversation(llm, memoryBuffer)	// create new conversation, which means langchain is modify initial promt in this moment. It is important, that your own template at local-ai side is also modifiyng template, so there might be a template collision.
 		
 	
@@ -214,7 +212,12 @@ func ContinueChatWithContextNoLimit(session *db.ChatSession, prompt string) (str
 
 
 
-// Main function for generating from single promt (without memory and context) --> this will result as Instruction, because it will not use langchain as template..
+/* Main function for generating from single promt (without memory and context) --> this will result as Instruction, because it will not use langchain as template..
+	     
+	Below is an instruction that describes a task. Write a response that appropriately completes the request.
+    Instruction: {{.Input}}
+    Response:
+	*/
 func GenerateContentInstruction(promt string, model_name string,api_token string,network string) (string,error) {
 	ctx := context.Background()
 	var result string
@@ -247,6 +250,7 @@ func GenerateContentInstruction(promt string, model_name string,api_token string
 		  log.Fatal(err)
 		}
 		
+
 		completion, err := llms.GenerateFromSinglePrompt(ctx, llm, promt)
 		if err != nil {
 		 // log.Fatal(err)
