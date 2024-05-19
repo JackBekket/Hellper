@@ -14,7 +14,14 @@ import (
 	"github.com/tmc/langchaingo/vectorstores/pgvector"
 )
 
+
+func LoadEnv() {
+
+}
+
 func GetVectorStore(args ...string) (vectorstores.VectorStore, error) {
+
+	_ = godotenv.Load()
 
 	var api_token string
 	if len(args) > 0 {
@@ -24,7 +31,7 @@ func GetVectorStore(args ...string) (vectorstores.VectorStore, error) {
 	}
 
 
-	_ = godotenv.Load()
+	
 	conn_pg_link := os.Getenv("PG_LINK")
   	
 
