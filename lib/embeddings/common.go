@@ -14,12 +14,19 @@ import (
 	"github.com/tmc/langchaingo/vectorstores/pgvector"
 )
 
-func GetVectorStore() (vectorstores.VectorStore, error) {
+func GetVectorStore(args ...string) (vectorstores.VectorStore, error) {
+
+	var api_token string
+	if len(args) > 0 {
+		api_token = args[0]
+	} else {
+		api_token = os.Getenv("OPENAI_API_KEY")	// this is not openai key actually, it's local key for localai
+	}
 
 
 	_ = godotenv.Load()
 	conn_pg_link := os.Getenv("PG_LINK")
-  	api_token := os.Getenv("OPENAI_API_KEY")	// this is not openai key actually, it's local key for localai
+  	
 
 
 	/*
