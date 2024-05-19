@@ -10,24 +10,27 @@ import (
 	"github.com/tmc/langchaingo/documentloaders"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/textsplitter"
+	"github.com/tmc/langchaingo/vectorstores"
 )
 
 
 
 
-func LoadDocsToStore(docs []schema.Document)  {
+func LoadDocsToStore(docs []schema.Document, store vectorstores.VectorStore)  {
 	fmt.Println("loading data from")
 
+	/*
 	store, err := GetVectorStore()
 
 	if err != nil {
 		log.Panic(err)
 	}
+	*/
 	//docs := getSampleDocs()
 
 	fmt.Println("no. of documents to be loaded", len(docs))
 
-	_, err = store.AddDocuments(context.Background(), docs)
+	_, err := store.AddDocuments(context.Background(), docs)
 
 	if err != nil {
 		log.Panic(err)

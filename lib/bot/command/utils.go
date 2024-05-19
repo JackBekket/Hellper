@@ -2,9 +2,11 @@ package command
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/JackBekket/uncensoredgpt_tgbot/lib/embeddings"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/joho/godotenv"
 )
 
 /**
@@ -54,9 +56,13 @@ func (c *Commander) HelpCommandMessage(updateMessage *tgbotapi.Message)  {
 
 func (c *Commander) SearchDocuments(chatID int64, promt string, maxResults int) {
 	//chatID := updateMessage.From.ID
+	_ = godotenv.Load()
+
+	conn_pg_link := os.Getenv("PG_LINK")
+	db_conn := conn_pg_link
 	user := c.usersDb[chatID]
 	api_token := user.AiSession.GptKey
-	store,err := embeddings.GetVectorStore(api_token)
+	store,err := embeddings.GetVectorStore(api_token,db_conn)
 	if err != nil {
 		//return nil, err
 		msg := tgbotapi.NewMessage(user.ID, "error occured: " + err.Error())
@@ -90,8 +96,12 @@ func (c *Commander) SearchDocuments(chatID int64, promt string, maxResults int) 
 // Retrival-Augmented Generation
 func (c *Commander) RAG(chatID int64, promt string, maxResults int) {
 	user := c.usersDb[chatID]
+	_ = godotenv.Load()
+
+	conn_pg_link := os.Getenv("PG_LINK")
+	db_conn := conn_pg_link
 	api_token := user.AiSession.GptKey
-	store,err := embeddings.GetVectorStore(api_token)
+	store,err := embeddings.GetVectorStore(api_token,db_conn)
 	if err != nil {
 		//return nil, err
 		msg := tgbotapi.NewMessage(user.ID, "error occured when getting store: " + err.Error())

@@ -343,7 +343,7 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint 
 			c.HelpCommandMessage(updateMessage)
 		case "search_doc":
 			promt := updateMessage.CommandArguments()
-			c.SearchDocuments(chatID,promt,10)
+			c.SearchDocuments(chatID,promt,3)
 		case "rag":
 			promt := updateMessage.CommandArguments()
 			c.RAG(chatID,promt,1)

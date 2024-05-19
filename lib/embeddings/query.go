@@ -10,18 +10,7 @@ import (
 	"github.com/tmc/langchaingo/vectorstores"
 )
 
-func Rag(question string, numOfResults int,api_token string,store_opt ...vectorstores.VectorStore) (result string,err error) {
-
-	var store vectorstores.VectorStore
-
-	if len(store_opt) > 0 {
-		store = store_opt[0]
-	} else {
-		store,err = GetVectorStore()
-		if err != nil {
-			return "",err
-		}
-	}
+func Rag(question string, numOfResults int,api_token string,store vectorstores.VectorStore) (result string,err error) {
 
 	// Create an embeddings client using the. Requires environment variable OPENAI_API_KEY to be set.
 	llm, err := openai.New(
@@ -54,17 +43,9 @@ func Rag(question string, numOfResults int,api_token string,store_opt ...vectors
 
 }
 
-func SemanticSearch(searchQuery string, maxResults int, store_opt ...vectorstores.VectorStore) (searchResults []schema.Document, err error) {
-	var store vectorstores.VectorStore
+func SemanticSearch(searchQuery string, maxResults int, store vectorstores.VectorStore) (searchResults []schema.Document, err error) {
+	//var store vectorstores.VectorStore
 
-	if len(store_opt) > 0 {
-		store = store_opt[0]
-	} else {
-		store,err = GetVectorStore()
-		if err != nil {
-			return nil,err
-		}
-	}
 
 	/*
 	store, err := GetVectorStore()

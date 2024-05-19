@@ -5,9 +5,6 @@ import (
 	"fmt"
 	"log"
 
-	"os"
-
-	"github.com/joho/godotenv"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/vectorstores"
@@ -19,21 +16,15 @@ func LoadEnv() {
 
 }
 
-func GetVectorStore(args ...string) (vectorstores.VectorStore, error) {
+func GetVectorStore(api_token string, db_link string) (vectorstores.VectorStore, error) {
 
+	/*
 	_ = godotenv.Load()
-
-	var api_token string
-	if len(args) > 0 {
-		api_token = args[0]
-	} else {
-		api_token = os.Getenv("OPENAI_API_KEY")	// this is not openai key actually, it's local key for localai
-	}
-
+	api_token = os.Getenv("OPENAI_API_KEY")	// this is not openai key actually, it's local key for localai
+	conn_pg_link := os.Getenv("PG_LINK")
+  	*/
 
 	
-	conn_pg_link := os.Getenv("PG_LINK")
-  	
 
 
 	/*
@@ -61,7 +52,7 @@ func GetVectorStore(args ...string) (vectorstores.VectorStore, error) {
 
 	pgConnURL := fmt.Sprintf(connURLFormat, user, url.QueryEscape(password), host, dbName)
 	*/
-	pgConnURL := conn_pg_link
+	pgConnURL := db_link
 
 
 	/*
