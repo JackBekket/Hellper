@@ -10,7 +10,7 @@ import (
 	"github.com/tmc/langchaingo/vectorstores"
 )
 
-func Rag(question string, numOfResults int,store_opt ...vectorstores.VectorStore) (result string,err error) {
+func Rag(question string, numOfResults int,api_token string,store_opt ...vectorstores.VectorStore) (result string,err error) {
 
 	var store vectorstores.VectorStore
 
@@ -27,8 +27,9 @@ func Rag(question string, numOfResults int,store_opt ...vectorstores.VectorStore
 	llm, err := openai.New(
 		openai.WithBaseURL("http://localhost:8080/v1/"),
 		openai.WithAPIVersion("v1"),
+		openai.WithToken(api_token),
     	openai.WithModel("wizard-uncensored-13b"),
-    //openai.WithEmbeddingModel("text-embedding-ada-002"),
+    	openai.WithEmbeddingModel("text-embedding-ada-002"),
 	)
 	if err != nil {
 		return "",err

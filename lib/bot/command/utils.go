@@ -98,7 +98,7 @@ func (c *Commander) RAG(chatID int64, promt string, maxResults int) {
 		c.bot.Send(msg)
 	}
 
-	result, err := embeddings.Rag(promt,1,store)
+	result, err := embeddings.Rag(promt,1,api_token,store)
 	if err != nil {
 		msg := tgbotapi.NewMessage(user.ID, "error occured when calling RAG: " + err.Error())
 		c.bot.Send(msg)
