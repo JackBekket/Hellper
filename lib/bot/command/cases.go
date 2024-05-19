@@ -335,10 +335,18 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint 
 			//go openaibot.StartImageSequence(c.bot, updateMessage, chatID, promt, c.ctx)
 
 		case "restart":
-			msg := tgbotapi.NewMessage(user.ID, "Restarting session...")
+			msg := tgbotapi.NewMessage(user.ID, "Restarting session..., type any key")
 			c.bot.Send(msg)
 			userDb := db.UsersMap
 			delete(userDb, user.ID)
+		case "help":
+			c.HelpCommandMessage(updateMessage)
+		case "search_doc":
+			promt := updateMessage.CommandArguments()
+			c.SearchDocuments(chatID,promt,10)
+		case "rag":
+			promt := updateMessage.CommandArguments()
+			c.RAG(chatID,promt,1)
 	default:
 		promt := updateMessage.Text
 		//go localai.StartDialogSequence(c.bot, chatID, promt, c.ctx, ai_endpoint)
@@ -396,5 +404,7 @@ func transformURL(inputURL string) string {
 	fileName := path.Base(parsedURL.Path)
 	return fileName
 }
+
+
 
 

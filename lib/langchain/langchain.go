@@ -16,7 +16,6 @@ import (
 
 	//"github.com/tmc/langchaingo/llms/options"
 	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/schema"
 )
 
 /** DEV NOTE
@@ -57,13 +56,10 @@ func main()  {
 		log.Println(err)
 	}
 	fmt.Println("answer 1",res1)
-
-
-
-
 }
 */
 
+/*
 // chat without context
 func GenerateContent(api_token string, model_name string, promt string, network string) (*llms.ContentResponse, error) {
 	ctx := context.Background()
@@ -77,7 +73,7 @@ func GenerateContent(api_token string, model_name string, promt string, network 
 			//llms.WithOptions()
 			openai.WithBaseURL("http://localhost:8080/v1/"),
 			openai.WithAPIVersion("v1"),
-		) 
+		)
 		if err != nil {
 			return nil, err
 		}
@@ -111,11 +107,10 @@ func GenerateContent(api_token string, model_name string, promt string, network 
 
 	return completion, nil
 }
+*/
 
-
-
-	// Example using call with few inputs
-	/*
+// Example using call with few inputs
+/*
 		translatePrompt := prompts.NewPromptTemplate(
 		"Translate the following text from {{.inputLanguage}} to {{.outputLanguage}}. {{.text}}",
 		[]string{"inputLanguage", "outputLanguage", "text"},
@@ -137,71 +132,6 @@ func GenerateContent(api_token string, model_name string, promt string, network 
 		return fmt.Errorf("invalid chain return")
 	}
 	fmt.Println(out)
-	*/
-
-// DEBUG NOTE -- this thing work
-// chat with context without limitation of token to use
-//  use it only to fast testing
-/*
-func TestChatWithContextNoLimit(api_token string, model_name string) (string, error) {
-	ctx := context.Background()
-	token := api_token
-
-	llm, err := openai.New(
-		openai.WithToken(token),
-		openai.WithModel(model_name),
-		//llms.WithOptions()
-		openai.WithBaseURL("http://localhost:8080/v1/"),	// comment this and next line to call OAI, if not then call to LAI
-		openai.WithAPIVersion("v1"),
-	)
-	if err != nil {
-	  log.Fatal(err)
-	}
-
-	memory_buffer := memory.NewConversationBuffer()
-
-	//test data
-	// First dialogue pair
-	inputValues1 := map[string]any{"input": "Hi"}				// ignore linter
-	outputValues1 := map[string]any{"output": "What's up"}
-
-	memory_buffer.SaveContext(ctx,inputValues1,outputValues1)	//initial messages should be put like this
-
-	memory_buffer.ChatHistory.AddUserMessage(ctx, "Not much, just hanging")  	// next messages from conversation could be added like this
-	memory_buffer.ChatHistory.AddAIMessage(ctx,"Cool")
-	memory_buffer.ChatHistory.AddUserMessage(ctx, "I am working at my new exiting golang AI project called 'Andromeda'")
-	memory_buffer.ChatHistory.AddUserMessage(ctx, "My name is Bekket btw")
-	
-	conversation := chains.NewConversation(llm,memory_buffer) 	// build chain, start new conversation thread
-	
-
-	// Run is used when we have only one input (promt for example).   If there are need in passing few inputs then use chains.Call instead
-	result, err := chains.Run(ctx,conversation,"what is my name and what project am I currently working on?")	//ignore linter error
-	if err != nil {
-		return "", err
-	}
-
-
-
-	log.Println("AI answer:")
-	log.Println(result)
-
-	log.Println("check if it's stored in messages, printing messages:")
-	history, err := memory_buffer.ChatHistory.Messages(ctx)
-	if err != nil {
-		return "", err
-	}
-	//log.Println(history)
-	total_turns := len(history)
-	log.Println("total number of turns: ", total_turns)
-	// Iterate over each message and print
-    log.Println("Printing messages:")
-    for _, msg := range history {
-        log.Println(msg.GetContent())
-    }
-
-	return result,err
-}
 */
 
 // Initialize New Dialog thread with User with no limitation for token usage (may fail, use with limit)  initial_promt is first user message, (workaround for bug with LAI context)
@@ -236,7 +166,7 @@ func InitializeNewChatWithContextNoLimit(api_token string, model_name string, ba
 		}
 	
 		memoryBuffer := memory.NewConversationBuffer()
-		//memoryBuffer.ChatHistory.AddUserMessage(ctx,user_initial_promt)
+		
 
 		conversation := chains.NewConversation(llm, memoryBuffer)	// create new conversation, which means langchain is modify initial promt in this moment. It is important, that your own template at local-ai side is also modifiyng template, so there might be a template collision.
 		
@@ -254,7 +184,7 @@ func StartNewChat(api_token string, model_name string, base_url string,user_init
 	if err1 != nil {
 		return "",nil, err1
 	}
-	result,post_session,err :=RunChain(session,user_initial_promt)
+	result,post_session,err := RunChain(session,user_initial_promt)
 	if err != nil {
 	return "",nil, err
 	}
@@ -284,16 +214,16 @@ func ContinueChatWithContextNoLimit(session *db.ChatSession, prompt string) (str
 
 
 
-// TODO: make one function for both OAI & LAI, add baseUrl as argument
-// Main function for generating from single promt (without memory and context)
-func GenerateFromSinglePromt(promt string, model_name string,api_token string,network string) (string,error) {
+// Main function for generating from single promt (without memory and context) --> this will result as Instruction, because it will not use langchain as template..
+func GenerateContentInstruction(promt string, model_name string,api_token string,network string) (string,error) {
 	ctx := context.Background()
 	var result string
 	if network == "local" {
 		llm, err := openai.New(
-			//openai.WithToken()
+			openai.WithToken(api_token),
 			openai.WithBaseURL("http://localhost:8080"),
 			openai.WithModel(model_name),
+			openai.WithAPIVersion("v1"),
 		)
 		if err != nil {
 		  log.Fatal(err)
