@@ -29,7 +29,7 @@ func Rag(question string, numOfResults int,api_token string,store_opt ...vectors
 		openai.WithAPIVersion("v1"),
 		openai.WithToken(api_token),
     	openai.WithModel("wizard-uncensored-13b"),
-    	openai.WithEmbeddingModel("text-embedding-ada-002"),
+    	//openai.WithEmbeddingModel("text-embedding-ada-002"),
 	)
 	if err != nil {
 		return "",err
