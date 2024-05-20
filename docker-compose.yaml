@@ -1,0 +1,29 @@
+version: '3.8'
+services:
+  local-ai:
+    image: localai/localai:latest-aio-gpu-nvidia-cuda-12
+    command: --models-path /models --context-size 2048 --threads 8
+    environment:
+      - DEBUG=true
+    volumes:
+      - ./models:/models
+      - ./tmp/generated/images:/tmp/generated/images
+      - ./configuration:/configuration
+    ports:
+      - 8080:8080
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+  helper-bot:
+    build: .
+    depends_on:
+      - local-ai
+    ports:
+      - 8085:8085
+    restart: unless-stopped
