@@ -1,0 +1,10 @@
+# LLMs
+*.ggml
+*.gguf
+
+
+# ignore tmps..?
+tmp
+.git
+*.png
+*.img
