@@ -20,6 +20,7 @@ WORKDIR /app
 
 RUN apk add ca-certificates
 #COPY --from=build_base /out/bot ./bot
+COPY --from=build_base /app/main /app/main
 
 #CMD ["/app/bot"]
 
