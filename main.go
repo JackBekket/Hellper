@@ -3,14 +3,31 @@ package main
 import (
 	"context"
 	"log"
+	"os"
+	"strconv"
 
 	"github.com/JackBekket/uncensoredgpt_tgbot/lib/bot/command"
 	"github.com/JackBekket/uncensoredgpt_tgbot/lib/bot/env"
 	"github.com/JackBekket/uncensoredgpt_tgbot/lib/database"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/joho/godotenv"
 )
 
+/*
+type AdminData struct {
+	ID     int64
+	GPTKey string
+	//localhost_password string
+}
+*/
+
 func main() {
+
+	_= godotenv.Load()
+	api_token := os.Getenv("OPENAI_API_KEY")	// this is not openai key actually, it's local key for localai
+	//conn_pg_link := os.Getenv("PG_LINK")
+
+	/*
 	err := env.Load()
 	if err != nil {
 		log.Panicf("could not load env from: %v", err)
@@ -31,6 +48,42 @@ func main() {
 	if err != nil {
 		log.Fatalf("tg token missing: %v\n", err)
 	}
+	*/
+
+	/*
+	err := env.Load()
+	if err != nil {
+		log.Panicf("could not load env from: %v", err)
+	}
+	*/
+
+	token := api_token
+	log.Println("TG token is: ", token)
+
+	admin_key := os.Getenv("ADMIN_KEY")
+	admin_id := os.Getenv("ADMIN_ID")
+	id, err := strconv.ParseInt(admin_id, 0, 64)
+			if err != nil {
+				log.Printf("admin id error parse: %s", admin_id)
+			}
+	ai_endpoint := os.Getenv("AI_ENDPOINT")
+	log.Println("ai endpoint is: ", ai_endpoint)
+
+	bot, err := tgbotapi.NewBotAPI(token)
+	if err != nil {
+		log.Fatalf("tg token missing: %v\n", err)
+	}
+
+	adminData := make(map[string]env.AdminData)
+	adminData["ADMIN_ID"] = env.AdminData{
+		ID:     id,
+		GPTKey: admin_key,
+	}
+
+
+
+
+
 
 	// init database and commander
 	usersDatabase := database.UsersMap

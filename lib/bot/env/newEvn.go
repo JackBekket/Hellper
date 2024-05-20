@@ -16,7 +16,6 @@ var env map[string]string
 type AdminData struct {
 	ID     int64
 	GPTKey string
-	localhost_password string
 }
 
 func Load() error {
