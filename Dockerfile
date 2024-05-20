@@ -23,4 +23,6 @@ RUN apk add ca-certificates
 
 #CMD ["/app/bot"]
 
+EXPOSE 8085
+
 CMD [ "./main" ]
