@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"log"
 
-	db "github.com/JackBekket/uncensoredgpt_tgbot/lib/database"
+	db "github.com/JackBekket/hellper/lib/database"
 
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/llms"

@@ -18,6 +18,8 @@ github.com/AssemblyAI/assemblyai-go-sdk v1.5.1 h1:FQRncG9p+GCjtmG7iiRvHAYpjdmo6n
 github.com/AssemblyAI/assemblyai-go-sdk v1.5.1/go.mod h1:ytTvsjAVL+nXZnzBfDagQ/LxDQaKL9W/eTiCo3ZuPJA=
 github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 h1:L/gRVlceqvL25UVaW/CKtUDjefjrs0SPonmDGUVOYP0=
 github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161/go.mod h1:xomTg63KZ2rFqZQzSB4Vz2SUXa1BpHTVz9L5PTmPC4E=
+github.com/JackBekket/uncensoredgpt_tgbot v0.0.0-20240521191827-04600fee38ca h1:IJ8aJi1M8NrGZtIEtkUllgu/JboXp0A0CJtYgt/s/oU=
+github.com/JackBekket/uncensoredgpt_tgbot v0.0.0-20240521191827-04600fee38ca/go.mod h1:M6W+dlEc5fRohbgKNWdCQl3yfHOsdJu9tN+mhATQ9rY=
 github.com/Masterminds/goutils v1.1.1 h1:5nUrii3FMTL5diU80unEVvNevw1nH4+ZV4DSLVJLSYI=
 github.com/Masterminds/goutils v1.1.1/go.mod h1:8cTjp+g8YejhMuvIA5y2vz3BpJxksy863GQaJW2MFNU=
 github.com/Masterminds/semver/v3 v3.2.0/go.mod h1:qvl/7zhW3nngYb5+80sSMF+FG2BjYrf8m9wsX0PNOMQ=

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/JackBekket/uncensoredgpt_tgbot/lib/embeddings"
+	"github.com/JackBekket/hellper/lib/embeddings"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
 )

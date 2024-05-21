@@ -5,7 +5,7 @@ import (
 	"log"
 	"sync"
 
-	db "github.com/JackBekket/uncensoredgpt_tgbot/lib/database"
+	db "github.com/JackBekket/hellper/lib/database"
 	//"github.com/sashabaranov/go-openai"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"

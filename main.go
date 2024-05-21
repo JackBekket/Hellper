@@ -6,9 +6,9 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/JackBekket/uncensoredgpt_tgbot/lib/bot/command"
-	"github.com/JackBekket/uncensoredgpt_tgbot/lib/bot/env"
-	"github.com/JackBekket/uncensoredgpt_tgbot/lib/database"
+	"github.com/JackBekket/hellper/lib/bot/command"
+	"github.com/JackBekket/hellper/lib/bot/env"
+	"github.com/JackBekket/hellper/lib/database"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
 )

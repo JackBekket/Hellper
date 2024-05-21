@@ -1,4 +1,4 @@
-module github.com/JackBekket/uncensoredgpt_tgbot
+module github.com/JackBekket/hellper
 
 go 1.22.3
 
@@ -13,6 +13,7 @@ require github.com/jackc/puddle/v2 v2.2.1 // indirect
 
 require (
 	github.com/AssemblyAI/assemblyai-go-sdk v1.5.1 // indirect
+	github.com/JackBekket/uncensoredgpt_tgbot v0.0.0-20240521191827-04600fee38ca
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.2.1 // indirect
 	github.com/Masterminds/sprig/v3 v3.2.3 // indirect

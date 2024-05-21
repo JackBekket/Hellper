@@ -5,9 +5,9 @@ import (
 	"net/url"
 	"path"
 
-	db "github.com/JackBekket/uncensoredgpt_tgbot/lib/database"
-	"github.com/JackBekket/uncensoredgpt_tgbot/lib/langchain"
-	"github.com/JackBekket/uncensoredgpt_tgbot/lib/localai"
+	db "github.com/JackBekket/hellper/lib/database"
+	"github.com/JackBekket/hellper/lib/langchain"
+	"github.com/JackBekket/hellper/lib/localai"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 

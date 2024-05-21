@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"log"
 
-	db "github.com/JackBekket/uncensoredgpt_tgbot/lib/database"
+	db "github.com/JackBekket/hellper/lib/database"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/tmc/langchaingo/llms"
 )
