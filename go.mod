@@ -1,6 +1,6 @@
 module github.com/JackBekket/uncensoredgpt_tgbot
 
-go 1.22.0
+go 1.22.3
 
 require (
 	github.com/StarkBotsIndustries/telegraph v1.0.0
