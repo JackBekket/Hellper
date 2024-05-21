@@ -6,7 +6,7 @@
 it may work unexpectedly
 
 
-   ![alt text](https://github.com/JackBekket/UncensoredGPT_tgbot/blob/master/img/local_ai.png)
+   ![alt text](https://github.com/JackBekket/hellper/blob/master/img/local_ai.png)
    
 
 

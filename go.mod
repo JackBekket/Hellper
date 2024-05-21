@@ -1,4 +1,4 @@
-module github.com/JackBekket/uncensoredgpt_tgbot
+module github.com/JackBekket/hellper
 
 go 1.22.3
 

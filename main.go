@@ -6,9 +6,9 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/JackBekket/uncensoredgpt_tgbot/lib/bot/command"
-	"github.com/JackBekket/uncensoredgpt_tgbot/lib/bot/env"
-	"github.com/JackBekket/uncensoredgpt_tgbot/lib/database"
+	"github.com/JackBekket/hellper/lib/bot/command"
+	"github.com/JackBekket/hellper/lib/bot/env"
+	"github.com/JackBekket/hellper/lib/database"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
 )
@@ -57,10 +57,11 @@ func main() {
 	}
 	*/
 
-	token := api_token
+	//token := api_token
+	token := os.Getenv("TG_KEY")
 	log.Println("TG token is: ", token)
 
-	admin_key := os.Getenv("ADMIN_KEY")
+	admin_key := api_token
 	admin_id := os.Getenv("ADMIN_ID")
 	id, err := strconv.ParseInt(admin_id, 0, 64)
 			if err != nil {

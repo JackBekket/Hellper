@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"log"
 
-	db "github.com/JackBekket/uncensoredgpt_tgbot/lib/database"
+	db "github.com/JackBekket/hellper/lib/database"
 
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/llms"
@@ -158,7 +158,8 @@ func InitializeNewChatWithContextNoLimit(api_token string, model_name string, ba
 		llm, err := openai.New(
 			openai.WithToken(api_token),
 			openai.WithModel(model_name),
-			openai.WithBaseURL("http://localhost:8080"),
+			//openai.WithBaseURL("http://localhost:8080"),
+			openai.WithBaseURL(base_url),
 			openai.WithAPIVersion("v1"),
 		)
 		if err != nil {
