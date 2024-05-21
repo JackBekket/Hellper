@@ -9,6 +9,8 @@ import (
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/vectorstores"
 	"github.com/tmc/langchaingo/vectorstores/pgvector"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 
@@ -62,6 +64,19 @@ func GetVectorStore(api_token string, db_link string) (vectorstores.VectorStore,
 	}
 	*/
 
+	config, err := pgxpool.ParseConfig(pgConnURL)
+	if err != nil {
+		return nil, err
+	}
+	
+	pool, err := pgxpool.NewWithConfig(context.Background(), config)
+	if err != nil {
+		return nil, err
+	}
+	
+
+
+
 	// Create an embeddings client using the OpenAI API. Requires environment variable API_KEY to be set.
 	llm, err := openai.New(
 		openai.WithBaseURL("http://localhost:8080/v1/"),
@@ -86,7 +101,7 @@ func GetVectorStore(api_token string, db_link string) (vectorstores.VectorStore,
 	store, err := pgvector.New(
 		context.Background(),
 		//pgvector.WithPreDeleteCollection(true),
-		pgvector.WithConnectionURL(pgConnURL),
+		pgvector.WithConn(pool),
 		pgvector.WithEmbedder(e),
 	)
 	if err != nil {
