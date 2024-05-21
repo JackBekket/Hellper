@@ -57,10 +57,11 @@ func main() {
 	}
 	*/
 
-	token := api_token
+	//token := api_token
+	token := os.Getenv("TG_KEY")
 	log.Println("TG token is: ", token)
 
-	admin_key := os.Getenv("ADMIN_KEY")
+	admin_key := api_token
 	admin_id := os.Getenv("ADMIN_ID")
 	id, err := strconv.ParseInt(admin_id, 0, 64)
 			if err != nil {
