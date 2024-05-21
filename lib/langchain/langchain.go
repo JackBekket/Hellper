@@ -158,7 +158,8 @@ func InitializeNewChatWithContextNoLimit(api_token string, model_name string, ba
 		llm, err := openai.New(
 			openai.WithToken(api_token),
 			openai.WithModel(model_name),
-			openai.WithBaseURL("http://localhost:8080"),
+			//openai.WithBaseURL("http://localhost:8080"),
+			openai.WithBaseURL(base_url),
 			openai.WithAPIVersion("v1"),
 		)
 		if err != nil {
