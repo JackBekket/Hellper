@@ -27,5 +27,5 @@ services:
     ports:
       - 8085:8085
     environment:
-      - AI_ENDPOINT=http://localai:8080/v1/chat/completions
+      - AI_ENDPOINT=http://local-ai:8080/v1/chat/completions
     restart: unless-stopped
