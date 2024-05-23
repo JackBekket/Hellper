@@ -30,111 +30,6 @@ import (
 	you can get conversation logs by docker logs -f local-ai
 	(if you run local-ai in DEBUG mode)
 */
-/*
-// I use it for fast testing
-func main()  {
-	//ctx := context.Background()
-	env.Load()
-	//env_data := env.LoadAdminData()
-	token := env.GetAdminToken()
-	//model_name := "gpt-3.5-turbo"	// using openai for tests
-	model_name := "wizard-uncensored-13b"
-
-	user_initial_promt := "Hello, my name is Bekket, I am working on a new project called 'Andromeda'."
-
-	result, err :=TestChatWithContextNoLimit(token,model_name)		// works with both OAI and LAI
-	if err != nil {
-		log.Println(err)
-	}
-	fmt.Println(result)
-
-
-	session, err := StartNewChat(token,model_name,"localai",user_initial_promt,)
-	if err != nil {
-		log.Println(err)
-	}
-	res1,err := ContinueChatWithContextNoLimit(session,"What's my name and what is the name of the project I currently working on?")
-	if err != nil {
-		log.Println(err)
-	}
-	fmt.Println("answer 1",res1)
-}
-*/
-
-/*
-// return ContentResponse instead of single string result
-func GenerateContent(api_token string, model_name string, promt string, network string) (*llms.ContentResponse, error) {
-	ctx := context.Background()
-	token := api_token
-	var llm_ *openai.LLM
-	if network == "localai" {
-		//base_url = "http://localhost:8080/v1/"
-		llm, err := openai.New(
-			openai.WithToken(token),
-			openai.WithModel(model_name),
-			//llms.WithOptions()
-			openai.WithBaseURL("http://localhost:8080/v1/"),
-			openai.WithAPIVersion("v1"),
-		)
-		if err != nil {
-			return nil, err
-		}
-		llm_ = llm
-	}
-	if network == "openai" {
-		//base_url
-		llm, err := openai.New(
-			openai.WithToken(token),
-			openai.WithModel(model_name),
-		)
-		if err != nil {
-			return nil, err
-		}
-		llm_ = llm
-	}
-
-	content := []llms.MessageContent{
-		llms.TextParts(schema.ChatMessageTypeSystem, "You are a helpfull assistant who help in whatever task human ask you about"),
-		llms.TextParts(schema.ChatMessageTypeHuman, promt),
-	}
-
-	completion, err := llm_.GenerateContent(ctx, content, llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
-		fmt.Print(string(chunk))
-		return nil
-	}))
-	if err != nil {
-		//log.Fatal(err)
-		return nil, err
-	}
-
-	return completion, nil
-}
-*/
-
-// Example using call with few inputs
-/*
-		translatePrompt := prompts.NewPromptTemplate(
-		"Translate the following text from {{.inputLanguage}} to {{.outputLanguage}}. {{.text}}",
-		[]string{"inputLanguage", "outputLanguage", "text"},
-	)
-	llmChain = chains.NewLLMChain(llm, translatePrompt)
-
-	// Otherwise the call function must be used.
-	outputValues, err := chains.Call(ctx, llmChain, map[string]any{
-		"inputLanguage":  "English",
-		"outputLanguage": "French",
-		"text":           "I love programming.",
-	})
-	if err != nil {
-		return err
-	}
-
-	out, ok := outputValues[llmChain.OutputKey].(string)
-	if !ok {
-		return fmt.Errorf("invalid chain return")
-	}
-	fmt.Println(out)
-*/
 
 // Initialize New Dialog thread with User with no limitation for token usage (may fail, use with limit)  initial_promt is first user message, (workaround for bug with LAI context)
 func InitializeNewChatWithContextNoLimit(api_token string, model_name string, base_url string, user_initial_promt string) (*db.ChatSession, error) {
@@ -167,6 +62,7 @@ func InitializeNewChatWithContextNoLimit(api_token string, model_name string, ba
 			openai.WithBaseURL(base_url),
 			openai.WithAPIVersion("v1"),
 			openai.WithCallback(cb),
+			
 		)
 		if err != nil {
 			return nil, err
