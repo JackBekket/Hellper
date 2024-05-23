@@ -15,7 +15,7 @@ type User struct {
 	Admin        bool
 	AiSession    AiSession
 	Network      string
-	local_ai_pass string
+	//local_ai_pass string
 }
 
 
@@ -26,6 +26,7 @@ type AiSession struct {
 	AI_Type	  int8
 	DialogThread ChatSession
 	Base_url  string
+	Usage	  map[string]int
 }
 
 type ChatSession struct {

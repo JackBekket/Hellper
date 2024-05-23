@@ -118,6 +118,24 @@ func (c *Commander) RAG(chatID int64, promt string, maxResults int) {
 }
 
 
+//
+func (c *Commander) GetUsage(chatID int64)  {
+	user := c.usersDb[chatID]
+	promt_tokens := user.AiSession.Usage["Promt"]
+	completion_tokens := user.AiSession.Usage["Completion"]
+	total_tokens := user.AiSession.Usage["Total"]
+
+	pt_str := fmt.Sprint(promt_tokens)
+	ct_str := fmt.Sprint(completion_tokens)
+	tt_str := fmt.Sprint(total_tokens)
+
+	msg := tgbotapi.NewMessage(user.ID, "Promt tokens: " + pt_str)
+	c.bot.Send(msg)
+	msg = tgbotapi.NewMessage(user.ID, "Completion tokens: " + ct_str)
+	c.bot.Send(msg)
+	msg = tgbotapi.NewMessage(user.ID, "Total tokens: " + tt_str)
+	c.bot.Send(msg)
+}
 
 /*
 // high-level instruct under base template without langchain templating

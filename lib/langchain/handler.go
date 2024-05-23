@@ -4,13 +4,18 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"strconv"
 
+	db "github.com/JackBekket/hellper/lib/database"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
+	//""
 )
 
 
 type ChainCallbackHandler struct{}
+
+
 
 // HandleAgentAction implements callbacks.Handler.
 func (h *ChainCallbackHandler) HandleAgentAction(ctx context.Context, action schema.AgentAction) {
@@ -100,15 +105,25 @@ func (h *ChainCallbackHandler) HandleLLMGenerateContentEnd(ctx context.Context, 
 	  fmt.Println("Completion Tokens:", completionTokens)
 
 	*/
-	LogResponseContentChoice(res)
+	LogResponseContentChoice(ctx,res)
+	
 }
 
-func LogResponseContentChoice(resp *llms.ContentResponse) {
+func LogResponseContentChoice(ctx context.Context,resp *llms.ContentResponse) {
 	//choice *llms.ContentChoice
 	choice := resp.Choices[0]
 	log.Println("Content: ", choice.Content)
 	log.Println("Stop Reason: ", choice.StopReason)
-	//t :=resp.Usage.CompletionTokens
+	
+	//Get user from context
+	user, ok := ctx.Value("user").(*db.User)
+	if !ok {
+	  log.Println("No user in context")
+	  return
+	}
+	//chatID := user.ID
+
+
 
 	// GenerationInfo is a map that could contain complex/nested structures,
 	// so we'll marshal it into a JSON string for a cleaner log message.
@@ -122,9 +137,43 @@ func LogResponseContentChoice(resp *llms.ContentResponse) {
 
 	// If you have specific fields you expect in GenerationInfo, you can log them individually:
 	// Example: log.Println("Some specific gen info: ", choice.GenerationInfo["someKey"])
-	log.Println("Some specific gen info: ", choice.GenerationInfo["PromptTokens"])
-	log.Println("Some specific gen info: ", choice.GenerationInfo["CompletionTokens"])
-	log.Println("Some specific gen info: ", choice.GenerationInfo["TotalTokens"])
+	log.Println("Promt tokens: ", choice.GenerationInfo["PromptTokens"])
+	log.Println("Completion tokens: ", choice.GenerationInfo["CompletionTokens"])
+	log.Println("Total tokens: ", choice.GenerationInfo["TotalTokens"])
+
+	// type any
+	promt_tokens_str := choice.GenerationInfo["PromptTokens"]
+	completion_tokens_str := choice.GenerationInfo["CompletionTokens"]
+	total_tokens_str := choice.GenerationInfo["TotalTokens"]
+
+
+	// type assertion (string)
+	pt_str, ok := promt_tokens_str.(string)
+	if !ok {
+  	log.Println("Error: value is not a string")
+  	return
+	}
+	ct_str, ok := completion_tokens_str.(string)
+	tt_str, ok := total_tokens_str.(string)
+
+	// conversion to int
+	pt,err := strconv.Atoi(pt_str)
+	ct, err := strconv.Atoi(ct_str)
+	tt, err := strconv.Atoi(tt_str)
+
+
+	
+		  // Update the user's usage information.
+		  user.AiSession.Usage = map[string]int{
+			"Total": tt,
+			"Promt": pt,
+			"Completion": ct,
+		  }
+		
+		  // Save the user back to the database.
+		  db.UsersMap[user.ID] = *user
+
+	
 
 	// Note: Since FuncCall is a pointer to a schema.FunctionCall, ensure you check for nil to avoid panics.
 	if choice.FuncCall != nil {

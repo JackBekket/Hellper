@@ -18,6 +18,8 @@ import (
 	"github.com/tmc/langchaingo/llms/openai"
 )
 
+//var tgbot *tgbotapi.BotAPI
+
 /** DEV NOTE
 	 OAI -- openAI, LAI -- localAI
 	 if your IDE says it won't compile just try to build from terminal first
