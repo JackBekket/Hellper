@@ -4,12 +4,10 @@ package langchain
 
 import (
 	"context"
-	"encoding/json"
 	"log"
 
 	db "github.com/JackBekket/hellper/lib/database"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/tmc/langchaingo/llms"
 )
 
 // Notifies the user that an error occurred while creating the request.
@@ -91,31 +89,4 @@ func LogResponse(resp *llms.ContentResponse) {
 */
 
 
-func LogResponseContentChoice(resp *llms.ContentResponse) {
-	//choice *llms.ContentChoice
-	choice := resp.Choices[0]
-	log.Println("Content: ", choice.Content)
-	log.Println("Stop Reason: ", choice.StopReason)
-  
-	// GenerationInfo is a map that could contain complex/nested structures,
-	// so we'll marshal it into a JSON string for a cleaner log message.
-	// This step is optional and depends on your preference for log clarity.
-	genInfo, err := json.Marshal(choice.GenerationInfo)
-	if err != nil {
-	  log.Println("Error marshaling GenerationInfo: ", err)
-	  return
-	}
-	log.Println("Generation Info: ", string(genInfo))
-  
-	// If you have specific fields you expect in GenerationInfo, you can log them individually:
-	// Example: log.Println("Some specific gen info: ", choice.GenerationInfo["someKey"])
-	
-	// Note: Since FuncCall is a pointer to a schema.FunctionCall, ensure you check for nil to avoid panics.
-	if choice.FuncCall != nil {
-	  // Assuming FuncCall has fields you want to log, replace 'FieldName' with actual fields.
-	  log.Printf("Function Call: %+v\n", choice.FuncCall)
-	  // For specific field: log.Println("FuncCall field: ", choice.FuncCall.FieldName)
-	} else {
-	  log.Println("No Function Call requested.")
-	}
-  }
+

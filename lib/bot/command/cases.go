@@ -360,6 +360,8 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint 
 			model_name := user.AiSession.GptModel
 			api_token := user.AiSession.GptKey
 			langchain.GenerateContentInstruction(promt,model_name,api_token,user.Network)
+		case "usage" :
+			c.GetUsage(chatID)
 	default:
 		promt := updateMessage.Text
 		//go localai.StartDialogSequence(c.bot, chatID, promt, c.ctx, ai_endpoint)

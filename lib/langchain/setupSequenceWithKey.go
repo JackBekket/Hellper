@@ -13,6 +13,9 @@ import (
 )
 
 var mu = sync.Mutex{}
+type contextKey string
+const UserKey contextKey = "user"
+
 
 func SetupSequenceWithKey(
 	bot *tgbotapi.BotAPI,
@@ -30,6 +33,9 @@ func SetupSequenceWithKey(
 	//log.Println("user network from session: ", u_network)
 	log.Println("user model from session: ", user.AiSession.GptModel)
 
+	//tgbot = bot
+
+	//ctx = context.WithValue(ctx, "user", user)
 
 	/*
 	// Initializing empty dialog thread
