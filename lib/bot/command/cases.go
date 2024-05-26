@@ -1,6 +1,7 @@
 package command
 
 import (
+	"context"
 	"log"
 	"net/url"
 	"path"
@@ -10,6 +11,11 @@ import (
 	"github.com/JackBekket/hellper/lib/localai"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
+
+type contextKey string
+const UserKey contextKey = "user"
+
+
 
 // Message:	case0 - "Input your openAI API key. It can be created at https://platform.openai.com/accousernamet/api-keys".
 //  DialogStatus 2 -> 3
@@ -299,15 +305,17 @@ func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.Message, 
 
 	msg := tgbotapi.NewMessage(user.ID, "connecting to ai node")
 	c.bot.Send(msg)
+
+	ctx := context.WithValue(c.ctx, "user", user)
 	
 
 	//go localai.SetupSequenceWithKey(c.bot, user, language, c.ctx, lpwd, ai_endpoint)
 
 		if network == "localai" {
-			go langchain.SetupSequenceWithKey(c.bot,user,language,c.ctx,ai_endpoint)
+			go langchain.SetupSequenceWithKey(c.bot,user,language,ctx,ai_endpoint)
 		} else {
 
-		go langchain.SetupSequenceWithKey(c.bot,user,language,c.ctx,"")
+		go langchain.SetupSequenceWithKey(c.bot,user,language,ctx,"")
 		//go localai.SetupSequenceWithKey(c.bot,user,language,c.ctx,lpwd,ai_endpoint)
 		}
 	

@@ -42,7 +42,7 @@ func StartDialogSequence(bot *tgbotapi.BotAPI, chatID int64, promt string, ctx c
 
 	thread := user.AiSession.DialogThread
 
-	resp,post_session, err := ContinueChatWithContextNoLimit(&thread,promt)
+	resp,post_session, err := ContinueChatWithContextNoLimit(ctx,&thread,promt)
 	if err != nil {
 		errorMessage(err,bot,user)
 	} else {

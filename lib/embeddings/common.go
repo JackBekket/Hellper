@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/vectorstores"
@@ -20,14 +22,16 @@ func LoadEnv() {
 
 func GetVectorStore(api_token string, db_link string) (vectorstores.VectorStore, error) {
 
-	/*
+	
 	_ = godotenv.Load()
+	
+	/*
 	api_token = os.Getenv("OPENAI_API_KEY")	// this is not openai key actually, it's local key for localai
 	conn_pg_link := os.Getenv("PG_LINK")
   	*/
 
 	
-
+	base_url := os.Getenv("AI_BASEURL")
 
 	/*
 	host := os.Getenv("PG_HOST")
@@ -79,7 +83,8 @@ func GetVectorStore(api_token string, db_link string) (vectorstores.VectorStore,
 
 	// Create an embeddings client using the OpenAI API. Requires environment variable API_KEY to be set.
 	llm, err := openai.New(
-		openai.WithBaseURL("http://localhost:8080/v1/"),
+		//openai.WithBaseURL("http://localhost:8080/v1/"),
+		openai.WithBaseURL(base_url),
 		openai.WithAPIVersion("v1"),
     	//openai.WithModel("wizard-uncensored-13b"),
     	openai.WithEmbeddingModel("text-embedding-ada-002"),

@@ -94,6 +94,7 @@ func tryLanguage(user db.User, language string, languageCode int, ctx context.Co
 	//var languageResponse string
 	model := user.AiSession.GptModel
 
+
 	switch languageCode {
 	case 1:
 		languagePromt = "Hi, Do you speak english?"
@@ -111,7 +112,7 @@ func tryLanguage(user db.User, language string, languageCode int, ctx context.Co
 	//chatID := user.ID
 
 	// Initializing empty dialog thread
-	result,thread, err := StartNewChat(gptKey,model,ai_endpoint,languagePromt)
+	result,thread, err := StartNewChat(ctx,gptKey,model,ai_endpoint,languagePromt)
 		if err != nil {
 			log.Println(err)
 			return "",nil,err

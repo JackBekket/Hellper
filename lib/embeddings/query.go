@@ -18,7 +18,7 @@ func Rag(question string, numOfResults int,api_token string,store vectorstores.V
 		openai.WithAPIVersion("v1"),
 		openai.WithToken(api_token),
     	openai.WithModel("wizard-uncensored-13b"),
-    	//openai.WithEmbeddingModel("text-embedding-ada-002"),
+    	openai.WithEmbeddingModel("text-embedding-ada-002"),
 	)
 	if err != nil {
 		return "",err
@@ -43,7 +43,7 @@ func Rag(question string, numOfResults int,api_token string,store vectorstores.V
 
 }
 
-func SemanticSearch(searchQuery string, maxResults int, store vectorstores.VectorStore) (searchResults []schema.Document, err error) {
+func SemanticSearch(searchQuery string, maxResults int, store vectorstores.VectorStore, options ...vectorstores.Option) (searchResults []schema.Document, err error) {
 	//var store vectorstores.VectorStore
 
 
@@ -54,7 +54,7 @@ func SemanticSearch(searchQuery string, maxResults int, store vectorstores.Vecto
 	}
 	*/
 
-	searchResults, err = store.SimilaritySearch(context.Background(), searchQuery, maxResults)
+	searchResults, err = store.SimilaritySearch(context.Background(), searchQuery, maxResults, options...)
 
 	if err != nil {
 		return nil,err

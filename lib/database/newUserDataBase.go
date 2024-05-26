@@ -5,8 +5,6 @@ import (
 	"github.com/tmc/langchaingo/memory"
 )
 
-//import "github.com/JackBekket/hellper/lib/langchain"
-
 // main database for dialogs, key (int64) is telegram user id
 type User struct {
 	ID           int64
