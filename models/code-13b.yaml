@@ -1,5 +1,5 @@
 name: code-13b
-#context_size: 2048
+context_size: 4096
 f16: false # true to GPU acceleration
 cuda: true # true to GPU acceleration
 gpu_layers: 10 # this model have max 40 layers, 15-20 is reccomended for half-load at NVIDIA 4060 TiTan (more layers -- more VRAM required), (i guess 0 is no GPU)
