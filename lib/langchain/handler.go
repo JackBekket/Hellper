@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"log"
-	"strconv"
 
 	db "github.com/JackBekket/hellper/lib/database"
 	"github.com/tmc/langchaingo/llms"
@@ -114,11 +113,14 @@ func LogResponseContentChoice(ctx context.Context,resp *llms.ContentResponse) {
 	choice := resp.Choices[0]
 	log.Println("Content: ", choice.Content)
 	log.Println("Stop Reason: ", choice.StopReason)
+
+	log.Println("Context: ", ctx)
 	
 	//Get user from context
-	user, ok := ctx.Value("user").(*db.User)
+	user, ok := ctx.Value("user").(db.User)
 	if !ok {
 	  log.Println("No user in context")
+	  //log.Println
 	  return
 	}
 	//chatID := user.ID
@@ -148,30 +150,37 @@ func LogResponseContentChoice(ctx context.Context,resp *llms.ContentResponse) {
 
 
 	// type assertion (string)
-	pt_str, ok := promt_tokens_str.(string)
+	pt, ok := promt_tokens_str.(int)
 	if !ok {
   	log.Println("Error: value is not a string")
   	return
 	}
-	ct_str, ok := completion_tokens_str.(string)
-	tt_str, ok := total_tokens_str.(string)
+	ct, ok := completion_tokens_str.(int)
+	tt, ok := total_tokens_str.(int)
 
 	// conversion to int
-	pt,err := strconv.Atoi(pt_str)
-	ct, err := strconv.Atoi(ct_str)
-	tt, err := strconv.Atoi(tt_str)
+	//pt,err := strconv.Atoi(pt_str)
+	//ct, err := strconv.Atoi(ct_str)
+	//tt, err := strconv.Atoi(tt_str)
 
 
 	
 		  // Update the user's usage information.
-		  user.AiSession.Usage = map[string]int{
+		  usage := map[string]int{
 			"Total": tt,
 			"Promt": pt,
 			"Completion": ct,
 		  }
 		
 		  // Save the user back to the database.
-		  db.UsersMap[user.ID] = *user
+		  db.UpdateUserUsage(user.ID,usage)
+
+		  user = db.UsersMap[user.ID]
+		  log.Printf(
+			  "Add new user to database: id: %v, username: %s\n",
+			  user.ID,
+			  user.Username,
+		  )
 
 	
 

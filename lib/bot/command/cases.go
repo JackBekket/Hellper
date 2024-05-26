@@ -21,7 +21,7 @@ const UserKey contextKey = "user"
 //  DialogStatus 2 -> 3
 func (c *Commander) InputYourAPIKey(updateMessage *tgbotapi.Message) {
 	chatID := updateMessage.From.ID
-	user := c.usersDb[chatID]
+	user := db.UsersMap[chatID]
 
 
 	msg := tgbotapi.NewMessage(
@@ -31,14 +31,14 @@ func (c *Commander) InputYourAPIKey(updateMessage *tgbotapi.Message) {
 	c.bot.Send(msg)
 
 	user.DialogStatus = 3
-	c.usersDb[chatID] = user
+	db.UsersMap[chatID] = user
 }
 
 
 // DialogStatus 0 - > 1
 func (c *Commander) ChooseNetwork(updateMessage *tgbotapi.Message) {
 	chatID := updateMessage.From.ID
-	user := c.usersDb[chatID]
+	user := db.UsersMap[chatID]
 	c.HelpCommandMessage(updateMessage)
 	// render menu
 	msg := tgbotapi.NewMessage(user.ID, msgTemplates["ch_network"])
@@ -51,7 +51,7 @@ func (c *Commander) ChooseNetwork(updateMessage *tgbotapi.Message) {
 	c.bot.Send(msg)
 
 	user.DialogStatus = 1	  // this is output dialog status
-	c.usersDb[chatID] = user // commit changes
+	db.UsersMap[chatID] = user // commit changes
 
 }
 
@@ -60,21 +60,21 @@ func (c *Commander) ChooseNetwork(updateMessage *tgbotapi.Message) {
 func (c *Commander) HandleNetworkChoose(updateMessage *tgbotapi.Message) {
 	chatID := updateMessage.From.ID
 	network := updateMessage.Text
-	user := c.usersDb[chatID]
+	user := db.UsersMap[chatID]
 	switch network {
 	case "openai":
 
 		user.Network = network
 		user.AiSession.AI_Type = 0
 		user.DialogStatus = 2
-		c.usersDb[chatID] = user
+		db.UsersMap[chatID] = user
 		c.InputYourAPIKey(updateMessage)
 	case "localai":
 
 		user.Network = network
 		user.AiSession.AI_Type = 1
 		user.DialogStatus = 2
-		c.usersDb[chatID] = user
+		db.UsersMap[chatID] = user
 		c.InputYourAPIKey(updateMessage)
 	default:
 		c.WrongNetwork(updateMessage)
@@ -89,7 +89,7 @@ func (c *Commander) HandleNetworkChoose(updateMessage *tgbotapi.Message) {
 func (c *Commander) ChooseModel(updateMessage *tgbotapi.Message) {
 	chatID := updateMessage.From.ID
 	gptKey := updateMessage.Text	// handling previouse message
-	user := c.usersDb[chatID]
+	user := db.UsersMap[chatID]
 	network := user.Network
 
 	// I can't validate key at this stage. The only way to validate key is to send test sequence (see case 3)
@@ -101,12 +101,12 @@ func (c *Commander) ChooseModel(updateMessage *tgbotapi.Message) {
 	case "localai" :
 		c.RenderModelMenuLAI(chatID)
 		user.DialogStatus = 4
-		c.usersDb[chatID] = user
+		db.UsersMap[chatID] = user
 	
 	case "openai" :
 		c.RenderModelMenuOAI(chatID)
 		user.DialogStatus = 4
-		c.usersDb[chatID] = user
+		db.UsersMap[chatID] = user
 
 
 	default :
@@ -119,7 +119,7 @@ func (c *Commander) ChooseModel(updateMessage *tgbotapi.Message) {
 func (c *Commander) HandleModelChoose(updateMessage *tgbotapi.Message) {
 	chatID := updateMessage.From.ID
 	model_name := updateMessage.Text
-	user := c.usersDb[chatID]
+	user := db.UsersMap[chatID]
 	network := user.Network
 
 	switch network {
@@ -131,14 +131,14 @@ func (c *Commander) HandleModelChoose(updateMessage *tgbotapi.Message) {
 			c.RenderLanguage(chatID)
 	
 			user.DialogStatus = 5
-			c.usersDb[chatID] = user
+			db.UsersMap[chatID] = user
 		case "wizard-uncensored-30b":
 			c.attachModel(model_name, chatID)
 			user.AiSession.GptModel = model_name
 			c.RenderLanguage(chatID)
 	
 			user.DialogStatus = 5
-			c.usersDb[chatID] = user
+			db.UsersMap[chatID] = user
 		default:
 			c.WrongModel(updateMessage)
 		}
@@ -152,14 +152,14 @@ func (c *Commander) HandleModelChoose(updateMessage *tgbotapi.Message) {
 			c.RenderLanguage(chatID)
 	
 			user.DialogStatus = 5
-			c.usersDb[chatID] = user
+			db.UsersMap[chatID] = user
 		case "gpt-4":
 			c.attachModel(model_name, chatID)
 			user.AiSession.GptModel = model_name
 			c.RenderLanguage(chatID)
 	
 			user.DialogStatus = 5
-			c.usersDb[chatID] = user
+			db.UsersMap[chatID] = user
 		default:
 			c.WrongModel(updateMessage)
 		}
@@ -179,7 +179,7 @@ func (c *Commander) ModelGPT3DOT5(updateMessage *tgbotapi.Message) {
 	log.Printf("Model selected: %s\n", updateMessage.Text)
 
 	chatID := updateMessage.From.ID
-	user := c.usersDb[chatID]
+	user := db.UsersMap[chatID]
 
 	//modelName := openai.GPT3Dot5Turbo // gpt-3.5
 	modelName := "gpt-3.5"
@@ -197,7 +197,7 @@ func (c *Commander) ModelGPT3DOT5(updateMessage *tgbotapi.Message) {
 	c.bot.Send(msg)
 
 	user.DialogStatus = 3
-	c.usersDb[chatID] = user
+	db.UsersMap[chatID] = user
 }
 
 
@@ -223,26 +223,26 @@ func (c *Commander) attachModel(model_name string, chatID int64) {
 	// TODO: Write down user choise
 	log.Printf("Model selected: %s\n", model_name)
 
-	user := c.usersDb[chatID]
+	user := db.UsersMap[chatID]
 
 	modelName := model_name
 	user.AiSession.GptModel = modelName
 	msg := tgbotapi.NewMessage(user.ID, "your session model: "+modelName)
 	c.bot.Send(msg)
-	c.usersDb[chatID] = user
+	db.UsersMap[chatID] = user
 }
 
 // internal for attach api key to a user
 func (c *Commander) AttachKey(gpt_key string, chatID int64) {
 	log.Println("Key promt: ", gpt_key)
-	user := c.usersDb[chatID]
+	user := db.UsersMap[chatID]
 	user.AiSession.GptKey = gpt_key // store key in memory
-	c.usersDb[chatID] = user
+	db.UsersMap[chatID] = user
 }
 
 // Dangerouse! NOTE -- probably work only internal
 func (c *Commander) ChangeDialogStatus(chatID int64, ds int8) {
-	user := c.usersDb[chatID]
+	user := db.UsersMap[chatID]
 	old_status := user.DialogStatus
 	log.Println("dialog status changed, old status is ", old_status)
 	log.Println("new status is ", ds)
@@ -272,25 +272,25 @@ func (c *Commander) RenderModelMenuLAI(chatID int64) {
 // update Dialog_Status = 4
 func (c *Commander) WrongModel(updateMessage *tgbotapi.Message) {
 	chatID := updateMessage.From.ID
-	user := c.usersDb[chatID]
+	user := db.UsersMap[chatID]
 
 	msg := tgbotapi.NewMessage(user.ID, "type wizard-uncensored-13b")
 	c.bot.Send(msg)
 
 	user.DialogStatus = 4
-	c.usersDb[chatID] = user
+	db.UsersMap[chatID] = user
 }
 
 // update Dialog_Status = 0
 func (c *Commander) WrongNetwork(updateMessage *tgbotapi.Message) {
 	chatID := updateMessage.From.ID
-	user := c.usersDb[chatID]
+	user := db.UsersMap[chatID]
 
 	msg := tgbotapi.NewMessage(user.ID, "type openai or localai")
 	c.bot.Send(msg)
 
 	user.DialogStatus = 0
-	c.usersDb[chatID] = user
+	db.UsersMap[chatID] = user
 }
 
 
@@ -298,7 +298,7 @@ func (c *Commander) WrongNetwork(updateMessage *tgbotapi.Message) {
 func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.Message, ai_endpoint string) {
 	chatID := updateMessage.From.ID
 	language := updateMessage.Text
-	user := c.usersDb[chatID]
+	user := db.UsersMap[chatID]
 	log.Println("check gpt key exist:", user.AiSession.GptKey)
 
 	network := user.Network
@@ -329,7 +329,7 @@ func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.Message, 
 // update Dialog_Status 6 -> 6 (loop), 
 func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint string) {
 	chatID := updateMessage.From.ID
-	user := c.usersDb[chatID]
+	user := db.UsersMap[chatID]
 
 	
 

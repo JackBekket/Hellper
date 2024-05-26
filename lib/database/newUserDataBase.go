@@ -33,3 +33,15 @@ type ChatSession struct {
 }
 
 var UsersMap = make(map[int64]User)
+
+func AddUser(user User) {
+	UsersMap[user.ID] = user
+}
+  
+func UpdateUserUsage(id int64, usage map[string]int) {
+	user, exists := UsersMap[id]
+	if exists {
+	  user.AiSession.Usage = usage
+	  UsersMap[id] = user
+	}
+  }

@@ -2,8 +2,10 @@ package command
 
 import (
 	"fmt"
+	"log"
 	"os"
 
+	db "github.com/JackBekket/hellper/lib/database"
 	"github.com/JackBekket/hellper/lib/embeddings"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
@@ -49,7 +51,7 @@ func (c *Commander) AddNewUserToMap(updateMessage *tgbotapi.Message) {
 
 func (c *Commander) HelpCommandMessage(updateMessage *tgbotapi.Message)  {
 	chatID := updateMessage.From.ID
-	user := c.usersDb[chatID]
+	user := db.UsersMap[chatID]
 	msg := tgbotapi.NewMessage(user.ID, msgTemplates["help_command"])
 	c.bot.Send(msg)
 }
@@ -60,7 +62,7 @@ func (c *Commander) SearchDocuments(chatID int64, promt string, maxResults int) 
 
 	conn_pg_link := os.Getenv("PG_LINK")
 	db_conn := conn_pg_link
-	user := c.usersDb[chatID]
+	user := db.UsersMap[chatID]
 	api_token := user.AiSession.GptKey
 	store,err := embeddings.GetVectorStore(api_token,db_conn)
 	if err != nil {
@@ -95,7 +97,7 @@ func (c *Commander) SearchDocuments(chatID int64, promt string, maxResults int) 
 
 // Retrival-Augmented Generation
 func (c *Commander) RAG(chatID int64, promt string, maxResults int) {
-	user := c.usersDb[chatID]
+	user := db.UsersMap[chatID]
 	_ = godotenv.Load()
 
 	conn_pg_link := os.Getenv("PG_LINK")
@@ -120,7 +122,8 @@ func (c *Commander) RAG(chatID int64, promt string, maxResults int) {
 
 //
 func (c *Commander) GetUsage(chatID int64)  {
-	user := c.usersDb[chatID]
+	user := db.UsersMap[chatID]
+	log.Println("user", user)
 	promt_tokens := user.AiSession.Usage["Promt"]
 	completion_tokens := user.AiSession.Usage["Completion"]
 	total_tokens := user.AiSession.Usage["Total"]
