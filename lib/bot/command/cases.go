@@ -139,6 +139,27 @@ func (c *Commander) HandleModelChoose(updateMessage *tgbotapi.Message) {
 	
 			user.DialogStatus = 5
 			db.UsersMap[chatID] = user
+		case "aya-8B":
+			c.attachModel(model_name, chatID)
+			user.AiSession.GptModel = model_name
+			c.RenderLanguage(chatID)
+	
+			user.DialogStatus = 5
+			db.UsersMap[chatID] = user
+		case  "qwen14b":
+			c.attachModel(model_name, chatID)
+			user.AiSession.GptModel = model_name
+			c.RenderLanguage(chatID)
+	
+			user.DialogStatus = 5
+			db.UsersMap[chatID] = user
+		case "code-13b":
+			c.attachModel(model_name, chatID)
+			user.AiSession.GptModel = model_name
+			c.RenderLanguage(chatID)
+	
+			user.DialogStatus = 5
+			db.UsersMap[chatID] = user
 		default:
 			c.WrongModel(updateMessage)
 		}
@@ -263,9 +284,16 @@ func (c *Commander) RenderModelMenuLAI(chatID int64) {
 	msg := tgbotapi.NewMessage(chatID, msgTemplates["case1"])
 	msg.ReplyMarkup = tgbotapi.NewOneTimeReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("wizard-uncensored-13b")),
-	//	tgbotapi.NewKeyboardButton("wizard-uncensored-30b")),
+			tgbotapi.NewKeyboardButton("wizard-uncensored-13b"),
+		tgbotapi.NewKeyboardButton("code-13b")),
+		
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton("qwen14b"),
+			tgbotapi.NewKeyboardButton("aya-8B"),
+		),
+	
 	)
+
 	c.bot.Send(msg)
 }
 
