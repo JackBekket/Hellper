@@ -70,6 +70,7 @@ func StartDialogSequence(bot *tgbotapi.BotAPI, chatID int64, promt string, ctx c
 		}
 
 		user.AiSession.DialogThread = *post_session
+		db.UsersMap[chatID] = user
 	}
 
 }
