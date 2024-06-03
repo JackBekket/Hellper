@@ -173,9 +173,9 @@ func LogResponseContentChoice(ctx context.Context,resp *llms.ContentResponse) {
 		  }
 		
 		  // Save the user back to the database.
-		  db.UpdateUserUsage(user.ID,usage)
+		  db.UpdateSessionUsage(user.ID,usage)
 
-		  user = db.UsersMap[user.ID]
+		 // user = db.UsersMap[user.ID]
 
 		  /*
 		  log.Printf(

@@ -59,6 +59,9 @@ func SetupSequenceWithKey(
 			bot.Send(msg)
 			user.DialogStatus = 6
 			user.AiSession.DialogThread = *probe
+			usage := db.GetSessionUsage(user.ID)
+			user.AiSession.Usage = usage
+			//log.Println(user.AiSession.Usage)
 			db.UsersMap[chatID] = user
 		}
 	case "Russian":
@@ -70,6 +73,9 @@ func SetupSequenceWithKey(
 			bot.Send(msg)
 			user.AiSession.DialogThread = *probe
 			user.DialogStatus = 6
+			usage := db.GetSessionUsage(user.ID)
+			user.AiSession.Usage = usage
+			log.Println(user.AiSession.Usage)
 			db.UsersMap[chatID] = user
 		}
 	default:
@@ -81,6 +87,9 @@ func SetupSequenceWithKey(
 			bot.Send(msg)
 			user.AiSession.DialogThread = *probe
 			user.DialogStatus = 6
+			usage := db.GetSessionUsage(user.ID)
+			user.AiSession.Usage = usage
+			//log.Println(user.AiSession.Usage)
 			db.UsersMap[chatID] = user
 		}
 	}

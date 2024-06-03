@@ -53,7 +53,9 @@ func StartDialogSequence(bot *tgbotapi.BotAPI, chatID int64, promt string, ctx c
 		bot.Send(msg)
 
 		user.DialogStatus = 6
-		db.UsersMap[chatID] = user
+		usage := db.GetSessionUsage(user.ID)
+		user.AiSession.Usage = usage
+		//db.UsersMap[chatID] = user
 
 		
 		//log.Println("check if it's stored in messages, printing messages:")
