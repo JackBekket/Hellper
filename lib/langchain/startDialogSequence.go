@@ -27,6 +27,7 @@ func errorMessage(err error, bot *tgbotapi.BotAPI, user db.User) {
 	// userDatabase[ID] = updateDb
 }
 
+
 func StartDialogSequence(bot *tgbotapi.BotAPI, chatID int64, promt string, ctx context.Context, ai_endpoint string) {
 	mu.Lock()
 	defer mu.Unlock()
@@ -42,7 +43,7 @@ func StartDialogSequence(bot *tgbotapi.BotAPI, chatID int64, promt string, ctx c
 
 	thread := user.AiSession.DialogThread
 
-	resp,post_session, err := ContinueChatWithContextNoLimit(&thread,promt)
+	resp,post_session, err := ContinueChatWithContextNoLimit(ctx,&thread,promt)
 	if err != nil {
 		errorMessage(err,bot,user)
 	} else {
@@ -53,23 +54,30 @@ func StartDialogSequence(bot *tgbotapi.BotAPI, chatID int64, promt string, ctx c
 		bot.Send(msg)
 
 		user.DialogStatus = 6
-		db.UsersMap[chatID] = user
+		usage := db.GetSessionUsage(user.ID)
+		user.AiSession.Usage = usage
+		//db.UsersMap[chatID] = user
 
-		log.Println("check if it's stored in messages, printing messages:")
+		
+		//log.Println("check if it's stored in messages, printing messages:")
 		history, err := thread.ConversationBuffer.ChatHistory.Messages(ctx)
 		if err != nil {
 			log.Println(err)
 		}
+		
 		//log.Println(history)
 		total_turns := len(history)
 		log.Println("total number of turns: ", total_turns)
 		// Iterate over each message and print
+		/*
 		log.Println("Printing messages:")
 		for _, msg := range history {
 			log.Println(msg.GetContent())
 		}
+		*/
 
 		user.AiSession.DialogThread = *post_session
+		db.UsersMap[chatID] = user
 	}
 
 }

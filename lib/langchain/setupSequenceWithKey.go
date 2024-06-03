@@ -33,21 +33,6 @@ func SetupSequenceWithKey(
 	//log.Println("user network from session: ", u_network)
 	log.Println("user model from session: ", user.AiSession.GptModel)
 
-	//tgbot = bot
-
-	//ctx = context.WithValue(ctx, "user", user)
-
-	/*
-	// Initializing empty dialog thread
-	thread, err := InitializeNewChatWithContextNoLimit(gptKey,user.AiSession.GptModel,ai_endpoint)
-	if err != nil {
-		log.Println(err)
-	}
-	user.AiSession.DialogThread = *thread
-	db.UsersMap[chatID] = user // we need to store empty buffer *before* starting dialog
-	*/
-	
-
 	switch language {
 	case "English":
 		response,probe, err := tryLanguage(user, "", 1, ctx,ai_endpoint)
@@ -59,6 +44,9 @@ func SetupSequenceWithKey(
 			bot.Send(msg)
 			user.DialogStatus = 6
 			user.AiSession.DialogThread = *probe
+			usage := db.GetSessionUsage(user.ID)
+			user.AiSession.Usage = usage
+			//log.Println(user.AiSession.Usage)
 			db.UsersMap[chatID] = user
 		}
 	case "Russian":
@@ -70,6 +58,9 @@ func SetupSequenceWithKey(
 			bot.Send(msg)
 			user.AiSession.DialogThread = *probe
 			user.DialogStatus = 6
+			usage := db.GetSessionUsage(user.ID)
+			user.AiSession.Usage = usage
+			log.Println(user.AiSession.Usage)
 			db.UsersMap[chatID] = user
 		}
 	default:
@@ -81,6 +72,9 @@ func SetupSequenceWithKey(
 			bot.Send(msg)
 			user.AiSession.DialogThread = *probe
 			user.DialogStatus = 6
+			usage := db.GetSessionUsage(user.ID)
+			user.AiSession.Usage = usage
+			//log.Println(user.AiSession.Usage)
 			db.UsersMap[chatID] = user
 		}
 	}
@@ -93,6 +87,7 @@ func tryLanguage(user db.User, language string, languageCode int, ctx context.Co
 	var languagePromt string
 	//var languageResponse string
 	model := user.AiSession.GptModel
+
 
 	switch languageCode {
 	case 1:
@@ -111,7 +106,7 @@ func tryLanguage(user db.User, language string, languageCode int, ctx context.Co
 	//chatID := user.ID
 
 	// Initializing empty dialog thread
-	result,thread, err := StartNewChat(gptKey,model,ai_endpoint,languagePromt)
+	result,thread, err := StartNewChat(ctx,gptKey,model,ai_endpoint,languagePromt)
 		if err != nil {
 			log.Println(err)
 			return "",nil,err

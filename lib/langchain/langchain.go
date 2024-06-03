@@ -31,7 +31,7 @@ import (
 	(if you run local-ai in DEBUG mode)
 */
 
-// Initialize New Dialog thread with User with no limitation for token usage (may fail, use with limit)  initial_promt is first user message, (workaround for bug with LAI context)
+// Initialize New Dialog thread with User with no limitation for token usage (may fail, use with limit)
 func InitializeNewChatWithContextNoLimit(api_token string, model_name string, base_url string, user_initial_promt string) (*db.ChatSession, error) {
 	//ctx := context.Background()
 
@@ -49,6 +49,7 @@ func InitializeNewChatWithContextNoLimit(api_token string, model_name string, ba
 
 		memoryBuffer := memory.NewConversationBuffer()
 		conversation := chains.NewConversation(llm, memoryBuffer) // create new conversation, which means langchain is modify initial promt in this moment. It is important, that your own template at local-ai side is also modifiyng template, so there might be a template collision.
+
 
 		return &db.ChatSession{
 			ConversationBuffer: *memoryBuffer,
@@ -79,20 +80,21 @@ func InitializeNewChatWithContextNoLimit(api_token string, model_name string, ba
 
 }
 
-func StartNewChat(api_token string, model_name string, base_url string, user_initial_promt string) (string, *db.ChatSession, error) {
+// Main function to start new conversation
+func StartNewChat(ctx context.Context,api_token string, model_name string, base_url string, user_initial_promt string) (string, *db.ChatSession, error) {
 	session, err1 := InitializeNewChatWithContextNoLimit(api_token, model_name, base_url, user_initial_promt)
 	if err1 != nil {
 		return "", nil, err1
 	}
-	result, post_session, err := RunChain(session, user_initial_promt)
+	result, post_session, err := RunChain(ctx,session, user_initial_promt)
 	if err != nil {
 		return "", nil, err
 	}
 	return result, post_session, nil
 }
 
-func RunChain(session *db.ChatSession, prompt string) (string, *db.ChatSession, error) {
-	ctx := context.Background()
+func RunChain(ctx context.Context,session *db.ChatSession, prompt string) (string, *db.ChatSession, error) {
+	//ctx := context.Background()
 	result, err := chains.Run(ctx, session.DialogThread, prompt)
 	if err != nil {
 		return "", nil, err
@@ -102,8 +104,8 @@ func RunChain(session *db.ChatSession, prompt string) (string, *db.ChatSession, 
 }
 
 // Continue Dialog with memory included, so user can chat with remembering context of previouse messages
-func ContinueChatWithContextNoLimit(session *db.ChatSession, prompt string) (string, *db.ChatSession, error) {
-	ctx := context.Background()
+func ContinueChatWithContextNoLimit(ctx context.Context,session *db.ChatSession, prompt string) (string, *db.ChatSession, error) {
+	//ctx := context.Background()
 	result, err := chains.Run(ctx, session.DialogThread, prompt)
 	if err != nil {
 		return "", nil, err
@@ -118,13 +120,14 @@ func ContinueChatWithContextNoLimit(session *db.ChatSession, prompt string) (str
 	    Instruction: {{.Input}}
 	    Response:
 */
-func GenerateContentInstruction(promt string, model_name string, api_token string, network string) (string, error) {
+func GenerateContentInstruction(base_url string,promt string, model_name string, api_token string, network string) (string, error) {
 	ctx := context.Background()
 	var result string
 	if network == "local" {
 		llm, err := openai.New(
 			openai.WithToken(api_token),
-			openai.WithBaseURL("http://localhost:8080"),
+			//openai.WithBaseURL("http://localhost:8080"),
+			openai.WithBaseURL(base_url),
 			openai.WithModel(model_name),
 			openai.WithAPIVersion("v1"),
 		)

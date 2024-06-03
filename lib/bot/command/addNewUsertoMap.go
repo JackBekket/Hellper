@@ -10,19 +10,22 @@ import (
 // Adds a new user to the database and assigns "Dialog_status" = 0.
 func (c *Commander) AddNewUserToMap(updateMessage *tgbotapi.Message) {
 	chatID := updateMessage.From.ID
-	c.usersDb[chatID] = database.User{
+	user := database.User{
 		ID:           chatID,
 		Username:     updateMessage.From.UserName,
 		DialogStatus: 0,
 		Admin:        false,
 	}
 
-	user := c.usersDb[chatID]
+	database.AddUser(user)
+
+	//user := c.usersDb[chatID]
 	log.Printf(
 		"Add new user to database: id: %v, username: %s\n",
 		user.ID,
 		user.Username,
 	)
+
 
 	msg := tgbotapi.NewMessage(user.ID, msgTemplates["hello"])
 	msg.ReplyMarkup = tgbotapi.NewOneTimeReplyKeyboard(

@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"log"
-	"strconv"
 
 	db "github.com/JackBekket/hellper/lib/database"
 	"github.com/tmc/langchaingo/llms"
@@ -94,19 +93,8 @@ func (h *ChainCallbackHandler) HandleText(ctx context.Context, text string) {
 // Implement other methods...
 
 func (h *ChainCallbackHandler) HandleLLMGenerateContentEnd(ctx context.Context, res *llms.ContentResponse) {
-	/*
-	  // Extract the headers you're interested in
-	  tokensUsed := res.Header.Get("Openai-Usage-Tokens")
-	  promptTokens := res.Header.Get("Openai-Usage-Prompt-Tokens")
-	  completionTokens := res.Header.Get("Openai-Usage-Completion-Tokens")
 
-	  fmt.Println("Tokens Used:", tokensUsed)
-	  fmt.Println("Prompt Tokens:", promptTokens)
-	  fmt.Println("Completion Tokens:", completionTokens)
-
-	*/
-	LogResponseContentChoice(ctx,res)
-	
+	LogResponseContentChoice(ctx,res)	
 }
 
 func LogResponseContentChoice(ctx context.Context,resp *llms.ContentResponse) {
@@ -114,11 +102,14 @@ func LogResponseContentChoice(ctx context.Context,resp *llms.ContentResponse) {
 	choice := resp.Choices[0]
 	log.Println("Content: ", choice.Content)
 	log.Println("Stop Reason: ", choice.StopReason)
+
+	log.Println("Context: ", ctx)
 	
 	//Get user from context
-	user, ok := ctx.Value("user").(*db.User)
+	user, ok := ctx.Value("user").(db.User)
 	if !ok {
 	  log.Println("No user in context")
+	  //log.Println
 	  return
 	}
 	//chatID := user.ID
@@ -147,33 +138,26 @@ func LogResponseContentChoice(ctx context.Context,resp *llms.ContentResponse) {
 	total_tokens_str := choice.GenerationInfo["TotalTokens"]
 
 
-	// type assertion (string)
-	pt_str, ok := promt_tokens_str.(string)
+	// type assertion (string --> int)
+	pt, ok := promt_tokens_str.(int)
 	if !ok {
   	log.Println("Error: value is not a string")
   	return
 	}
-	ct_str, ok := completion_tokens_str.(string)
-	tt_str, ok := total_tokens_str.(string)
-
-	// conversion to int
-	pt,err := strconv.Atoi(pt_str)
-	ct, err := strconv.Atoi(ct_str)
-	tt, err := strconv.Atoi(tt_str)
-
-
+	ct, ok := completion_tokens_str.(int)
+	tt, ok := total_tokens_str.(int)
 	
 		  // Update the user's usage information.
-		  user.AiSession.Usage = map[string]int{
+		  usage := map[string]int{
 			"Total": tt,
 			"Promt": pt,
 			"Completion": ct,
 		  }
 		
-		  // Save the user back to the database.
-		  db.UsersMap[user.ID] = *user
+		  // Save the user usage back to the database -- it's will not update user info, but stored it in separate structure to avoide race condition
+		  db.UpdateSessionUsage(user.ID,usage)
 
-	
+
 
 	// Note: Since FuncCall is a pointer to a schema.FunctionCall, ensure you check for nil to avoid panics.
 	if choice.FuncCall != nil {

@@ -13,7 +13,7 @@ func (c *Commander) AddAdminToMap(
 
 ) {
 	chatID := updateMessage.From.ID
-	c.usersDb[chatID] = db.User{
+	db.UsersMap[chatID] = db.User{
 		ID:           chatID,
 		Username:     updateMessage.From.UserName,
 		DialogStatus: 2,
@@ -23,7 +23,7 @@ func (c *Commander) AddAdminToMap(
 		},
 	}
 
-	admin := c.usersDb[chatID]
+	admin := db.UsersMap[chatID]
 	log.Printf("%s authorized\n", admin.Username)
 
 	msg := tgbotapi.NewMessage(admin.ID, "authorized: "+admin.Username)
