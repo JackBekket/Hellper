@@ -364,7 +364,7 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint 
 			promt := updateMessage.CommandArguments()
 			model_name := user.AiSession.GptModel
 			api_token := user.AiSession.GptKey
-			langchain.GenerateContentInstruction(promt,model_name,api_token,user.Network)
+			langchain.GenerateContentInstruction(user.AiSession.Base_url,promt,model_name,api_token,user.Network)
 		case "usage" :
 			c.GetUsage(chatID)
 	default:

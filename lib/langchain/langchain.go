@@ -119,13 +119,14 @@ func ContinueChatWithContextNoLimit(ctx context.Context,session *db.ChatSession,
 	    Instruction: {{.Input}}
 	    Response:
 */
-func GenerateContentInstruction(promt string, model_name string, api_token string, network string) (string, error) {
+func GenerateContentInstruction(base_url string,promt string, model_name string, api_token string, network string) (string, error) {
 	ctx := context.Background()
 	var result string
 	if network == "local" {
 		llm, err := openai.New(
 			openai.WithToken(api_token),
-			openai.WithBaseURL("http://localhost:8080"),
+			//openai.WithBaseURL("http://localhost:8080"),
+			openai.WithBaseURL(base_url),
 			openai.WithModel(model_name),
 			openai.WithAPIVersion("v1"),
 		)
