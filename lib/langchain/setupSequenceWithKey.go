@@ -33,21 +33,6 @@ func SetupSequenceWithKey(
 	//log.Println("user network from session: ", u_network)
 	log.Println("user model from session: ", user.AiSession.GptModel)
 
-	//tgbot = bot
-
-	//ctx = context.WithValue(ctx, "user", user)
-
-	/*
-	// Initializing empty dialog thread
-	thread, err := InitializeNewChatWithContextNoLimit(gptKey,user.AiSession.GptModel,ai_endpoint)
-	if err != nil {
-		log.Println(err)
-	}
-	user.AiSession.DialogThread = *thread
-	db.UsersMap[chatID] = user // we need to store empty buffer *before* starting dialog
-	*/
-	
-
 	switch language {
 	case "English":
 		response,probe, err := tryLanguage(user, "", 1, ctx,ai_endpoint)

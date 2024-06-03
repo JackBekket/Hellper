@@ -31,7 +31,7 @@ import (
 	(if you run local-ai in DEBUG mode)
 */
 
-// Initialize New Dialog thread with User with no limitation for token usage (may fail, use with limit)  initial_promt is first user message, (workaround for bug with LAI context)
+// Initialize New Dialog thread with User with no limitation for token usage (may fail, use with limit)
 func InitializeNewChatWithContextNoLimit(api_token string, model_name string, base_url string, user_initial_promt string) (*db.ChatSession, error) {
 	//ctx := context.Background()
 
@@ -80,6 +80,7 @@ func InitializeNewChatWithContextNoLimit(api_token string, model_name string, ba
 
 }
 
+// Main function to start new conversation
 func StartNewChat(ctx context.Context,api_token string, model_name string, base_url string, user_initial_promt string) (string, *db.ChatSession, error) {
 	session, err1 := InitializeNewChatWithContextNoLimit(api_token, model_name, base_url, user_initial_promt)
 	if err1 != nil {

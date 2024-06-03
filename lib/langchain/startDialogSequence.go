@@ -27,6 +27,7 @@ func errorMessage(err error, bot *tgbotapi.BotAPI, user db.User) {
 	// userDatabase[ID] = updateDb
 }
 
+
 func StartDialogSequence(bot *tgbotapi.BotAPI, chatID int64, promt string, ctx context.Context, ai_endpoint string) {
 	mu.Lock()
 	defer mu.Unlock()
