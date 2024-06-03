@@ -138,7 +138,7 @@ func LogResponseContentChoice(ctx context.Context,resp *llms.ContentResponse) {
 	total_tokens_str := choice.GenerationInfo["TotalTokens"]
 
 
-	// type assertion (string)
+	// type assertion (string --> int)
 	pt, ok := promt_tokens_str.(int)
 	if !ok {
   	log.Println("Error: value is not a string")
