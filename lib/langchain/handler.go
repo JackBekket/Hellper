@@ -176,13 +176,23 @@ func LogResponseContentChoice(ctx context.Context,resp *llms.ContentResponse) {
 		  db.UpdateUserUsage(user.ID,usage)
 
 		  user = db.UsersMap[user.ID]
+
+		  /*
 		  log.Printf(
-			  "Add new user to database: id: %v, username: %s\n",
+			  "Print log user to database: id: %v, username: %s\n",
 			  user.ID,
 			  user.Username,
+			  user.AiSession.Usage,
 		  )
+		  */
 
-	
+		  /*
+		  log.Printf(
+			"Print log user to database: username: %v, usage: %s\n",
+			user.Username,
+			user.AiSession.Usage,
+		) 
+		*/
 
 	// Note: Since FuncCall is a pointer to a schema.FunctionCall, ensure you check for nil to avoid panics.
 	if choice.FuncCall != nil {

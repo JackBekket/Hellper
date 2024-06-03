@@ -55,19 +55,23 @@ func StartDialogSequence(bot *tgbotapi.BotAPI, chatID int64, promt string, ctx c
 		user.DialogStatus = 6
 		db.UsersMap[chatID] = user
 
-		log.Println("check if it's stored in messages, printing messages:")
+		
+		//log.Println("check if it's stored in messages, printing messages:")
 		history, err := thread.ConversationBuffer.ChatHistory.Messages(ctx)
 		if err != nil {
 			log.Println(err)
 		}
+		
 		//log.Println(history)
 		total_turns := len(history)
 		log.Println("total number of turns: ", total_turns)
 		// Iterate over each message and print
+		/*
 		log.Println("Printing messages:")
 		for _, msg := range history {
 			log.Println(msg.GetContent())
 		}
+		*/
 
 		user.AiSession.DialogThread = *post_session
 		db.UsersMap[chatID] = user
