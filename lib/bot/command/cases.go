@@ -191,37 +191,6 @@ func (c *Commander) HandleModelChoose(updateMessage *tgbotapi.Message) {
 
 
 
-// Depracated?
-// Message: "Choose language. If you have different languages then listed, then just send 'Hello' at your desired language".
-//
-//	update Dialog_Status = 3
-func (c *Commander) ModelGPT3DOT5(updateMessage *tgbotapi.Message) {
-	// TODO: Write down user choise
-	log.Printf("Model selected: %s\n", updateMessage.Text)
-
-	chatID := updateMessage.From.ID
-	user := db.UsersMap[chatID]
-
-	//modelName := openai.GPT3Dot5Turbo // gpt-3.5
-	modelName := "gpt-3.5"
-
-	user.AiSession.GptModel = modelName
-	msg := tgbotapi.NewMessage(user.ID, "your session model: "+modelName)
-	c.bot.Send(msg)
-
-	msg = tgbotapi.NewMessage(user.ID, "Choose a language or send 'Hello' in your desired language.")
-	msg.ReplyMarkup = tgbotapi.NewOneTimeReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("English"),
-			tgbotapi.NewKeyboardButton("Russian")),
-	)
-	c.bot.Send(msg)
-
-	user.DialogStatus = 3
-	db.UsersMap[chatID] = user
-}
-
-
 // render language menu
 func (c *Commander) RenderLanguage(chat_id int64) {
 	chatID := chat_id
@@ -400,8 +369,9 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint 
 			c.GetUsage(chatID)
 	default:
 		promt := updateMessage.Text
+		ctx := context.WithValue(c.ctx, "user", user)
 		//go localai.StartDialogSequence(c.bot, chatID, promt, c.ctx, ai_endpoint)
-		go langchain.StartDialogSequence(c.bot,chatID,promt,c.ctx,ai_endpoint)
+		go langchain.StartDialogSequence(c.bot,chatID,promt,ctx,ai_endpoint)
 	}	
 }
 
