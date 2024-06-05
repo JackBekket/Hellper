@@ -3,6 +3,7 @@ package embeddings
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/llms/openai"
@@ -12,9 +13,13 @@ import (
 
 func Rag(question string, numOfResults int,api_token string,store vectorstores.VectorStore) (result string,err error) {
 
-	// Create an embeddings client using the. Requires environment variable OPENAI_API_KEY to be set.
+	base_url := os.Getenv("AI_BASEURL")
+
+
+	// Create an embeddings client using the. 
 	llm, err := openai.New(
-		openai.WithBaseURL("http://localhost:8080/v1/"),
+		//openai.WithBaseURL("http://localhost:8080/v1/"),
+		openai.WithBaseURL(base_url),
 		openai.WithAPIVersion("v1"),
 		openai.WithToken(api_token),
     	openai.WithModel("wizard-uncensored-13b"),
