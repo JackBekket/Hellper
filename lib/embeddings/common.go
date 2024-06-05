@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/joho/godotenv"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/vectorstores"
@@ -22,7 +21,7 @@ func LoadEnv() {
 func GetVectorStore(base_url string,api_token string, db_link string) (vectorstores.VectorStore, error) {
 
 	
-	_ = godotenv.Load()
+	//_ = godotenv.Load()
 	
 	/*
 	api_token = os.Getenv("OPENAI_API_KEY")	// this is not openai key actually, it's local key for localai
