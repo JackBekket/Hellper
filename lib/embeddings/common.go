@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/joho/godotenv"
 	"github.com/tmc/langchaingo/embeddings"
@@ -20,7 +19,7 @@ func LoadEnv() {
 
 }
 
-func GetVectorStore(api_token string, db_link string) (vectorstores.VectorStore, error) {
+func GetVectorStore(base_url string,api_token string, db_link string) (vectorstores.VectorStore, error) {
 
 	
 	_ = godotenv.Load()
@@ -31,7 +30,7 @@ func GetVectorStore(api_token string, db_link string) (vectorstores.VectorStore,
   	*/
 
 	
-	base_url := os.Getenv("AI_BASEURL")
+	//base_url := os.Getenv("AI_BASEURL")
 
 	/*
 	host := os.Getenv("PG_HOST")

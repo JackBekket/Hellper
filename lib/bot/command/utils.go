@@ -24,10 +24,11 @@ func (c *Commander) SearchDocuments(chatID int64, promt string, maxResults int) 
 	_ = godotenv.Load()
 
 	conn_pg_link := os.Getenv("PG_LINK")
+	base_url := os.Getenv("AI_BASEURL")
 	db_conn := conn_pg_link
 	user := db.UsersMap[chatID]
 	api_token := user.AiSession.GptKey
-	store,err := embeddings.GetVectorStore(api_token,db_conn)
+	store,err := embeddings.GetVectorStore(base_url,api_token,db_conn)
 	if err != nil {
 		//return nil, err
 		msg := tgbotapi.NewMessage(user.ID, "error occured: " + err.Error())
@@ -64,9 +65,10 @@ func (c *Commander) RAG(chatID int64, promt string, maxResults int) {
 	_ = godotenv.Load()
 
 	conn_pg_link := os.Getenv("PG_LINK")
+	base_url := os.Getenv("AI_BASEURL")
 	db_conn := conn_pg_link
 	api_token := user.AiSession.GptKey
-	store,err := embeddings.GetVectorStore(api_token,db_conn)
+	store,err := embeddings.GetVectorStore(base_url,api_token,db_conn)
 	if err != nil {
 		//return nil, err
 		msg := tgbotapi.NewMessage(user.ID, "error occured when getting store: " + err.Error())
