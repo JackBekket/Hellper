@@ -14,7 +14,7 @@ COPY . .
 #RUN go build -o /out/bot .
 RUN go build -o main .
 
-FROM alpine:latest 
+FROM debian:bookworm
 
 WORKDIR /app
 
