@@ -3,7 +3,6 @@ package embeddings
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/llms/openai"
@@ -11,10 +10,12 @@ import (
 	"github.com/tmc/langchaingo/vectorstores"
 )
 
-func Rag(question string, numOfResults int,api_token string,store vectorstores.VectorStore) (result string,err error) {
 
-	base_url := os.Getenv("AI_BASEURL")
 
+func Rag(ai_url string,api_token string,question string, numOfResults int,store vectorstores.VectorStore) (result string,err error) {
+
+	//base_url := os.Getenv("AI_BASEURL")
+	base_url := ai_url
 
 	// Create an embeddings client using the. 
 	llm, err := openai.New(

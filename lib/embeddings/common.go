@@ -18,9 +18,13 @@ func LoadEnv() {
 
 }
 
-func GetVectorStore(base_url string,api_token string, db_link string) (vectorstores.VectorStore, error) {
 
-	
+// Get vector store from db. ai_url is AI url (localhost or openai or docker), api_token is AI token, db_link is database link
+func GetVectorStore(ai_url string,api_token string, db_link string) (vectorstores.VectorStore, error) {
+
+	base_url := ai_url
+
+
 	//_ = godotenv.Load()
 	
 	/*
