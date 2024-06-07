@@ -1,4 +1,4 @@
-FROM golang:1.22 AS build_base
+FROM golang:1.22-bookworm AS build_base
 
 # Set the Current Working Directory inside the container
 WORKDIR /app
