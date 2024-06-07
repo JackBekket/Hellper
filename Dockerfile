@@ -12,6 +12,7 @@ COPY . .
 
 
 #RUN go build -o /out/bot .
+RUN apt update && apt install ca-certificates
 RUN go build -o main .
 
 FROM debian:bookworm
