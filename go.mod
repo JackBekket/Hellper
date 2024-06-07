@@ -6,7 +6,7 @@ require (
 	github.com/StarkBotsIndustries/telegraph v1.0.0
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
 	github.com/joho/godotenv v1.5.1
-	github.com/tmc/langchaingo v0.1.10
+	github.com/tmc/langchaingo v0.1.11-0.20240523170143-078e88b77de4
 )
 
 require github.com/jackc/puddle/v2 v2.2.1 // indirect
