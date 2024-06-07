@@ -10,16 +10,15 @@ RUN go mod download
 COPY . .
 
 
-
+FROM debian:bookworm
 #RUN go build -o /out/bot .
-RUN apt update && apt install ca-certificates
+RUN apt update && apt install -y ca-certificates
 RUN go build -o main .
 
-FROM debian:bookworm
 
 WORKDIR /app
 
-RUN apk add ca-certificates
+#RUN apk add ca-certificates
 #COPY --from=build_base /out/bot ./bot
 COPY --from=build_base /app/main /app/main
 COPY --from=build_base /app/.env /app/.env
