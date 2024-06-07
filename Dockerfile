@@ -10,7 +10,7 @@ RUN go mod download
 COPY . .
 
 
-FROM debian:bookworm
+FROM golang:1.22-bookworm
 #RUN go build -o /out/bot .
 RUN apt update && apt install -y ca-certificates
 RUN go build -o main .
