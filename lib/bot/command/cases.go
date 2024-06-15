@@ -139,13 +139,6 @@ func (c *Commander) HandleModelChoose(updateMessage *tgbotapi.Message) {
 	
 			user.DialogStatus = 5
 			db.UsersMap[chatID] = user
-		case "aya-8B":
-			c.attachModel(model_name, chatID)
-			user.AiSession.GptModel = model_name
-			c.RenderLanguage(chatID)
-	
-			user.DialogStatus = 5
-			db.UsersMap[chatID] = user
 		case  "qwen14b":
 			c.attachModel(model_name, chatID)
 			user.AiSession.GptModel = model_name
@@ -258,7 +251,6 @@ func (c *Commander) RenderModelMenuLAI(chatID int64) {
 		
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("qwen14b"),
-			tgbotapi.NewKeyboardButton("aya-8B"),
 		),
 	
 	)
