@@ -1,10 +1,13 @@
 name: qwen14b
-context_size: 32768
+context_size: 22768
 f16: false # true to GPU acceleration
 cuda: true # true to GPU acceleration
-gpu_layers: 10 # this model have max 40 layers, 15-20 is reccomended for half-load at NVIDIA 4060 TiTan (more layers -- more VRAM required), (i guess 0 is no GPU)
+gpu_layers: 5 # 0 is CPU only
+
 parameters:
   model: qwen1_5-14b-chat-q5_0.gguf
+stopwords:
+- "HUMAN:"
 template:
 
   chat: &template |

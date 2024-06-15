@@ -5,6 +5,8 @@ cuda: true # true to GPU acceleration
 gpu_layers: 10 # this model have max 40 layers, 15-20 is reccomended for half-load at NVIDIA 4060 TiTan (more layers -- more VRAM required), (i guess 0 is no GPU)
 parameters:
   model: aya-23-8B-Q5_K_S.gguf
+stopwords:
+- "<|END_OF_TURN_TOKEN|>"
 template:
 
   chat: &template |
