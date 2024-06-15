@@ -6,6 +6,7 @@ gpu_layers: 10 # this model have max 40 layers, 15-20 is reccomended for half-lo
 parameters:
   model: aya-23-8B-Q5_K_S.gguf
 stopwords:
+- "HUMAN"
 - "<|END_OF_TURN_TOKEN|>"
 template:
 

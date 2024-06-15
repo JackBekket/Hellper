@@ -1,13 +1,15 @@
-name: qwen14b
-context_size: 22768
+name: qwen14b   # model from Alibaba, probably pirated, understand english, russian, chinese
+context_size: 22000  # max is 32k context but I got out of mem on my machine if I use it in full forse.
 f16: false # true to GPU acceleration
 cuda: true # true to GPU acceleration
-gpu_layers: 5 # 0 is CPU only
+gpu_layers: 4 # 0 is CPU only
 
 parameters:
   model: qwen1_5-14b-chat-q5_0.gguf
 stopwords:
 - "HUMAN:"
+cutstrings:
+- "<|im_end|>"
 template:
 
   chat: &template |
