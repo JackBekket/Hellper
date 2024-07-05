@@ -114,6 +114,7 @@ func ContinueChatWithContextNoLimit(ctx context.Context,session *db.ChatSession,
 }
 
 /*
+		HIGH LEVEL INSTRUCT (SUDO)
 	 Main function for generating from single promt (without memory and context) --> this will result as Instruction, because it will not use langchain as template..
 
 		Below is an instruction that describes a task. Write a response that appropriately completes the request.
