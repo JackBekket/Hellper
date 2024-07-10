@@ -2,8 +2,8 @@ version: '3.8'
 services:
   local-ai:
     image: localai/localai:latest-aio-gpu-nvidia-cuda-12
-    command: --models-path /models --p2p
-     --context-size 2048 --threads 9 --localai-config-dir /configuration
+    command: --models-path /models 
+     --context-size 2048 --threads 9 --localai-config-dir /configuration worker p2p-llama-cpp-rpc --token ${P2PTOKEN}
     environment:
       - DEBUG=true
     volumes:
@@ -16,14 +16,4 @@ services:
 
     restart: unless-stopped
 
-  helper-bot:
-    build: .
-    depends_on:
-      - local-ai
-    ports:
-      - 8085:8085
-    environment:
-  #    - AI_ENDPOINT=http://local-ai:8080/v1/chat/completions
-      - AI_BASEURL=http://local-ai:8080
-      - AI_ENDPOINT=http://local-ai:8080
-    restart: unless-stopped
+
