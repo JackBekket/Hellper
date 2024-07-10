@@ -3,7 +3,7 @@ services:
   local-ai:
     image: localai/localai:latest-aio-cpu
     command: --models-path /models 
-     --context-size 2048 --name worker --threads 9 --localai-config-dir /configuration worker p2p-llama-cpp-rpc --token ${P2PTOKEN}
+     --context-size 2048  --threads 9 --localai-config-dir /configuration worker p2p-llama-cpp-rpc --token ${P2PTOKEN}
     environment:
       - DEBUG=true
     volumes:
