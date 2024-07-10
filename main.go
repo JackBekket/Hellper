@@ -23,7 +23,12 @@ type AdminData struct {
 
 func main() {
 
-	_= godotenv.Load()
+	err := godotenv.Load()
+	if err != nil {
+	  log.Fatalf("Error loading .env file: %v", err)
+	}
+	
+ 
 	api_token := os.Getenv("OPENAI_API_KEY")	// this is not openai key actually, it's local key for localai
 	//conn_pg_link := os.Getenv("PG_LINK")
 
