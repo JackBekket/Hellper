@@ -11,7 +11,7 @@ services:
       - ./tmp/generated/images:/tmp/generated/images
       - ./configuration:/configuration
     ports:
-      - 8080:8080
+      - 8090:8090
 
 
     restart: unless-stopped
