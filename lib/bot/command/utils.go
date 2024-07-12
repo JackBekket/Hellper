@@ -2,12 +2,10 @@ package command
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"math/rand"
 	"os"
 	"path/filepath"
-	"time"
 
 	db "github.com/JackBekket/hellper/lib/database"
 	"github.com/JackBekket/hellper/lib/embeddings"
@@ -115,14 +113,14 @@ func (c *Commander) SendMediaHelper(chatID int64) {
 
 		// Send helper video error
 		// Get a list of all files in the media directory
-		files, err := ioutil.ReadDir("../../media/")
+		files, err := os.ReadDir("../../media/")
 		if err != nil {
 		  log.Println("Could not read media directory:", err)
 		  return
 		}
 	
 		  // Select a random file
-		  rand.Seed(time.Now().UnixNano())
+		  //rand.Seed(time.Now().UnixNano())
 		  randomFile := files[rand.Intn(len(files))]
 	
 	  // Open the video file

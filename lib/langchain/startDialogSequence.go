@@ -9,7 +9,6 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
-	"time"
 
 	db "github.com/JackBekket/hellper/lib/database"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -34,7 +33,7 @@ func errorMessage(err error, bot *tgbotapi.BotAPI, user db.User) {
 		}
 	
 		  // Select a random file
-		  rand.Seed(time.Now().UnixNano())
+		  //rand.Seed(time.Now().UnixNano())
 		  randomFile := files[rand.Intn(len(files))]
 	
 	  // Open the video file
