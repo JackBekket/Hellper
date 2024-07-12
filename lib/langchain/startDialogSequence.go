@@ -4,7 +4,12 @@ package langchain
 
 import (
 	"context"
+	"io/ioutil"
 	"log"
+	"math/rand"
+	"os"
+	"path/filepath"
+	"time"
 
 	db "github.com/JackBekket/hellper/lib/database"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -20,8 +25,54 @@ func errorMessage(err error, bot *tgbotapi.BotAPI, user db.User) {
 	msg = tgbotapi.NewMessage(user.ID, "an error has occured. In order to proceed we need to recreate client and initialize new session")
 	bot.Send(msg)
 
+		// Send helper video error
+		// Get a list of all files in the media directory
+		files, err := ioutil.ReadDir("../../media/")
+		if err != nil {
+		  log.Println("Could not read media directory:", err)
+		  return
+		}
+	
+		  // Select a random file
+		  rand.Seed(time.Now().UnixNano())
+		  randomFile := files[rand.Intn(len(files))]
+	
+	  // Open the video file
+	  videoFile, err := os.Open(filepath.Join("../../media/", randomFile.Name()))
+	  if err != nil {
+		log.Println("Could not open video file:", err)
+		return
+	  }
+	  defer videoFile.Close()
+	
+	  // Create a new video message
+	  videoMsg := tgbotapi.NewVideo(user.ID, tgbotapi.FileReader{
+		Name: randomFile.Name(),
+		Reader: videoFile,
+		//Size: -1, // Let the tgbotapi package determine the size
+	  })
+	
+	  // Send the video message
+	  _, err = bot.Send(videoMsg)
+	  if err != nil {
+		log.Println("Could not send video message:", err)
+	  }
+
+
+
+
+
+
+
+
+
+
 	userDb := db.UsersMap
 	delete(userDb, user.ID)
+
+
+
+
 	// updateDb := userDatabase[ID]
 	// updateDb.Dialog_status = 0
 	// userDatabase[ID] = updateDb

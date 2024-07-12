@@ -1,0 +1,3 @@
+wizard-uncensored-13b 
+CPU: 1.94 token per second
+GPU: 126 tokens per second
