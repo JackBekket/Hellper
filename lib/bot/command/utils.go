@@ -2,8 +2,12 @@ package command
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
+	"math/rand"
 	"os"
+	"path/filepath"
+	"time"
 
 	db "github.com/JackBekket/hellper/lib/database"
 	"github.com/JackBekket/hellper/lib/embeddings"
@@ -106,4 +110,41 @@ func (c *Commander) GetUsage(chatID int64)  {
 }
 
 
+
+func (c *Commander) SendMediaHelper(chatID int64) {
+
+		// Send helper video error
+		// Get a list of all files in the media directory
+		files, err := ioutil.ReadDir("../../media/")
+		if err != nil {
+		  log.Println("Could not read media directory:", err)
+		  return
+		}
+	
+		  // Select a random file
+		  rand.Seed(time.Now().UnixNano())
+		  randomFile := files[rand.Intn(len(files))]
+	
+	  // Open the video file
+	  videoFile, err := os.Open(filepath.Join("../../media/", randomFile.Name()))
+	  if err != nil {
+		log.Println("Could not open video file:", err)
+		return
+	  }
+	  defer videoFile.Close()
+	
+	  // Create a new video message
+	  videoMsg := tgbotapi.NewVideo(chatID, tgbotapi.FileReader{
+		Name: randomFile.Name(),
+		Reader: videoFile,
+		//Size: -1, // Let the tgbotapi package determine the size
+	  })
+	
+	  // Send the video message
+	  _, err = c.bot.Send(videoMsg)
+	  if err != nil {
+		log.Println("Could not send video message:", err)
+	  }
+
+}
 

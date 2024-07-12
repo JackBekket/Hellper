@@ -359,6 +359,8 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint 
 			langchain.GenerateContentInstruction(user.AiSession.Base_url,promt,model_name,api_token,user.Network)
 		case "usage" :
 			c.GetUsage(chatID)
+		case "helper":
+			c.SendMediaHelper(chatID)
 	default:
 		promt := updateMessage.Text
 		ctx := context.WithValue(c.ctx, "user", user)
