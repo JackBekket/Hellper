@@ -119,9 +119,15 @@ func (c *Commander) SendMediaHelper(chatID int64) {
 		  return
 		}
 	
-		  // Select a random file
-		  //rand.Seed(time.Now().UnixNano())
-		  randomFile := files[rand.Intn(len(files))]
+		if len(files) == 0 {
+			log.Println("No files in media directory")
+			return  
+		}
+
+
+		// Select a random file
+		//rand.Seed(time.Now().UnixNano())
+		randomFile := files[rand.Intn(len(files))]
 	
 	  // Open the video file
 	  videoFile, err := os.Open(filepath.Join("../../media/", randomFile.Name()))
