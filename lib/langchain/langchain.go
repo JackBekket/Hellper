@@ -119,7 +119,7 @@ func ContinueChatWithContextNoLimit(ctx context.Context, session *db.ChatSession
 	    Instruction: {{.Input}}
 	    Response:
 */
-func GenerateContentInstruction(base_url string, promt string, model_name string, api_token string, network string) (string, error) {
+func GenerateContentInstruction(base_url string, promt string, model_name string, api_token string, network string, options ...llms.CallOption) (string, error) {
 	ctx := context.Background()
 	var result string
 	if network == "local" {
@@ -134,7 +134,7 @@ func GenerateContentInstruction(base_url string, promt string, model_name string
 			log.Fatal(err)
 		}
 
-		completion, err := llms.GenerateFromSinglePrompt(ctx, llm, promt)
+		completion, err := llms.GenerateFromSinglePrompt(ctx, llm, promt, options...)
 		if err != nil {
 			// log.Fatal(err)
 			return "", err
@@ -152,7 +152,7 @@ func GenerateContentInstruction(base_url string, promt string, model_name string
 			log.Fatal(err)
 		}
 
-		completion, err := llms.GenerateFromSinglePrompt(ctx, llm, promt)
+		completion, err := llms.GenerateFromSinglePrompt(ctx, llm, promt, options...)
 		if err != nil {
 			// log.Fatal(err)
 			return "", err
@@ -163,26 +163,4 @@ func GenerateContentInstruction(base_url string, promt string, model_name string
 	}
 
 	return result, nil
-}
-
-func GenerateContentInstructionOptions(base_url string, promt string, model_name string, api_token string, network string, options ...llms.CallOption) (string, error) {
-	ctx := context.Background()
-	llm, err := openai.New(
-		openai.WithToken(api_token),
-		//openai.WithBaseURL("http://localhost:8080"),
-		openai.WithBaseURL(base_url),
-		openai.WithModel(model_name),
-		openai.WithAPIVersion("v1"),
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	completion, err := llms.GenerateFromSinglePrompt(ctx, llm, promt, options...)
-	if err != nil {
-		// log.Fatal(err)
-		return "", err
-	}
-
-	return completion, nil
 }
