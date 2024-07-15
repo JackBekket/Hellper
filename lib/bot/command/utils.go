@@ -113,7 +113,8 @@ func (c *Commander) SendMediaHelper(chatID int64) {
 
 		// Send helper video error
 		// Get a list of all files in the media directory
-		files, err := os.ReadDir("../../media/")
+		//files, err := os.ReadDir("../../media/")
+		files, err := os.ReadDir("./media/")
 		if err != nil {
 		  log.Println("Could not read media directory:", err)
 		  return
@@ -130,7 +131,7 @@ func (c *Commander) SendMediaHelper(chatID int64) {
 		randomFile := files[rand.Intn(len(files))]
 	
 	  // Open the video file
-	  videoFile, err := os.Open(filepath.Join("../../media/", randomFile.Name()))
+	  videoFile, err := os.Open(filepath.Join("./media/", randomFile.Name()))
 	  if err != nil {
 		log.Println("Could not open video file:", err)
 		return
