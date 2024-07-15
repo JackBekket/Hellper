@@ -1,9 +1,10 @@
 version: '3.8'
 services:
-  local-ai:
+  local-ai-worker:
     image: localai/localai:latest-aio-gpu-nvidia-cuda-12
     command: --models-path /models --p2ptoken ${P2PTOKEN}
-     --context-size 2048 --threads 5 --localai-config-dir /configuration 
+     --context-size 2048 --threads 10 --localai-config-dir /configuration 
+     worker p2p-llama-cpp-rpc --token ${P2PTOKEN}
     environment:
       - DEBUG=true
     volumes:
@@ -11,7 +12,7 @@ services:
       - ./tmp/generated/images:/tmp/generated/images
       - ./configuration:/configuration
     ports:
-      - 8080:8080
+      - 8090:8090
     deploy:
       resources:
         reservations:
@@ -21,14 +22,3 @@ services:
               capabilities: [gpu]
     restart: unless-stopped
 
-  helper-bot:
-    build: .
-    depends_on:
-      - local-ai
-    ports:
-      - 8085:8085
-    environment:
-  #    - AI_ENDPOINT=http://local-ai:8080/v1/chat/completions
-      - AI_BASEURL=http://local-ai:8080
-      - AI_ENDPOINT=http://local-ai:8080
-    restart: unless-stopped
