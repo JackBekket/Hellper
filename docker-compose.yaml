@@ -2,8 +2,8 @@ version: '3.8'
 services:
   local-ai:
     image: localai/localai:latest-aio-gpu-nvidia-cuda-12
-    command: --models-path /models 
-     --context-size 2048 --threads 10 --localai-config-dir /configuration
+    command: --models-path /models --p2p
+     --context-size 2048 --threads 5 --localai-config-dir /configuration 
     environment:
       - DEBUG=true
     volumes:
