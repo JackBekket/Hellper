@@ -151,10 +151,7 @@ func GetVectorStoreWithOptions(ai_url string, api_token string, db_link string, 
 
 	store, err := pgvector.New(
 		context.Background(),
-		pgvector.WithCollectionName(name+"Collection"),
-		pgvector.WithCollectionTableName(name+"CollectionTable"),
-		pgvector.WithEmbeddingTableName(name+"EmbeddingTable"),
-
+		pgvector.WithCollectionName(name),
 		//pgvector.WithPreDeleteCollection(true),
 		pgvector.WithConn(pool),
 		pgvector.WithEmbedder(e),
