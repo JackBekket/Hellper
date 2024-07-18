@@ -13,6 +13,14 @@ it may work unexpectedly
 https://github.com/mudler/LocalAI -- original repo of local ai golang node
 
 
+# GPU WORKER
+This is branch for gpu worker, which should launch local-ai gpu worker as p2p node and do not launch telegram bot itself.
+Use this branch if you want to run a node and attach it to a cluster, using randez-vous point
+
+One more time -- in this brunch Dockerfile intended to assemble and laucnh local-ai node, *NOT* the bot or the head node. So dockerfile in this brunch and master brunch are completely different and should not be merged!!!
+
+
+
 # How to run?
 
 simply run `docker-compose up --build` (with `-d` for deattach) -- it will create two containers -- local-ai and this bot

@@ -2,7 +2,7 @@ version: '3.8'
 services:
   local-ai-worker:
     image: localai/localai:latest-aio-gpu-nvidia-cuda-12
-    command: --models-path /models --p2ptoken ${P2PTOKEN}
+    command: --models-path /models 
      --context-size 2048 --threads 10 --localai-config-dir /configuration 
      worker p2p-llama-cpp-rpc --token ${P2PTOKEN}
     environment:
