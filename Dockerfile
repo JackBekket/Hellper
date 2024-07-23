@@ -6,7 +6,8 @@ WORKDIR /app
 
 # Copy the local directories into the container
 COPY ./models /models
-COPY ./tmp/generated/images /tmp/generated/images
+RUN mkdir /tmp/generated/images
+#COPY ./tmp/generated/images /tmp/generated/images
 COPY ./configuration /configuration
 
 # Set the environment variable
