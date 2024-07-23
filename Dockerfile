@@ -7,7 +7,7 @@ WORKDIR /app
 
 RUN mkdir /models
 # Copy the local directories into the container
-COPY /models /models
+COPY models /models
 RUN mkdir /tmp/generated/images
 #COPY ./tmp/generated/images /tmp/generated/images
 COPY ./configuration /configuration
