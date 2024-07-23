@@ -5,7 +5,7 @@
 
 # ignore tmps..?
 tmp
-models
+#models
 .git
 *.png
 *.img
