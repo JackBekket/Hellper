@@ -20,6 +20,7 @@ ENV DEBUG=true
 
 # Expose the specified port
 EXPOSE 8090
+EXPOSE 8080
 
 # Run the command
 CMD ["--models-path", "/models", "--context-size", "2048", "--threads", "10", "--localai-config-dir", "/configuration", "worker", "p2p-llama-cpp-rpc", "--token", "${P2PTOKEN}"]
