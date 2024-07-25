@@ -18,6 +18,7 @@ https://github.com/mudler/LocalAI -- original repo of local ai golang node
 simply run `docker-compose up --build` (with `-d` for deattach) -- it will create two containers -- local-ai and this bot
 
 if your local-ai node is already running, then you can just build this bot as `docker build -t helper-bot .` and then `docker run -d --name helper-bot --restart=always -p 8085:8085 helper-bot`
+add `-p 8080:8080 for web UI
 
 
 
