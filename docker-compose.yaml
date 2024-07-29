@@ -3,7 +3,7 @@ services:
   local-ai-head:
     image: localai/localai:latest-aio-gpu-nvidia-cuda-12
     command: --models-path /models --p2ptoken ${P2PTOKEN}
-     --context-size 2048 --threads 5 --localai-config-dir /configuration 
+     --context-size 2048 --threads 10 --localai-config-dir /configuration 
     environment:
       - DEBUG=true
     volumes:
@@ -24,7 +24,7 @@ services:
   local-ai-worker:
     image: localai/localai:latest-aio-gpu-nvidia-cuda-12
     command: --models-path /models 
-     --context-size 2048 --threads 10 --localai-config-dir /configuration 
+     --context-size 2048 --threads 6 --localai-config-dir /configuration 
      worker p2p-llama-cpp-rpc --token ${P2PTOKEN}
     environment:
       - DEBUG=true
