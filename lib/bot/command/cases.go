@@ -4,12 +4,14 @@ import (
 	"context"
 	"log"
 	"net/url"
+	"os"
 	"path"
 
 	db "github.com/JackBekket/hellper/lib/database"
 	"github.com/JackBekket/hellper/lib/langchain"
 	"github.com/JackBekket/hellper/lib/localai"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/joho/godotenv"
 )
 
 type contextKey string
@@ -45,7 +47,8 @@ func (c *Commander) ChooseNetwork(updateMessage *tgbotapi.Message) {
 	msg.ReplyMarkup = tgbotapi.NewOneTimeReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("openai"),
-			tgbotapi.NewKeyboardButton("localai")),
+			tgbotapi.NewKeyboardButton("localai"),
+			tgbotapi.NewKeyboardButton("vastai")),
 
 	)
 	c.bot.Send(msg)
@@ -73,6 +76,12 @@ func (c *Commander) HandleNetworkChoose(updateMessage *tgbotapi.Message) {
 
 		user.Network = network
 		user.AiSession.AI_Type = 1
+		user.DialogStatus = 2
+		db.UsersMap[chatID] = user
+		c.InputYourAPIKey(updateMessage)
+	case "vastai":
+		user.Network = network
+		user.AiSession.AI_Type = 2
 		user.DialogStatus = 2
 		db.UsersMap[chatID] = user
 		c.InputYourAPIKey(updateMessage)
@@ -108,7 +117,10 @@ func (c *Commander) ChooseModel(updateMessage *tgbotapi.Message) {
 		user.DialogStatus = 4
 		db.UsersMap[chatID] = user
 
-
+	case "vastai" :
+		c.RenderModelMenuVAI(chatID)
+		user.DialogStatus = 4
+		db.UsersMap[chatID] = user
 	default :
 		c.WrongNetwork(updateMessage)
 	}
@@ -177,6 +189,34 @@ func (c *Commander) HandleModelChoose(updateMessage *tgbotapi.Message) {
 		default:
 			c.WrongModel(updateMessage)
 		}
+	case "vastai" :
+		switch model_name {
+		case "wizard-uncensored-13b":
+			c.attachModel(model_name, chatID)
+			user.AiSession.GptModel = model_name
+			c.RenderLanguage(chatID)
+	
+			user.DialogStatus = 5
+			db.UsersMap[chatID] = user
+		case "wizard-uncensored-30b":
+			c.attachModel(model_name, chatID)
+			user.AiSession.GptModel = model_name
+			c.RenderLanguage(chatID)
+	
+			user.DialogStatus = 5
+			db.UsersMap[chatID] = user
+		case  "qwen14b":
+			c.attachModel(model_name, chatID)
+			user.AiSession.GptModel = model_name
+			c.RenderLanguage(chatID)
+	
+			user.DialogStatus = 5
+			db.UsersMap[chatID] = user
+		default:
+			c.WrongModel(updateMessage)
+		}
+
+
 	}
 
 
@@ -184,22 +224,7 @@ func (c *Commander) HandleModelChoose(updateMessage *tgbotapi.Message) {
 
 
 
-// render language menu
-func (c *Commander) RenderLanguage(chat_id int64) {
-	chatID := chat_id
-	//user := c.usersDb[chatID]
 
-	msg := tgbotapi.NewMessage(chatID, "Choose a language or send 'Hello' in your desired language.")
-	msg.ReplyMarkup = tgbotapi.NewOneTimeReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("English"),
-			tgbotapi.NewKeyboardButton("Russian")),
-	)
-	c.bot.Send(msg)
-
-	//user.DialogStatus = 3
-	//c.usersDb[chatID] = user
-}
 
 // low level attach model name to user profile
 func (c *Commander) attachModel(model_name string, chatID int64) {
@@ -232,31 +257,7 @@ func (c *Commander) ChangeDialogStatus(chatID int64, ds int8) {
 	user.DialogStatus = ds
 }
 
-func (c *Commander) RenderModelMenuOAI(chatID int64) {
-	msg := tgbotapi.NewMessage(chatID, msgTemplates["case1"])
-	msg.ReplyMarkup = tgbotapi.NewOneTimeReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("gpt-3.5"),
-		tgbotapi.NewKeyboardButton("gpt-4")),
-	)
-	c.bot.Send(msg)
-}
 
-func (c *Commander) RenderModelMenuLAI(chatID int64) {
-	msg := tgbotapi.NewMessage(chatID, msgTemplates["case1"])
-	msg.ReplyMarkup = tgbotapi.NewOneTimeReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("wizard-uncensored-13b"),
-		tgbotapi.NewKeyboardButton("code-13b")),
-		
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("qwen14b"),
-		),
-	
-	)
-
-	c.bot.Send(msg)
-}
 
 // update Dialog_Status = 4
 func (c *Commander) WrongModel(updateMessage *tgbotapi.Message) {
@@ -285,6 +286,8 @@ func (c *Commander) WrongNetwork(updateMessage *tgbotapi.Message) {
 
 // update update Dialog_Status 5 -> 6
 func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.Message, ai_endpoint string) {
+	_= godotenv.Load()
+
 	chatID := updateMessage.From.ID
 	language := updateMessage.Text
 	user := db.UsersMap[chatID]
@@ -296,16 +299,16 @@ func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.Message, 
 	c.bot.Send(msg)
 
 	ctx := context.WithValue(c.ctx, "user", user)
-	
 
-	//go localai.SetupSequenceWithKey(c.bot, user, language, c.ctx, lpwd, ai_endpoint)
 
 		if network == "localai" {
-			go langchain.SetupSequenceWithKey(c.bot,user,language,ctx,ai_endpoint)
+			go langchain.SetupSequenceWithKey(c.bot,user,language,ctx,ai_endpoint)	//local-ai
+		} else if network ==  "vastai" {
+			ai_endpoint := os.Getenv("VASTAI_ENDPOINT")
+			log.Println("vast-ai endpoint is: ", ai_endpoint)
+			go langchain.SetupSequenceWithKey(c.bot,user,language,ctx,ai_endpoint)	//vast-ai
 		} else {
-
-		go langchain.SetupSequenceWithKey(c.bot,user,language,ctx,"")
-		//go localai.SetupSequenceWithKey(c.bot,user,language,c.ctx,lpwd,ai_endpoint)
+		go langchain.SetupSequenceWithKey(c.bot,user,language,ctx,"")	//openai
 		}
 	
 	
