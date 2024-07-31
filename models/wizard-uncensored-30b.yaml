@@ -15,5 +15,4 @@ template:
     Response:
   # Modify the prompt template here ^^^ as per your requirements
   completion: *template
-
-  download_files: [https://huggingface.co/TheBloke/Wizard-Vicuna-30B-Uncensored-GGUF/raw/main/Wizard-Vicuna-30B-Uncensored.Q4_K_M.gguf]
+download_files: [https://huggingface.co/TheBloke/Wizard-Vicuna-30B-Uncensored-GGUF/resolve/main/Wizard-Vicuna-30B-Uncensored.Q4_K_M.gguf]
