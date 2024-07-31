@@ -6,6 +6,7 @@ gpu_layers: 0 # 0 is CPU only
 
 parameters:
   model: qwen1_5-14b-chat-q5_0.gguf
+  #model: huggingface://Qwen/Qwen1.5-14B-Chat-GGUF/qwen1_5-14b-chat-q5_0.gguf
 stopwords:
 - "HUMAN:"
 cutstrings:
@@ -18,4 +19,3 @@ template:
     Response:
   # Modify the prompt template here ^^^ as per your requirements
   completion: *template
-downloadfiles: [https://huggingface.co/Qwen/Qwen1.5-14B-Chat-GGUF/resolve/main/qwen1_5-14b-chat-q5_0.gguf]

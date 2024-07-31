@@ -5,6 +5,7 @@ cuda: true # true to GPU acceleration
 gpu_layers: 10 # this model have max 40 layers, 15-20 is reccomended for half-load at NVIDIA 4060 TiTan (more layers -- more VRAM required), (i guess 0 is no GPU)
 parameters:
   model: Wizard-Vicuna-30B-Uncensored.Q4_K_M.gguf
+  #model: huggingface://TheBloke/Wizard-Vicuna-30B-Uncensored-GGUF/Wizard-Vicuna-30B-Uncensored.Q4_K_M.gguf
 cutstrings:
 - "</s>"
 template:
@@ -15,4 +16,3 @@ template:
     Response:
   # Modify the prompt template here ^^^ as per your requirements
   completion: *template
-download_files: [https://huggingface.co/TheBloke/Wizard-Vicuna-30B-Uncensored-GGUF/resolve/main/Wizard-Vicuna-30B-Uncensored.Q4_K_M.gguf]
