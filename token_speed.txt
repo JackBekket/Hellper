@@ -1,3 +1,8 @@
 wizard-uncensored-13b 
 CPU: 1.94 token per second
 GPU: 126 tokens per second   -- NVIDIA 4060 Ti (8 Gb RAM)
+
+
+GPU 2 RTX A5000  (all models using maximum layers offload)
+wizard-uncensored-13b  60.56 tokens per second (generation time)
+wizard-uncensored-30b  30.37 tokens per second (generation time)
