@@ -8,8 +8,8 @@ stopwords:
 - <｜end▁of▁sentence｜>
 template:
   chat: &template |
-    <｜begin▁of▁sentence｜>
-    User: {{.Input }}
-    Assistant: 
+    <|begin_of_sentence|>{{ if .System }}{{ .System }}
+    {{end}}{{ if .Input }}User: {{ .Input }}
+    {{end}}Assistant: {{ .Response }}<|end_of_sentence|>
   completion: |
     {{.Input}}
