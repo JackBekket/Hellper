@@ -1,0 +1,22 @@
+context_size: 8192
+mmap: true
+name: deepseek-coder-v2-lite-instruct
+parameters:
+  model: DeepSeek-Coder-V2-Lite-Instruct-Q4_K_M.gguf
+  # https://huggingface.co/LoneStriker/DeepSeek-Coder-V2-Lite-Instruct-GGUF
+stopwords:
+- <｜end▁of▁sentence｜>
+template:
+  chat: |
+    {{.Input -}}
+    <｜begin▁of▁sentence｜>
+    Assistant: 
+  #Space is preserved for templating reasons, but line does not end with one for the linter.
+  chat_message: |-
+    {{if eq .RoleName "user" -}}User: {{.Content }}
+    {{ end -}}
+    <｜begin▁of▁sentence｜>{{if eq .RoleName "assistant" -}}Assistant: {{.Content}}<｜end▁of▁sentence｜>{{end}}
+    {{if eq .RoleName "system" -}}{{.Content}}
+    {{end -}}<｜end▁of▁sentence｜>
+  completion: |
+    {{.Input}}
