@@ -8,6 +8,7 @@ stopwords:
 - <｜end▁of▁sentence｜>
 template:
   chat: |
+    <｜begin▁of▁sentence｜>
     {{.Input }}
     Assistant: 
   chat_message: |-
