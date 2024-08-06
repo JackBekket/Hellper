@@ -1,11 +1,13 @@
 name: wizard-uncensored-30b
 context_size: 2048
-f16: false # true to GPU acceleration
+f16: true # true to GPU acceleration
 cuda: true # true to GPU acceleration
 gpu_layers: 10 # this model have max 40 layers, 15-20 is reccomended for half-load at NVIDIA 4060 TiTan (more layers -- more VRAM required), (i guess 0 is no GPU)
 parameters:
   model: Wizard-Vicuna-30B-Uncensored.Q4_K_M.gguf
   #model: huggingface://TheBloke/Wizard-Vicuna-30B-Uncensored-GGUF/Wizard-Vicuna-30B-Uncensored.Q4_K_M.gguf
+stopwords:
+- "HUMAN:"
 cutstrings:
 - "</s>"
 template:
