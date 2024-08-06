@@ -1,6 +1,6 @@
 name: qwen14b   # model from Alibaba, probably pirated, understand english, russian, chinese
 context_size: 32000  # max is 32k context but I got out of mem on my machine if I use it in full forse.
-f16: false # true to GPU acceleration
+f16: true # true to GPU acceleration
 cuda: false # true to GPU acceleration
 gpu_layers: 40 # 0 is CPU only
 parameters:
