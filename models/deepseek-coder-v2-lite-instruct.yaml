@@ -10,6 +10,6 @@ template:
   chat: &template |
     <｜begin▁of▁sentence｜>
     User: {{.Input }}
-    Assistant: <｜end▁of▁sentence｜>
+    Assistant: 
   completion: |
     {{.Input}}
