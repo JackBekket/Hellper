@@ -9,11 +9,13 @@ stopwords:
 template:
   chat: |
     {{.Input }}
-    <start_of_turn>model
+    <｜begin▁of▁sentence｜>
+    Assistant: 
   chat_message: |-
-    <start_of_turn>{{if eq .RoleName "assistant" }}model{{else}}{{ .RoleName }}{{end}}
-    {{ if .Content -}}
-    {{.Content -}}
-    {{ end -}}<end_of_turn>
+    {{if eq .RoleName "user" -}}User: {{.Content }}
+    {{ end -}}
+    <｜begin▁of▁sentence｜>{{if eq .RoleName "assistant" -}}Assistant: {{.Content}}{{end}}
+    {{if eq .RoleName "system" -}}{{.Content}}
+    {{end -}}
   completion: |
     {{.Input}}
