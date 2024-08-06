@@ -10,7 +10,7 @@ template:
   chat: |
     {{.Input -}}
     <｜begin▁of▁sentence｜>
- #    Assistant: 
+     Assistant: 
   #Space is preserved for templating reasons, but line does not end with one for the linter.
   chat_message: |-
     <｜begin▁of▁sentence｜>{{if eq .RoleName "assistant" -}}Assistant: {{.Content}}{{end}}<｜end▁of▁sentence｜>
