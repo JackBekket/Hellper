@@ -9,12 +9,11 @@ stopwords:
 template:
   chat: |
     {{.Input -}}
-    <｜begin▁of▁sentence｜>
-     Assistant: 
+    <start_of_turn>
+  #Assistant: <start_of_turn>
   #Space is preserved for templating reasons, but line does not end with one for the linter.
   chat_message: |-
-    <｜begin▁of▁sentence｜>{{if eq .RoleName "assistant" -}}Assistant: {{.Content}}{{end}}<｜end▁of▁sentence｜>
-    {{if eq .RoleName "system" -}}{{.Content}}
-    {{end -}}<｜end▁of▁sentence｜>
+    <start_of_turn>{{if eq .RoleName "assistant" -}}Assistant: {{.Content}}{{end}}
+    {{if eq .RoleName "system" -}}{{.Content}}{{end -}}
   completion: |
     {{.Input}}
