@@ -7,15 +7,9 @@ parameters:
 stopwords:
 - <｜end▁of▁sentence｜>
 template:
-  chat: |
+  chat: &template |
     <｜begin▁of▁sentence｜>
-    {{.Input }}
-    Assistant: 
-  chat_message: |-
-    {{if eq .RoleName "user" -}}User: {{.Content }}
-    {{ end -}}
-    <｜begin▁of▁sentence｜>{{if eq .RoleName "assistant" -}}Assistant: {{.Content}}{{end}}
-    {{if eq .RoleName "system" -}}{{.Content}}
-    {{end -}}
+    User: {{.Input }}
+    Assistant: <｜end▁of▁sentence｜>
   completion: |
     {{.Input}}
