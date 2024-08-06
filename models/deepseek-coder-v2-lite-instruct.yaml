@@ -9,7 +9,6 @@ stopwords:
 template:
   chat: |
     {{.Input }}
-    <｜begin▁of▁sentence｜>
     Assistant: 
   chat_message: |-
     {{if eq .RoleName "user" -}}User: {{.Content }}
