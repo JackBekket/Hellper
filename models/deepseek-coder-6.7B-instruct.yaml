@@ -8,13 +8,14 @@ parameters:
   model: huggingface://TheBloke/deepseek-coder-6.7B-instruct-GGUF/deepseek-coder-6.7b-instruct.Q4_K_M.gguf
 stopwords:
 - "HUMAN:"
+- "### Instruction:"
 cutstrings:
 - "</s>"
 template:
 
   chat: &template |
     Below is an instruction that describes a task. Write a response that appropriately completes the request.
-    Instruction: {{.Input}}
-    Response:
+    ### Instruction: {{.Input}}
+    ### Response:
   # Modify the prompt template here ^^^ as per your requirements
   completion: *template
