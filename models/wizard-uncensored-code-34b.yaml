@@ -8,7 +8,7 @@ parameters:
   model: huggingface://TheBloke/WizardLM-1.0-Uncensored-CodeLlama-34B-GGUF/wizardlm-1.0-uncensored-codellama-34b.Q4_K_M.gguf
 stopwords:
 - "HUMAN:"
-- "Instruction:"
+#- "Instruction:"
 cutstrings:
 - "</s>"
 template:
