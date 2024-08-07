@@ -1,3 +1,4 @@
+# DOESNT WORK WITH LOCALAI
 context_size: 8192
 mmap: true
 name: deepseek-coder-v2-lite-instruct
