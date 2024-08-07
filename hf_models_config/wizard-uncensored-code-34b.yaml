@@ -1,0 +1,21 @@
+# This model is UNCENSORED and suited for code tasks
+name: wizard-uncensored-code-34b
+#context_size: 2048
+f16: true # true to GPU acceleration
+cuda: true # true to GPU acceleration
+#gpu_layers: 60 # this model have max 61 layers,  (i guess 0 is no GPU) 
+parameters:
+  model: huggingface://TheBloke/WizardLM-1.0-Uncensored-CodeLlama-34B-GGUF/wizardlm-1.0-uncensored-codellama-34b.Q4_K_M.gguf
+stopwords:
+- "HUMAN:"
+cutstrings:
+- "</s>"
+template:
+
+  chat: &template |
+    Below is an instruction that describes a task. Write a response that appropriately completes the request.
+    Instruction: {{.Input}}
+    Response:
+  # Modify the prompt template here ^^^ as per your requirements
+  completion: *template
+

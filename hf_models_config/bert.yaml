@@ -1,0 +1,9 @@
+name: text-embedding-ada-002
+parameters:
+  model: bert
+backend: bert-embeddings
+embeddings: true
+# .. other parameters
+# https://huggingface.co/skeskinen/ggml -- download models from bert there
+# use this file if you want to use embeddings via bert.cpp
+# wget https://huggingface.co/skeskinen/ggml/resolve/main/all-MiniLM-L6-v2/ggml-model-q4_0.bin -O models/bert

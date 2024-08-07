@@ -1,0 +1,6 @@
+name: text-embedding-ada-002
+backend: llama
+embeddings: true
+parameters:
+  model: all-MiniLM-L6-v2-f16.gguf
+  # wget https://gpt4all.io/models/all-MiniLM-L6-v2-f16.gguf
