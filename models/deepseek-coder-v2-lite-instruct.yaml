@@ -8,8 +8,11 @@ stopwords:
 - <｜end▁of▁sentence｜>
 template:
   chat: |
-    {{.Input -}}
-    Assistant: # Space is preserved for templating reasons, but line does not end with one for the linter.
+    {{if eq .RoleName "system" -}}{{.System }}
+    {{end -}}
+    {{if eq .RoleName "user" -}}User: {{.Input}}
+    {{ end -}}
+    Assistant: {{.Response}}<｜end▁of▁sentence｜>{{end}}
   chat_message: |-
     {{if eq .RoleName "user" -}}User: {{.Content }}
     {{ end -}}
