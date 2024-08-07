@@ -1,0 +1,25 @@
+# This model can be programmer assistant (with actually high perfomance), but it CENSORED, which will not allow you to make jailbreaks, exploits, etc
+name: deepseek-coder-6b-instruct  # approx 9Gb RAM/VRAM required
+mmap: true
+context_size: 8192  # 16384 -- max context 
+f16: true # true to GPU acceleration
+cuda: true # true to GPU acceleration
+#gpu_layers: 32 # this model have max 32 layers
+parameters:
+  model: huggingface://TheBloke/deepseek-coder-6.7B-instruct-GGUF/deepseek-coder-6.7b-instruct.Q4_K_M.gguf
+  #  there is model with 33b parameters available (required 22.44 Gb RAM/VRAM)
+  #  huggingface://TheBloke/deepseek-coder-33B-instruct-GGUF/deepseek-coder-33b-instruct.Q4_K_M.gguf
+stopwords:
+- "HUMAN:"
+- "Instruction:"
+- "<|EOT|>"
+cutstrings:
+- "</s>"
+template:
+
+  chat: &template |
+    Below is an instruction that describes a task. Write a response that appropriately completes the request.
+    Instruction: {{.Input}}
+    Response:
+  # Modify the prompt template here ^^^ as per your requirements
+  completion: *template
