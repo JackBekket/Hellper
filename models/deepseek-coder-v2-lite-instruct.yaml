@@ -8,9 +8,9 @@ stopwords:
 - <｜end▁of▁sentence｜>
 template:
   chat: |
-    {{if eq .RoleName "system" -}}{{.System }}
+    {{ if .System }}{{ .System }}
     {{end -}}
-    {{if eq .RoleName "user" -}}User: {{.Input}}
+    User: {{.Input}}
     {{ end -}}
     Assistant: {{.Response}}<｜end▁of▁sentence｜>
   chat_message: |-
