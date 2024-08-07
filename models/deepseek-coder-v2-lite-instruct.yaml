@@ -12,7 +12,7 @@ template:
     {{end -}}
     {{if eq .RoleName "user" -}}User: {{.Input}}
     {{ end -}}
-    Assistant: {{.Response}}<｜end▁of▁sentence｜>{{end -}}
+    Assistant: {{.Response}}<｜end▁of▁sentence｜>
   chat_message: |-
     {{if eq .RoleName "user" -}}User: {{.Content }}
     {{ end -}}
