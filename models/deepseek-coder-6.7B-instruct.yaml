@@ -8,8 +8,8 @@ parameters:
   model: huggingface://TheBloke/deepseek-coder-6.7B-instruct-GGUF/deepseek-coder-6.7b-instruct.Q4_K_M.gguf
 stopwords:
 - "HUMAN:"
-- "### Instruction:"
 - "Instruction:"
+- "<|EOT|>"
 cutstrings:
 - "</s>"
 template:
