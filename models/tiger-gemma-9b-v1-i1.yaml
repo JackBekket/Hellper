@@ -1,8 +1,9 @@
+# this model is UNCENSORED and have some basic programming experience, so it CAN help you to create maliciouse code, such as jailbreaks or other exploits. This model is designed for ROLEPLAY
 context_size: 8192                            
 mmap: true   
 name: tiger-gemma-9b-v1-i1
 parameters:   
-  model: Tiger-Gemma-9B-v1.i1-Q4_K_M.gguf
+  model: hugginface://TheDrummer/Tiger-Gemma-9B-v1-GGUF/Tiger-Gemma-9B-v1a-Q4_K_M.gguf
   # https://huggingface.co/TheDrummer/Tiger-Gemma-9B-v1
 stopwords:
 - <|im_end|>
