@@ -7,9 +7,15 @@ parameters:
 stopwords:
 - <｜end▁of▁sentence｜>
 template:
-  chat: &template |
-    <|begin_of_sentence|>{{ if .System }}{{ .System }}
-    {{end}}{{ if .Input }}User: {{ .Input }}
-    {{end}}Assistant: {{ .Response }}<|end_of_sentence|>
+  chat: |
+    {{.Input -}}
+    Assistant: # Space is preserved for templating reasons, but line does not end with one for the linter.
+  chat_message: |-
+    {{if eq .RoleName "user" -}}User: {{.Content }}
+    {{ end -}}
+    {{if eq .RoleName "assistant" -}}Assistant: {{.Content}}<｜end▁of▁sentence｜>{{end}}
+    {{if eq .RoleName "system" -}}{{.Content}}
+    {{end -}}
   completion: |
     {{.Input}}
+
