@@ -1,6 +1,5 @@
-# This model is UNCENSORED and suited for code tasks
 name: wizard-uncensored-code-34b
-#context_size: 2048
+context_size: 2048
 f16: true # true to GPU acceleration
 cuda: true # true to GPU acceleration
 #gpu_layers: 60 # this model have max 61 layers,  (i guess 0 is no GPU) 
@@ -9,7 +8,7 @@ parameters:
 stopwords:
 - "HUMAN:"
 - "</s>"
- "Instruction: "
+- "Instruction: "
 cutstrings:
 - "</s>"
 template:
