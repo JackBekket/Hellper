@@ -13,9 +13,6 @@ stopwords:
 cutstrings:
 - "</s>"
 template:
-
- chat: &template |
-   Instruction: {{.Input}}
-  # Modify the prompt template here ^^^ as per your requirements
+  chat: &template |
+    Instruction: {{.Input}}
   completion: *template
-
