@@ -146,10 +146,6 @@ func main() {
 				comm.GetUsage(chatID)
 			case "helper":
 				comm.SendMediaHelper(chatID)
-		default:
-			comm.HelpCommandMessage(update.Message)
-		 }	
-
 		}
 
 		if update.Message == nil {
@@ -188,6 +184,7 @@ func main() {
 
 		}
 
-	}
+		}
 
-} // end of main func
+	} // end of main func
+	}
