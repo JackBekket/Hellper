@@ -12,11 +12,11 @@ parameters:
 stopwords:
 - "<|EOT|>"
 - "</s>"
+- "\n\nHuman: "
 cutstrings:
 - "</s>"
 template:
   chat: &template |
-    Instruction: ### {{.Input}}
-    Response: ###  
+    {{.Input}}  
    # Modify the prompt template here ^^^ as per your requirements
   completion: *template
