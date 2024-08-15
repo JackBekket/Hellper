@@ -302,12 +302,19 @@ func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.Message, 
 
 
 		if network == "localai" {
+			log.Println("network: ", network)
+			if ai_endpoint == "" {
+				ai_endpoint = os.Getenv("AI_ENDPOINT")
+			}
+			log.Println("local-ai endpoint is: ", ai_endpoint)
 			go langchain.SetupSequenceWithKey(c.bot,user,language,ctx,ai_endpoint)	//local-ai
 		} else if network ==  "vastai" {
+			log.Println("network: ", network)
 			ai_endpoint := os.Getenv("VASTAI_ENDPOINT")
 			log.Println("vast-ai endpoint is: ", ai_endpoint)
 			go langchain.SetupSequenceWithKey(c.bot,user,language,ctx,ai_endpoint)	//vast-ai
 		} else {
+		log.Println("network: ", network)
 		go langchain.SetupSequenceWithKey(c.bot,user,language,ctx,"")	//openai
 		}
 	
