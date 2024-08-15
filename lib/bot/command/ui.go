@@ -17,7 +17,7 @@ func (c *Commander) RenderModelMenuLAI(chatID int64) {
 	msg.ReplyMarkup = tgbotapi.NewOneTimeReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("wizard-uncensored-13b"),
-		tgbotapi.NewKeyboardButton("tiger-gemma-9b-v1-i1"),
+		tgbotapi.NewKeyboardButton("wizard-uncensored-30b"),
 		))
 
 	c.bot.Send(msg)
