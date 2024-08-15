@@ -16,9 +16,9 @@ func (c *Commander) RenderModelMenuLAI(chatID int64) {
 	msg := tgbotapi.NewMessage(chatID, msgTemplates["case1"])
 	msg.ReplyMarkup = tgbotapi.NewOneTimeReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("wizard-uncensored-13b")),
-		//tgbotapi.NewKeyboardButton("code-13b")),
-	)
+			tgbotapi.NewKeyboardButton("wizard-uncensored-13b"),
+		tgbotapi.NewKeyboardButton("tiger-gemma-9b-v1-i1"),
+		))
 
 	c.bot.Send(msg)
 }
@@ -29,11 +29,11 @@ func (c *Commander) RenderModelMenuVAI(chatID int64) {
 	msg := tgbotapi.NewMessage(chatID, msgTemplates["case1"])
 	msg.ReplyMarkup = tgbotapi.NewOneTimeReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("wizard-uncensored-13b"),
-		tgbotapi.NewKeyboardButton("wizard-uncensored-30b")),
+			tgbotapi.NewKeyboardButton("deepseek-coder-6b-instruct"),
+		tgbotapi.NewKeyboardButton("wizard-uncensored-code-34b")),
 		
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("qwen14b"),
+			tgbotapi.NewKeyboardButton("tiger-gemma-9b-v1-i1"),
 		),
 	
 	)
