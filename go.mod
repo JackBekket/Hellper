@@ -9,7 +9,10 @@ require (
 	github.com/tmc/langchaingo v0.1.11-0.20240523170143-078e88b77de4
 )
 
-require github.com/jackc/puddle/v2 v2.2.1 // indirect
+require (
+	github.com/jackc/puddle/v2 v2.2.1 // indirect
+	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
+)
 
 require (
 	github.com/AssemblyAI/assemblyai-go-sdk v1.5.1 // indirect
@@ -23,6 +26,7 @@ require (
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/dlclark/regexp2 v1.11.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
+	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
