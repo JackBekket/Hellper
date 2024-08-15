@@ -9,6 +9,7 @@ import (
 	"github.com/JackBekket/hellper/lib/bot/command"
 	"github.com/JackBekket/hellper/lib/bot/env"
 	"github.com/JackBekket/hellper/lib/database"
+	"github.com/JackBekket/hellper/lib/langchain"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
 )
@@ -100,12 +101,63 @@ func main() {
 	//whenever bot gets a new message, check for user id in the database happens, if it's a new user, the entry in the database is created.
 	for update := range updates {
 
+		chatID := update.Message.From.ID
+		user, ok := usersDatabase[chatID]
+		if !ok {
+			comm.CheckAdmin(adminData, update.Message)
+		}
+		if ok {
+
+			switch update.Message.Command() {
+	
+			case "image":
+				msg := tgbotapi.NewMessage(user.ID, "Image link generation...")
+				bot.Send(msg)
+	
+				promt := update.Message.CommandArguments()
+				log.Printf("Command /image arg: %s\n", promt)
+				if (promt == "") {
+					comm.GenerateNewImageLAI_SD("evangelion, neon, anime",chatID,bot)
+				} else {
+					comm.GenerateNewImageLAI_SD(promt,chatID,bot)
+				}
+				//go openaibot.StartImageSequence(c.bot, updateMessage, chatID, promt, c.ctx)
+	
+			case "restart":
+				msg := tgbotapi.NewMessage(user.ID, "Restarting session..., type any key")
+				bot.Send(msg)
+				userDb := database.UsersMap
+				delete(userDb, user.ID)
+			case "help":
+				comm.HelpCommandMessage(update.Message)
+			case "search_doc":
+				promt := update.Message.CommandArguments()
+				comm.SearchDocuments(chatID,promt,3)
+			case "rag":
+				promt := update.Message.CommandArguments()
+				comm.RAG(chatID,promt,1)
+			case "instruct" :
+				// this is calling local-ai within base template (and without langhain injections)
+				promt := update.Message.CommandArguments()
+				model_name := user.AiSession.GptModel
+				api_token := user.AiSession.GptKey
+				langchain.GenerateContentInstruction(user.AiSession.Base_url,promt,model_name,api_token,user.Network)
+			case "usage" :
+				comm.GetUsage(chatID)
+			case "helper":
+				comm.SendMediaHelper(chatID)
+		default:
+			comm.HelpCommandMessage(update.Message)
+		 }	
+
+		}
+
 		if update.Message == nil {
 			continue
 		}
 
-		chatID := update.Message.From.ID
-		user, ok := usersDatabase[chatID]
+		//chatID := update.Message.From.ID
+		//user, ok := usersDatabase[chatID]
 		if !ok {
 			comm.CheckAdmin(adminData, update.Message)
 		}
