@@ -9,7 +9,7 @@ import (
 
 type Commander struct {
 	bot     *tgbotapi.BotAPI
-	//usersDb map[int64]database.User
+	usersDb map[int64]database.User
 	ctx     context.Context
 }
 
@@ -20,7 +20,9 @@ func NewCommander(
 ) *Commander {
 	return &Commander{
 		bot:     bot,
-		//usersDb: usersDb,
+		usersDb: usersDb,
 		ctx:     ctx,
 	}
 }
+
+//func GetCommander()

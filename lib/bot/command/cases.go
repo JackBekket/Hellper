@@ -165,6 +165,27 @@ func (c *Commander) HandleModelChoose(updateMessage *tgbotapi.Message) {
 	
 			user.DialogStatus = 5
 			db.UsersMap[chatID] = user
+		case  "deepseek-coder-6b-instruct":
+			c.attachModel(model_name, chatID)
+			user.AiSession.GptModel = model_name
+			c.RenderLanguage(chatID)
+	
+			user.DialogStatus = 5
+			db.UsersMap[chatID] = user
+		case  "tiger-gemma-9b-v1-i1":
+			c.attachModel(model_name, chatID)
+			user.AiSession.GptModel = model_name
+			c.RenderLanguage(chatID)
+	
+			user.DialogStatus = 5
+			db.UsersMap[chatID] = user
+		case  "wizard-uncensored-code-34b":
+			c.attachModel(model_name, chatID)
+			user.AiSession.GptModel = model_name
+			c.RenderLanguage(chatID)
+	
+			user.DialogStatus = 5
+			db.UsersMap[chatID] = user
 		default:
 			c.WrongModel(updateMessage)
 		}
@@ -206,6 +227,27 @@ func (c *Commander) HandleModelChoose(updateMessage *tgbotapi.Message) {
 			user.DialogStatus = 5
 			db.UsersMap[chatID] = user
 		case  "qwen14b":
+			c.attachModel(model_name, chatID)
+			user.AiSession.GptModel = model_name
+			c.RenderLanguage(chatID)
+	
+			user.DialogStatus = 5
+			db.UsersMap[chatID] = user
+		case  "deepseek-coder-6b-instruct":
+			c.attachModel(model_name, chatID)
+			user.AiSession.GptModel = model_name
+			c.RenderLanguage(chatID)
+	
+			user.DialogStatus = 5
+			db.UsersMap[chatID] = user
+		case  "tiger-gemma-9b-v1-i1":
+			c.attachModel(model_name, chatID)
+			user.AiSession.GptModel = model_name
+			c.RenderLanguage(chatID)
+	
+			user.DialogStatus = 5
+			db.UsersMap[chatID] = user
+		case  "wizard-uncensored-code-34b":
 			c.attachModel(model_name, chatID)
 			user.AiSession.GptModel = model_name
 			c.RenderLanguage(chatID)
@@ -302,12 +344,19 @@ func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.Message, 
 
 
 		if network == "localai" {
+			log.Println("network: ", network)
+			if ai_endpoint == "" {
+				ai_endpoint = os.Getenv("AI_ENDPOINT")
+			}
+			log.Println("local-ai endpoint is: ", ai_endpoint)
 			go langchain.SetupSequenceWithKey(c.bot,user,language,ctx,ai_endpoint)	//local-ai
 		} else if network ==  "vastai" {
+			log.Println("network: ", network)
 			ai_endpoint := os.Getenv("VASTAI_ENDPOINT")
 			log.Println("vast-ai endpoint is: ", ai_endpoint)
 			go langchain.SetupSequenceWithKey(c.bot,user,language,ctx,ai_endpoint)	//vast-ai
 		} else {
+		log.Println("network: ", network)
 		go langchain.SetupSequenceWithKey(c.bot,user,language,ctx,"")	//openai
 		}
 	
@@ -324,52 +373,12 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint 
 	user := db.UsersMap[chatID]
 
 	
-
-
-	switch updateMessage.Command() {
+	if updateMessage != nil {
 	
-		case "image":
-			msg := tgbotapi.NewMessage(user.ID, "Image link generation...")
-			c.bot.Send(msg)
-
-			promt := updateMessage.CommandArguments()
-			log.Printf("Command /image arg: %s\n", promt)
-			if (promt == "") {
-				c.GenerateNewImageLAI_SD("evangelion, neon, anime",chatID,c.bot)
-			} else {
-				c.GenerateNewImageLAI_SD(promt,chatID,c.bot)
-			}
-			//go openaibot.StartImageSequence(c.bot, updateMessage, chatID, promt, c.ctx)
-
-		case "restart":
-			msg := tgbotapi.NewMessage(user.ID, "Restarting session..., type any key")
-			c.bot.Send(msg)
-			userDb := db.UsersMap
-			delete(userDb, user.ID)
-		case "help":
-			c.HelpCommandMessage(updateMessage)
-		case "search_doc":
-			promt := updateMessage.CommandArguments()
-			c.SearchDocuments(chatID,promt,3)
-		case "rag":
-			promt := updateMessage.CommandArguments()
-			c.RAG(chatID,promt,1)
-		case "instruct" :
-			// this is calling local-ai within base template (and without langhain injections)
-			promt := updateMessage.CommandArguments()
-			model_name := user.AiSession.GptModel
-			api_token := user.AiSession.GptKey
-			langchain.GenerateContentInstruction(user.AiSession.Base_url,promt,model_name,api_token,user.Network)
-		case "usage" :
-			c.GetUsage(chatID)
-		case "helper":
-			c.SendMediaHelper(chatID)
-	default:
-		promt := updateMessage.Text
-		ctx := context.WithValue(c.ctx, "user", user)
-		//go localai.StartDialogSequence(c.bot, chatID, promt, c.ctx, ai_endpoint)
-		go langchain.StartDialogSequence(c.bot,chatID,promt,ctx,ai_endpoint)
-	}	
+	promt := updateMessage.Text
+	ctx := context.WithValue(c.ctx, "user", user)
+	go langchain.StartDialogSequence(c.bot,chatID,promt,ctx,ai_endpoint)
+	}
 }
 
 // stable diffusion
@@ -421,6 +430,17 @@ func transformURL(inputURL string) string {
 	// Use path.Base to get the filename from the URL path
 	fileName := path.Base(parsedURL.Path)
 	return fileName
+}
+
+
+func (c *Commander) GetUsersDb() (map[int64]db.User){
+	data_base := db.UsersMap
+	return data_base
+}
+
+func (c *Commander) GetUser(id int64) (db.User) {
+	user := db.UsersMap[id]
+	return user
 }
 
 

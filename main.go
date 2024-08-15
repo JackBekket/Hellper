@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/JackBekket/hellper/lib/bot/command"
+	"github.com/JackBekket/hellper/lib/bot/dialog"
 	"github.com/JackBekket/hellper/lib/bot/env"
 	"github.com/JackBekket/hellper/lib/database"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -50,12 +51,6 @@ func main() {
 	}
 	*/
 
-	/*
-	err := env.Load()
-	if err != nil {
-		log.Panicf("could not load env from: %v", err)
-	}
-	*/
 
 	//token := api_token
 	token := os.Getenv("TG_KEY")
@@ -82,10 +77,6 @@ func main() {
 	}
 
 
-
-
-
-
 	// init database and commander
 	usersDatabase := database.UsersMap
 	ctx := context.Background()
@@ -96,46 +87,28 @@ func main() {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
+	upd_ch := make(chan tgbotapi.Update)
+
+	//updateHandler := 
 	updates := bot.GetUpdatesChan(u)
+
+	// handling any incoming updates through channel
+	go dialog.HandleUpdates(upd_ch,bot,*comm)
+
+
 	//whenever bot gets a new message, check for user id in the database happens, if it's a new user, the entry in the database is created.
+	
 	for update := range updates {
 
-		if update.Message == nil {
-			continue
-		}
-
 		chatID := update.Message.From.ID
-		user, ok := usersDatabase[chatID]
+		_, ok := usersDatabase[chatID]
 		if !ok {
-			comm.CheckAdmin(adminData, update.Message)
+			upd_ch <- update
 		}
 		if ok {
-
-			log.Println("user dialog status:", user.DialogStatus)
-			log.Println(user.ID)
-			log.Println(user.Username)
-			switch user.DialogStatus {
-			// first check for user status, (for a new user status 0 is set automatically),
-			// then user reply for the first bot message is logged to a database as name AND user status is updated
-			case 0:
-				comm.ChooseNetwork(update.Message)
-			case 1:
-				comm.HandleNetworkChoose(update.Message)
-			case 2:
-				comm.InputYourAPIKey(update.Message) 
-			case 3:
-				comm.ChooseModel(update.Message)
-			case 4:
-				comm.HandleModelChoose(update.Message)
-			case 5:
-				comm.ConnectingToAiWithLanguage(update.Message, ai_endpoint)	
-			case 6: 
-				comm.DialogSequence(update.Message,ai_endpoint)
-				
-			}
-
+			upd_ch <- update
 		}
-
 	}
+
 
 } // end of main func
