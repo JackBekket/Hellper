@@ -324,56 +324,12 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint 
 	user := db.UsersMap[chatID]
 
 	
-
-	/*
-	switch updateMessage.Command() {
+	if updateMessage != nil {
 	
-		case "image":
-			msg := tgbotapi.NewMessage(user.ID, "Image link generation...")
-			c.bot.Send(msg)
-
-			promt := updateMessage.CommandArguments()
-			log.Printf("Command /image arg: %s\n", promt)
-			if (promt == "") {
-				c.GenerateNewImageLAI_SD("evangelion, neon, anime",chatID,c.bot)
-			} else {
-				c.GenerateNewImageLAI_SD(promt,chatID,c.bot)
-			}
-			//go openaibot.StartImageSequence(c.bot, updateMessage, chatID, promt, c.ctx)
-
-		case "restart":
-			msg := tgbotapi.NewMessage(user.ID, "Restarting session..., type any key")
-			c.bot.Send(msg)
-			userDb := db.UsersMap
-			delete(userDb, user.ID)
-		case "help":
-			c.HelpCommandMessage(updateMessage)
-		case "search_doc":
-			promt := updateMessage.CommandArguments()
-			c.SearchDocuments(chatID,promt,3)
-		case "rag":
-			promt := updateMessage.CommandArguments()
-			c.RAG(chatID,promt,1)
-		case "instruct" :
-			// this is calling local-ai within base template (and without langhain injections)
-			promt := updateMessage.CommandArguments()
-			model_name := user.AiSession.GptModel
-			api_token := user.AiSession.GptKey
-			langchain.GenerateContentInstruction(user.AiSession.Base_url,promt,model_name,api_token,user.Network)
-		case "usage" :
-			c.GetUsage(chatID)
-		case "helper":
-			c.SendMediaHelper(chatID)
-	default:
-		promt := updateMessage.Text
-		ctx := context.WithValue(c.ctx, "user", user)
-		//go localai.StartDialogSequence(c.bot, chatID, promt, c.ctx, ai_endpoint)
-		go langchain.StartDialogSequence(c.bot,chatID,promt,ctx,ai_endpoint)
-	}	
-	*/
 	promt := updateMessage.Text
 	ctx := context.WithValue(c.ctx, "user", user)
 	go langchain.StartDialogSequence(c.bot,chatID,promt,ctx,ai_endpoint)
+	}
 }
 
 // stable diffusion

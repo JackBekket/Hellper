@@ -51,12 +51,6 @@ func main() {
 	}
 	*/
 
-	/*
-	err := env.Load()
-	if err != nil {
-		log.Panicf("could not load env from: %v", err)
-	}
-	*/
 
 	//token := api_token
 	token := os.Getenv("TG_KEY")
