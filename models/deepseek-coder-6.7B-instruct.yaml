@@ -17,6 +17,6 @@ cutstrings:
 - "</s>"
 template:
   chat: &template |
-    {{.Input}}  
+    {{.Input}}
    # Modify the prompt template here ^^^ as per your requirements
   completion: *template
