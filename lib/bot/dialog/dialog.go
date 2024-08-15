@@ -3,24 +3,28 @@ package dialog
 import (
 	"log"
 
-	comm "github.com/JackBekket/hellper/lib/bot/command"
+	"github.com/JackBekket/hellper/lib/bot/command"
 	"github.com/JackBekket/hellper/lib/database"
 	"github.com/JackBekket/hellper/lib/langchain"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func handleUpdates(updates <-chan tgbotapi.Update, bot tgbotapi.BotAPI)  {
+func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm command.Commander)  {
 	
 
 
 for update := range updates {
 
-	chatID := update.Message.From.ID
-	user, ok := usersDatabase[chatID]
+	var chatID int64
+	chatID = int64(update.Message.From.ID)
+	db := comm.GetUsersDb()
+	user, ok := db[int64(chatID)]
 	if !ok {
-		comm.CheckAdmin(adminData, update.Message)
+		//comm.CheckAdmin(adminData, update.Message)
+		comm.AddNewUserToMap(update.Message)
 	}
 	if ok {
+		//chatID = int64(chatID)
 
 		switch update.Message.Command() {
 
@@ -68,8 +72,9 @@ for update := range updates {
 
 	//chatID := update.Message.From.ID
 	//user, ok := usersDatabase[chatID]
+	ai_endpoint := user.AiSession.Base_url
 	if !ok {
-		comm.CheckAdmin(adminData, update.Message)
+		comm.AddNewUserToMap(update.Message)
 	}
 	if ok {
 
@@ -92,7 +97,7 @@ for update := range updates {
 		case 5:
 			comm.ConnectingToAiWithLanguage(update.Message, ai_endpoint)	
 		case 6: 
-			comm.DialogSequence(update.Message,ai_endpoint)
+		comm.DialogSequence(update.Message,ai_endpoint)
 			
 		}
 

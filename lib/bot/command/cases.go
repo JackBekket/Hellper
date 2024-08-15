@@ -384,5 +384,16 @@ func transformURL(inputURL string) string {
 }
 
 
+func (c *Commander) GetUsersDb() (map[int64]db.User){
+	data_base := db.UsersMap
+	return data_base
+}
+
+func (c *Commander) GetUser(id int64) (db.User) {
+	user := db.UsersMap[id]
+	return user
+}
+
+
 
 
