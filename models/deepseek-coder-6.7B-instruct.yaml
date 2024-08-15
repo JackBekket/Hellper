@@ -10,19 +10,13 @@ parameters:
   #  there is model with 33b parameters available (required 22.44 Gb RAM/VRAM)
   #  huggingface://TheBloke/deepseek-coder-33B-instruct-GGUF/deepseek-coder-33b-instruct.Q4_K_M.gguf
 stopwords:
-- "HUMAN:"
-#- "Human: "
-- "Instruction: "
 - "<|EOT|>"
-#- "Response: "
 - "</s>"
 cutstrings:
 - "</s>"
 template:
-
   chat: &template |
-#Below is an instruction that describes a task. Write a response that appropriately completes the request.
-    Instruction: {{.Input}}
-    Response:
-  # Modify the prompt template here ^^^ as per your requirements
+    Instruction: ### {{.Input}}
+    Response: ###  
+   # Modify the prompt template here ^^^ as per your requirements
   completion: *template
