@@ -91,9 +91,81 @@ func main() {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
+	upd_ch := make(chan tgbotapi.Update)
+
 	//updateHandler := 
 	updates := bot.GetUpdatesChan(u)
-	go dialog.HandleUpdates(updates,bot,*comm)
+
+	go dialog.HandleUpdates(upd_ch,bot,*comm)
+
+
+		//whenever bot gets a new message, check for user id in the database happens, if it's a new user, the entry in the database is created.
+	
+	for update := range updates {
+
+		chatID := update.Message.From.ID
+		_, ok := usersDatabase[chatID]
+		if !ok {
+			//comm.CheckAdmin(adminData, update.Message)
+			upd_ch <- update
+		}
+		if ok {
+			upd_ch <- update
+			//go dialog.HandleUpdates(upd_ch,bot,*comm)
+			/*
+			switch update.Message.Command() {
+	
+			case "image":
+				msg := tgbotapi.NewMessage(user.ID, "Image link generation...")
+				bot.Send(msg)
+	
+				promt := update.Message.CommandArguments()
+				log.Printf("Command /image arg: %s\n", promt)
+				if (promt == "") {
+					comm.GenerateNewImageLAI_SD("evangelion, neon, anime",chatID,bot)
+				} else {
+					comm.GenerateNewImageLAI_SD(promt,chatID,bot)
+				}
+				//go openaibot.StartImageSequence(c.bot, updateMessage, chatID, promt, c.ctx)
+	
+			case "restart":
+				msg := tgbotapi.NewMessage(user.ID, "Restarting session..., type any key")
+				bot.Send(msg)
+				userDb := database.UsersMap
+				delete(userDb, user.ID)
+			case "help":
+				comm.HelpCommandMessage(update.Message)
+			case "search_doc":
+				promt := update.Message.CommandArguments()
+				comm.SearchDocuments(chatID,promt,3)
+			case "rag":
+				promt := update.Message.CommandArguments()
+				comm.RAG(chatID,promt,1)
+			case "instruct" :
+				// this is calling local-ai within base template (and without langhain injections)
+				promt := update.Message.CommandArguments()
+				model_name := user.AiSession.GptModel
+				api_token := user.AiSession.GptKey
+				langchain.GenerateContentInstruction(user.AiSession.Base_url,promt,model_name,api_token,user.Network)
+			case "usage" :
+				comm.GetUsage(chatID)
+			case "helper":
+				comm.SendMediaHelper(chatID)
+		}
+		*/
+
+		//go dialog.HandleUpdates(upd_ch,bot,*comm)
+
+		}
+
+
+	}
+	//go dialog.HandleUpdates(upd_ch,bot,*comm)
+
+
+	
+	//upd_ch = <-updates
+	//go dialog.HandleUpdates(updates,bot,*comm)
 	//whenever bot gets a new message, check for user id in the database happens, if it's a new user, the entry in the database is created.
 	/*
 	for update := range updates {

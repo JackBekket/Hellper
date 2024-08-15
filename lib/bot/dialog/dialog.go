@@ -14,6 +14,7 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 
 
 for update := range updates {
+	//update := updates
 
 	var chatID int64
 	chatID = int64(update.Message.From.ID)
