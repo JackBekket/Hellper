@@ -325,7 +325,7 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint 
 
 	
 
-
+	/*
 	switch updateMessage.Command() {
 	
 		case "image":
@@ -370,6 +370,10 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint 
 		//go localai.StartDialogSequence(c.bot, chatID, promt, c.ctx, ai_endpoint)
 		go langchain.StartDialogSequence(c.bot,chatID,promt,ctx,ai_endpoint)
 	}	
+	*/
+	promt := updateMessage.Text
+	ctx := context.WithValue(c.ctx, "user", user)
+	go langchain.StartDialogSequence(c.bot,chatID,promt,ctx,ai_endpoint)
 }
 
 // stable diffusion
