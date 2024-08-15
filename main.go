@@ -10,7 +10,6 @@ import (
 	"github.com/JackBekket/hellper/lib/bot/dialog"
 	"github.com/JackBekket/hellper/lib/bot/env"
 	"github.com/JackBekket/hellper/lib/database"
-	"github.com/JackBekket/hellper/lib/langchain"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
 )
@@ -96,6 +95,7 @@ func main() {
 	updates := bot.GetUpdatesChan(u)
 	go dialog.HandleUpdates(updates,bot,*comm)
 	//whenever bot gets a new message, check for user id in the database happens, if it's a new user, the entry in the database is created.
+	/*
 	for update := range updates {
 
 		chatID := update.Message.From.ID
@@ -183,5 +183,7 @@ func main() {
 
 		}
 
+	 } // range updates
+	 */ 
+
 	} // end of main func
-	}
