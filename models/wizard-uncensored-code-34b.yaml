@@ -11,10 +11,10 @@ stopwords:
 #- "Human:"
 - "<s>"
 - "Instruction: "
+- "\n\nHuman: "
 cutstrings:
 - "</s>"
 template:
  chat: &template |
-   Instruction: {{.Input}}
-   Response:
+   {{.Input}}
  completion: *template
