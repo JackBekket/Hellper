@@ -8,13 +8,15 @@ parameters:
   model: huggingface://TheBloke/WizardLM-1.0-Uncensored-CodeLlama-34B-GGUF/wizardlm-1.0-uncensored-codellama-34b.Q4_K_M.gguf
 stopwords:
 - "HUMAN:"
-#- "Human:"
+- "Human:"
 - "<s>"
 - "Instruction: "
 - "\n\nHuman: "
 cutstrings:
+- "AI: "
 - "</s>"
 template:
  chat: &template |
-   {{.Input}}
+ "Follow this instruction and write appropriate response "{{.Input}}
+ "Response: "
  completion: *template
