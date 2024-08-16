@@ -1,5 +1,4 @@
-# This model can be programmer assistant (with actually high perfomance), but it CENSORED, which will not allow you to make jailbreaks, exploits, etc
-name: deepseek-coder-6b-instruct  # approx 9Gb RAM/VRAM required
+name: deepseek-coder-6b-instruct
 mmap: true
 context_size: 16000  # 16384 -- max context ?
 f16: true # true to GPU acceleration
@@ -12,11 +11,11 @@ parameters:
 stopwords:
 - "<|EOT|>"
 - "</s>"
-- "\n\nHuman: "
+- "Human: "
+- "Human:"
 cutstrings:
 - "</s>"
 template:
   chat: &template |
-    {{.Input}}
-   # Modify the prompt template here ^^^ as per your requirements
+   "Follow this instruction and write appropiate response: "{{.Input}}
   completion: *template
