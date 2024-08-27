@@ -1,6 +1,6 @@
 name: deepseek-coder-6b-instruct
 mmap: true
-context_size: 16000  # 16384 -- max context ?
+context_size: 8192  # 16384 -- max context ?
 f16: true # true to GPU acceleration
 cuda: true # true to GPU acceleration
 #gpu_layers: 32 # this model have max 32 layers
@@ -9,13 +9,17 @@ parameters:
   #  there is model with 33b parameters available (required 22.44 Gb RAM/VRAM)
   #  huggingface://TheBloke/deepseek-coder-33B-instruct-GGUF/deepseek-coder-33b-instruct.Q4_K_M.gguf
 stopwords:
+- <｜end▁of▁sentence｜>
 - "<|EOT|>"
-- "</s>"
-- "Human: "
-- "Human:"
-cutstrings:
-- "</s>"
 template:
-  chat: &template |
-   "Follow this instruction and write appropiate response: "{{.Input}}
-  completion: *template
+  chat: |
+    {{.Input -}}
+    Assistant: # Space is preserved for templating reasons, but line does not end with one for the linter.
+  chat_message: |-
+    {{if eq .RoleName "user" -}}User: {{.Content }}
+    {{ end -}}
+    {{if eq .RoleName "assistant" -}}Assistant: {{.Content}}<｜end▁of▁sentence｜>{{end}}
+    {{if eq .RoleName "system" -}}{{.Content}}
+    {{end -}}
+  completion: |
+    {{.Input}}
