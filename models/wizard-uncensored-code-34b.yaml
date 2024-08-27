@@ -17,6 +17,6 @@ cutstrings:
 - "</s>"
 template:
  chat: &template |
-  "Follow this instruction and write appropriate response: "{{.Input}}
-  "Response: "
+  Follow this instruction and write appropriate response: {{.Input}}
+  Response:
  completion: *template
