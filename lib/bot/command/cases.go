@@ -151,20 +151,6 @@ func (c *Commander) HandleModelChoose(updateMessage *tgbotapi.Message) {
 	
 			user.DialogStatus = 5
 			db.UsersMap[chatID] = user
-		case  "qwen14b":
-			c.attachModel(model_name, chatID)
-			user.AiSession.GptModel = model_name
-			c.RenderLanguage(chatID)
-	
-			user.DialogStatus = 5
-			db.UsersMap[chatID] = user
-		case "code-13b":
-			c.attachModel(model_name, chatID)
-			user.AiSession.GptModel = model_name
-			c.RenderLanguage(chatID)
-	
-			user.DialogStatus = 5
-			db.UsersMap[chatID] = user
 		case  "deepseek-coder-6b-instruct":
 			c.attachModel(model_name, chatID)
 			user.AiSession.GptModel = model_name
@@ -226,13 +212,6 @@ func (c *Commander) HandleModelChoose(updateMessage *tgbotapi.Message) {
 	
 			user.DialogStatus = 5
 			db.UsersMap[chatID] = user
-		case  "qwen14b":
-			c.attachModel(model_name, chatID)
-			user.AiSession.GptModel = model_name
-			c.RenderLanguage(chatID)
-	
-			user.DialogStatus = 5
-			db.UsersMap[chatID] = user
 		case  "deepseek-coder-6b-instruct":
 			c.attachModel(model_name, chatID)
 			user.AiSession.GptModel = model_name
@@ -241,6 +220,13 @@ func (c *Commander) HandleModelChoose(updateMessage *tgbotapi.Message) {
 			user.DialogStatus = 5
 			db.UsersMap[chatID] = user
 		case  "tiger-gemma-9b-v1-i1":
+			c.attachModel(model_name, chatID)
+			user.AiSession.GptModel = model_name
+			c.RenderLanguage(chatID)
+	
+			user.DialogStatus = 5
+			db.UsersMap[chatID] = user
+		case  "big-tiger-gemma-27b-v1":
 			c.attachModel(model_name, chatID)
 			user.AiSession.GptModel = model_name
 			c.RenderLanguage(chatID)

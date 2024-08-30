@@ -18,6 +18,7 @@ func (c *Commander) RenderModelMenuLAI(chatID int64) {
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("wizard-uncensored-13b"),
 		tgbotapi.NewKeyboardButton("wizard-uncensored-30b"),
+		tgbotapi.NewKeyboardButton("tiger-gemma-9b-v1-i1"),
 		))
 
 	c.bot.Send(msg)
@@ -34,6 +35,7 @@ func (c *Commander) RenderModelMenuVAI(chatID int64) {
 		
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("tiger-gemma-9b-v1-i1"),
+			tgbotapi.NewKeyboardButton("big-tiger-gemma-27b-v1"),
 		),
 	
 	)
