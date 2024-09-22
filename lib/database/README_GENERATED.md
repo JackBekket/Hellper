@@ -1,42 +1,42 @@
 # database
 
-This package provides a database for storing and managing user data, AI session data, and session usage data. It includes structs for representing users, AI sessions, and session usage, as well as functions for adding users, updating user and session usage, and retrieving session usage.
+This package provides a database for storing and managing user data, including user sessions and their usage. It also includes a database for managing AI session data.
 
-## File Structure
+## File structure
 
 ```
 lib/database/
-    newAiSessionDataBase.go
     newUserDataBase.go
+    newAiSessionDataBase.go
 ```
 
-## Major Code Parts
+## User data
 
-### User Data
+The `newUserDataBase.go` file defines a database for storing user data. It includes functions for adding new users, updating user usage, and retrieving session usage.
 
-The `User` struct represents a user in the database. It has fields for the user's ID, username, dialog status, admin status, AI session, and network. The `UsersMap` variable is a map that stores users, where the key is the user's ID and the value is the `User` struct.
+- `AddUser(user User)`: Adds a new user to the `UsersMap`.
+- `UpdateUserUsage(id int64, usage map[string]int)`: Updates the usage of a user's AiSession.
+- `UpdateSessionUsage(id int64, usage map[string]int)`: Updates the usage of a session.
+- `GetSessionUsage(id int64) (map[string]int)`: Returns the usage of a session.
 
-The `AddUser` function adds a new user to the `UsersMap`.
+The `User` struct represents a user and includes fields for ID, username, dialog status, admin status, AiSession, and network.
 
-### AI Session Data
+- `AiSession`: Represents an AI session and includes fields for GPT key, GPT model, AI type, dialog thread, base URL, and usage.
 
-The `AiSession` struct represents an AI session. It has fields for the GPT key, GPT model, AI type, dialog thread, base URL, and usage. The `AiSessionMap` variable is a map that stores AI sessions, where the key is an integer and the value is the `AiSession` struct.
+The `UsersMap` is a map that stores users by their ID.
 
-### Session Usage Data
+## AI session data
 
-The `SessionUsage` struct represents the usage of a session. It has fields for the session ID and usage data. The `UsageMap` variable is a map that stores session usage, where the key is the session ID and the value is the `SessionUsage` struct.
+The `newAiSessionDataBase.go` file defines a database for storing AI session data. It includes an `AiSessionMap` that stores AI sessions by their ID.
 
-The `UpdateSessionUsage` function updates the usage of a session with a given ID in the `UsageMap`. The `GetSessionUsage` function returns the usage of a session with a given ID from the `UsageMap`.
+- `main()`: Prints "Hello world!"
 
-### Chat Session Data
+The `AiSession` struct represents an AI session and includes fields for GPT key, GPT model, AI type, dialog thread, base URL, and usage.
 
-The `ChatSession` struct represents a chat session. It has fields for the conversation buffer and dialog thread.
+## Edge cases
 
-### Edge Cases
+There are no edge cases mentioned in the provided code.
 
-The package does not explicitly handle any edge cases for launching the application.
+## Conclusion
 
-### Environment Variables, Flags, and Command-Line Arguments
-
-The package does not use any environment variables, flags, or command-line arguments for configuration.
-
+This package provides a database for storing and managing user data, including user sessions and their usage. It also includes a database for managing AI session data. The package includes functions for adding new users, updating user usage, and retrieving session usage. The package also includes a database for managing AI session data.

@@ -1,47 +1,35 @@
 # dialog
 
-This package provides a dialog handler for a Telegram bot. It handles incoming updates from the Telegram API and routes them to the appropriate command handler. The package also manages user data, such as chat IDs and AI session information.
+This package provides a dialog management system for a Telegram bot. It handles user interactions, manages dialog states, and provides various commands for users to interact with the bot.
 
-## Environment variables
-
-- None specified
-
-## Flags
-
-- None specified
-
-## Cmdline arguments
-
-- None specified
-
-## Files and their paths
-
-- lib/bot/dialog/dialog.go
-
-## Edge cases
-
-- None specified
-
-## Project package structure
+## File structure
 
 - lib/bot/dialog/dialog.go
 
 ## Code summary
 
-The `HandleUpdates` function is the main entry point for the dialog handler. It iterates over incoming updates from the Telegram API and processes each update. For each update, it extracts the chat ID and retrieves the corresponding user data from the command handler's user database. If the user is not found in the database, a new user entry is created.
+The `HandleUpdates` function is the main entry point for handling user interactions. It iterates over a channel of Telegram updates and processes each update. For each update, it extracts the chat ID, retrieves the user from a database, and handles the user's command or dialog state.
 
-The function then checks the command of the update and routes it to the appropriate command handler. The available commands are:
+The package provides several commands for users to interact with the bot, including:
 
-- `/image`: Generates an image based on the provided prompt or a default prompt if no prompt is given.
-- `/restart`: Restarts the user's session by deleting their data from the user database.
-- `/help`: Displays a help message with available commands.
-- `/search_doc`: Searches for documents based on the provided prompt and returns the top 3 results.
-- `/rag`: Performs a RAG (Retrieval Augmented Generation) task based on the provided prompt.
-- `/instruct`: Generates content based on the provided prompt using the user's selected AI model and API key.
-- `/usage`: Displays the usage statistics for the user.
-- `/helper`: Sends a media helper message to the user.
+- `/image`: Generates an image based on a prompt.
+- `/restart`: Restarts the user's session.
+- `/help`: Displays help information.
+- `/search_doc`: Searches for documents based on a prompt.
+- `/rag`: Performs RAG based on a prompt.
+- `/instruct`: Calls a local AI model to generate content based on a prompt.
+- `/usage`: Displays usage information.
+- `/helper`: Sends a media helper message.
 
-The `HandleUpdates` function also handles the logic for generating images using the LAI_SD model and searching for documents using a search engine. It also manages the user's AI session information, such as the selected AI model, API key, and network.
+The package also manages dialog states, which are used to guide the user through a sequence of interactions. The dialog states are:
 
-The package also includes helper functions for generating help messages, searching for documents, performing RAG tasks, and sending media helper messages.
+- Status 0: Chooses a network.
+- Status 1: Handles network choice.
+- Status 2: Prompts the user to input their API key.
+- Status 3: Chooses a model.
+- Status 4: Handles model choice.
+- Status 5: Connects to the AI with the chosen language.
+- Status 6: Performs the dialog sequence.
+
+The package uses a database to store user information and dialog states. It also uses a local AI model for content generation and a network for communication with the AI.
 

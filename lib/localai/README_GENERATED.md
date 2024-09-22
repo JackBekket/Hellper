@@ -1,106 +1,53 @@
 # localai
 
-This package provides a set of functions to interact with a GPT model and generate text completions. It also includes functions for uploading images to Telegraph and managing user sessions.
+This package provides a set of functions to manage and interact with a local AI model. It includes functions for setting up a sequence with a key, starting a dialog sequence, and generating completions and images.
 
-## Project Package Structure
+## File Structure
 
-```
-lib/localai/
-├── localai.go
-└── startDialogSequence.go
-```
+- lib/localai/setupSequenceWithKey.go
+- lib/localai/startDialogSequence.go
+- lib/localai/localai.go
 
 ## Code Summary
 
-### localai.go
+### SetupSequenceWithKey
 
-This file contains functions for generating text completions using a GPT model and uploading images to Telegraph.
+This function takes a bot API, user, language, context, and passwords as input. It retrieves the user's GPT key and model from the session, and then calls the `tryLanguage` function to generate a response based on the provided language. The response is then sent to the user, and the user's dialog status is updated.
 
-1. GenerateCompletion(prompt, modelName, url)
-   - Takes a prompt, model name, and URL as input.
-   - Creates a ChatRequest struct with the given prompt, model name, and temperature.
-   - Converts the ChatRequest struct to JSON.
-   - Sends a POST request to the given URL with the JSON data.
-   - Reads the response body and parses it as a ChatResponse struct.
-   - Returns the ChatResponse struct and any errors encountered.
+### StartDialogSequence
 
-2. GenerateCompletionWithPWD(prompt, modelName, url, s_pwd, u_pwd)
-   - Takes a prompt, model name, URL, stored password, and user-provided password as input.
-   - Checks if the user-provided password matches the stored password.
-   - If the passwords match, calls GenerateCompletion with the given parameters and returns the result.
-   - If the passwords don't match, returns an error.
+This function takes a bot API, chat ID, prompt, context, and AI endpoint as input. It retrieves the user from the database, logs the GPT model and prompt, and generates a completion using the prompt and GPT model. If there is an error, it calls the `errorMessage` function. If there is no error, it logs the response, sends the response to the user, and updates the user's dialog status.
 
-3. GenerateImageStableDissusion(prompt, size)
-   - Takes a prompt and size as input.
-   - Creates a payload with the given prompt and size.
-   - Converts the payload to JSON.
-   - Sends a POST request to the given URL with the JSON data.
-   - Reads the response body and parses it as a GenerationResponse struct.
-   - Returns the image URL from the GenerationResponse struct and any errors encountered.
+### LocalAI
 
-4. UploadToTelegraph(fileName)
-   - Takes a file name as input.
-   - Gets the absolute path to the file.
-   - Opens the file using the absolute path.
-   - Uploads the file to Telegraph using the telegraph.Upload function.
-   - Returns the uploaded file link.
+This package provides a set of functions to manage and interact with a local AI model. It includes functions for setting up a sequence with a key, starting a dialog sequence, and generating completions and images.
 
-5. deleteFromTemp(fileName)
-   - Takes a file name as input.
-   - Gets the absolute path to the file.
-   - Deletes the file from the temporary directory.
+### GenerateCompletion
 
-### startDialogSequence.go
+This function takes a prompt, model name, and URL as input. It creates a ChatRequest with the model name, prompt, and temperature, converts the ChatRequest to JSON, sends a POST request to the URL with the JSON data, reads the response body, parses the JSON response into a ChatResponse, and returns the ChatResponse.
 
-This file contains functions for managing user sessions and handling dialog sequences.
+### GenerateCompletionWithPWD
 
-1. errorMessage(err, bot, user)
-   - Logs the error.
-   - Sends an error message to the user via the bot.
-   - Sends a message instructing the user to recreate the client and initialize a new session.
-   - Removes the user from the database.
+This function takes a prompt, model name, URL, and passwords as input. It checks if the passwords match, calls GenerateCompletion with the prompt, model name, and URL, and returns the result.
 
-2. StartDialogSequence(bot, chatID, promt, ctx, ai_endpoint)
-   - Acquires a lock.
-   - Retrieves the user from the database.
-   - Logs the GPT model and prompt.
-   - Generates a completion using the prompt and GPT model.
-   - Handles errors by calling errorMessage.
-   - Logs the response.
-   - Sends the response to the user via the bot.
-   - Updates the user's dialog status.
-   - Releases the lock.
+### GenerateImageStableDissusion
 
-3. LogResponse(resp)
-   - Logs various details about the response, including the full response object, created timestamp, ID, model, object, Choices[0], and usage statistics.
+This function takes a prompt and size as input. It creates a payload with the prompt and size, converts the payload to JSON, sends a POST request to the URL with the JSON data, reads the response body, parses the JSON response into a GenerationResponse, and returns the image URL.
 
-### setupSequenceWithKey.go
+### UploadToTelegraph
 
-This file contains functions for setting up user sessions and handling dialog sequences with a key.
+This function takes a file name as input. It gets the absolute path to the file, opens the file, uploads the file to telegraph, and returns the link.
 
-1. SetupSequenceWithKey(bot, user, language, ctx, spwd, ai_endpoint)
-   - Acquires a lock on mu.
-   - Assigns chatID to user.ID.
-   - Assigns gptKey to user.AiSession.GptKey.
-   - Logs user GPT key from session.
-   - Logs user model from session.
-   - Logs upwd.
-   - Checks if language is "English", "Russian" or default.
-   - Calls tryLanguage function based on language.
-   - Updates user.DialogStatus to 4.
-   - Updates db.UsersMap with user.
+### DeleteFromTemp
 
-2. tryLanguage(user, language, languageCode, ctx, ai_endpoint, spwd, upwd)
-   - Assigns languagePromt based on languageCode.
-   - Logs languagePromt.
-   - Assigns model to user.AiSession.GptModel.
-   - Calls GenerateCompletionWithPWD function.
-   - Logs response.
-   - Returns answer from response.
+This function takes a file name as input. It gets the absolute path to the file and deletes the file from the local machine.
 
-3. GenerateCompletionWithPWD(languagePromt, model, ai_endpoint, spwd, upwd)
-   - TODO: implement GenerateCompletionWithPWD.
+## Edge Cases
 
-4. errorMessage(err, bot, user)
-   - TODO: implement errorMessage.
+- If the passwords do not match, the `GenerateCompletionWithPWD` function will return an error.
+- If the user is not found in the database, the `StartDialogSequence` function will return an error.
+- If there is an error during the generation of the completion or image, the corresponding functions will return an error.
 
+## Conclusion
+
+The `localai` package provides a set of functions to manage and interact with a local AI model. It includes functions for setting up a sequence with a key, starting a dialog sequence, and generating completions and images. The package also includes functions for uploading files to telegraph and deleting files from the local machine.

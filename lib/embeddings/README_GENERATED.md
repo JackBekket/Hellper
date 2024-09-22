@@ -1,75 +1,31 @@
 # embeddings
 
-This package provides functions for loading documents into a vector store, performing semantic search, and running a retrieval QA chain using an OpenAI model.
+This package provides functions for loading documents into a vector store, querying the store for relevant documents, and performing semantic search. It utilizes the OpenAI API for embeddings and the pgvector library for storing and retrieving vectors.
 
-## Environment variables, flags, cmdline arguments, files and their paths that can be used for configuration
-
-- `ai_url`: URL of the OpenAI API
-- `api_token`: API token for the OpenAI API
-- `db_link`: Database connection string for the vector store
-- `name`: Name of the collection in the vector store
-
-## Edge cases of how application can be launched
-
-- No specific edge cases mentioned in the code.
-
-## Project package structure
+## File Structure
 
 ```
 lib/embeddings/
-    query.go
-    load.go
-    common.go
+  common.go
+  load.go
+  query.go
 ```
 
-## Major code parts
+## Code Summary
 
-### Rag function
+### common.go
 
-- Takes an OpenAI API URL, API token, a question, the number of results to return, and a vector store as input.
-- Initializes an OpenAI client using the provided API URL, token, and model.
-- Creates a retrieval QA chain using the OpenAI client and the vector store.
-- Runs the retrieval QA chain with the given question and a maximum of 2048 tokens.
-- Returns the final answer and any error.
+- The `LoadEnv()` function is not implemented.
+- The `GetVectorStore()` function takes an AI service URL, API token, and database link as input. It creates a connection to the database, an embeddings client using the OpenAI API, and a vector store using the pgvector library. The vector store is connected to the database and uses the embeddings client. The function returns the vector store and any errors encountered.
+- The `GetVectorStoreWithOptions()` function is similar to `GetVectorStore()`, but it also takes a collection name as input. It creates a vector store using the pgvector library, connecting to the database, using the embeddings client, and specifying the collection name. The function returns the vector store and any errors encountered.
 
-### SemanticSearch function
+### load.go
 
-- Takes a search query, the maximum number of results to return, a vector store, and optional vector store options as input.
-- Performs a similarity search on the vector store using the given search query and maximum results.
-- Prints the similarity search results, including the page content and score for each document.
-- Returns the search results and any error.
+- The `LoadDocsToStore()` function takes a list of documents and a vector store as input. It prints the number of documents to be loaded, adds the documents to the vector store, and prints a success message. It also logs any errors encountered.
+- The `getDocs()` function takes a source string as input. It fetches data from the given source, loads and splits the data into documents, and returns the documents and any errors.
 
-### LoadDocsToStore function
+### query.go
 
-- Takes a slice of documents and a vector store as input.
-- Prints the number of documents to be loaded.
-- Adds the documents to the vector store.
-- Prints a success message or any error.
-
-### getDocs function
-
-- Takes a source URL as input.
-- Sends a GET request to the given source.
-- Loads and splits the response body using document loaders and text splitters.
-- Returns the loaded documents and any error.
-
-### LoadEnv function
-
-- Unimplemented.
-
-### GetVectorStore function
-
-- Takes an OpenAI API URL, API token, and database connection string as input.
-- Creates a pgxpool.Pool from the database connection string.
-- Creates an embeddings.Embedder using the OpenAI API with the given API token and base URL.
-- Creates a pgvector.VectorStore using the Embedder and the pgxpool.Pool.
-- Returns the VectorStore and any error.
-
-### GetVectorStoreWithOptions function
-
-- Takes an OpenAI API URL, API token, database connection string, and a collection name as input.
-- Creates a pgxpool.Pool from the database connection string.
-- Creates an embeddings.Embedder using the OpenAI API with the given API token and base URL.
-- Creates a pgvector.VectorStore using the Embedder, the pgxpool.Pool, and the given collection name.
-- Returns the VectorStore and any error.
+- The `Rag()` function takes an AI service URL, API token, question, number of results, and a vector store as input. It sets the base URL to the AI service URL, creates an embeddings client using the provided parameters, runs a retrieval QA chain using the embeddings client and the provided store, prints the final answer, and returns the result and any error.
+- The `SemanticSearch()` function takes a search query, maximum number of results, a vector store, and optional options as input. It performs a similarity search using the provided store and options, prints the similarity search results, and returns the search results and any error.
 
