@@ -125,15 +125,12 @@ func (c *Commander) HandleModelChoose(updateMessage *tgbotapi.CallbackQuery) {
 	chatID := updateMessage.From.ID
 	messageID := updateMessage.Message.MessageID
 	model_name := updateMessage.Data
-	fmt.Println("Data:", updateMessage.Data)
 	user := db.UsersMap[chatID]
 	network := user.Network
-	fmt.Println("Network ", network)
 	switch network {
 	case "localai":
 		switch model_name {
 		case "wizard-uncensored-13b":
-			fmt.Println("I'm here")
 			c.attachModel(model_name, chatID)
 			user.AiSession.GptModel = model_name
 			c.RenderLanguage(chatID)
