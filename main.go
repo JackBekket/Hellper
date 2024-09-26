@@ -24,33 +24,32 @@ type AdminData struct {
 
 func main() {
 
-	_= godotenv.Load()
-	api_token := os.Getenv("OPENAI_API_KEY")	// this is not openai key actually, it's local key for localai
+	_ = godotenv.Load()
+	api_token := os.Getenv("OPENAI_API_KEY") // this is not openai key actually, it's local key for localai
 	//conn_pg_link := os.Getenv("PG_LINK")
 
 	/*
-	err := env.Load()
-	if err != nil {
-		log.Panicf("could not load env from: %v", err)
-	}
+		err := env.Load()
+		if err != nil {
+			log.Panicf("could not load env from: %v", err)
+		}
 
-	token, err := env.LoadTGToken()
-	if err != nil {
-		log.Panic(err)
-	}
-	log.Println("TG token is: ", token)
+		token, err := env.LoadTGToken()
+		if err != nil {
+			log.Panic(err)
+		}
+		log.Println("TG token is: ", token)
 
-	adminData := env.LoadAdminData()
-	//local_access_pwd:= env.LoadLocalPD()
-	ai_endpoint := env.LoadLocalAI_Endpoint()
-	log.Println("ai endpoint is: ", ai_endpoint)
+		adminData := env.LoadAdminData()
+		//local_access_pwd:= env.LoadLocalPD()
+		ai_endpoint := env.LoadLocalAI_Endpoint()
+		log.Println("ai endpoint is: ", ai_endpoint)
 
-	bot, err := tgbotapi.NewBotAPI(token)
-	if err != nil {
-		log.Fatalf("tg token missing: %v\n", err)
-	}
+		bot, err := tgbotapi.NewBotAPI(token)
+		if err != nil {
+			log.Fatalf("tg token missing: %v\n", err)
+		}
 	*/
-
 
 	//token := api_token
 	token := os.Getenv("TG_KEY")
@@ -59,9 +58,9 @@ func main() {
 	admin_key := api_token
 	admin_id := os.Getenv("ADMIN_ID")
 	id, err := strconv.ParseInt(admin_id, 0, 64)
-			if err != nil {
-				log.Printf("admin id error parse: %s", admin_id)
-			}
+	if err != nil {
+		log.Printf("admin id error parse: %s", admin_id)
+	}
 	ai_endpoint := os.Getenv("AI_ENDPOINT")
 	log.Println("ai endpoint is: ", ai_endpoint)
 
@@ -76,7 +75,6 @@ func main() {
 		GPTKey: admin_key,
 	}
 
-
 	// init database and commander
 	usersDatabase := database.UsersMap
 	ctx := context.Background()
@@ -89,18 +87,22 @@ func main() {
 
 	upd_ch := make(chan tgbotapi.Update)
 
-	//updateHandler := 
+	//updateHandler :=
 	updates := bot.GetUpdatesChan(u)
 
 	// handling any incoming updates through channel
-	go dialog.HandleUpdates(upd_ch,bot,*comm)
-
+	go dialog.HandleUpdates(upd_ch, bot, *comm)
 
 	//whenever bot gets a new message, check for user id in the database happens, if it's a new user, the entry in the database is created.
-	
-	for update := range updates {
 
-		chatID := update.Message.From.ID
+	for update := range updates {
+		//inline keyboards logic (it works as a callback)
+		var chatID int64
+		if update.CallbackQuery != nil {
+			chatID = update.CallbackQuery.Message.Chat.ID
+		} else {
+			chatID = update.Message.From.ID
+		}
 		_, ok := usersDatabase[chatID]
 		if !ok {
 			upd_ch <- update
@@ -108,7 +110,7 @@ func main() {
 		if ok {
 			upd_ch <- update
 		}
-	}
 
+	}
 
 } // end of main func
