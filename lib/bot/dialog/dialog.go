@@ -21,6 +21,7 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 				//comm.CheckAdmin(adminData, update.Message)
 				comm.AddNewUserToMap(update.Message)
 			}
+			ai_endpoint := user.AiSession.Base_url
 			if ok {
 				//chatID = int64(chatID)
 
@@ -70,7 +71,7 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 
 				//chatID := update.Message.From.ID
 				//user, ok := usersDatabase[chatID]
-				ai_endpoint := user.AiSession.Base_url
+
 				if !ok {
 					comm.AddNewUserToMap(update.Message)
 				}
@@ -90,8 +91,8 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 						comm.InputYourAPIKey(update.Message)
 					case 3:
 						comm.ChooseModel(update.Message)
-					case 5:
-						comm.ConnectingToAiWithLanguage(update.Message, ai_endpoint)
+					case 4, 5:
+						comm.WrongResponse(update.Message)
 					case 6:
 						comm.DialogSequence(update.Message, ai_endpoint)
 
@@ -106,9 +107,13 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 			chatID := int64(update.CallbackQuery.Message.Chat.ID)
 			db := comm.GetUsersDb()
 			user := db[int64(chatID)]
+			ai_endpoint := user.AiSession.Base_url
+
 			switch user.DialogStatus {
 			case 4:
 				comm.HandleModelChoose(update.CallbackQuery)
+			case 5:
+				comm.ConnectingToAiWithLanguage(update.CallbackQuery, ai_endpoint)
 			}
 		}
 	} // end of main func

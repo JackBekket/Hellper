@@ -7,8 +7,8 @@ func (c *Commander) RenderModelMenuOAI(chatID int64) {
 	msg := tgbotapi.NewMessage(chatID, msgTemplates["case1"])
 	msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("gpt-3.5", "gpt_3_5"),
-			tgbotapi.NewInlineKeyboardButtonData("gpt-4", "gpt_4"),
+			tgbotapi.NewInlineKeyboardButtonData("gpt-3.5", "gpt-3.5"),
+			tgbotapi.NewInlineKeyboardButtonData("gpt-4", "gpt-4"),
 		),
 	)
 	c.bot.Send(msg)
@@ -56,8 +56,8 @@ func (c *Commander) RenderLanguage(chatID int64) {
 	msg := tgbotapi.NewMessage(chatID, "Choose a language or send 'Hello' in your desired language.")
 	msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("English", "language_english"),
-			tgbotapi.NewInlineKeyboardButtonData("Russian", "language_russian"),
+			tgbotapi.NewInlineKeyboardButtonData("English", "English"),
+			tgbotapi.NewInlineKeyboardButtonData("Russian", "Russian"),
 		),
 	)
 

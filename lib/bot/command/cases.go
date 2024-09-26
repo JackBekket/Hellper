@@ -276,16 +276,13 @@ func (c *Commander) ChangeDialogStatus(chatID int64, ds int8) {
 	user.DialogStatus = ds
 }
 
-// update Dialog_Status = 4
-func (c *Commander) WrongModel(updateMessage *tgbotapi.Message) {
+func (c *Commander) WrongResponse(updateMessage *tgbotapi.Message) {
 	chatID := updateMessage.From.ID
 	user := db.UsersMap[chatID]
 
-	msg := tgbotapi.NewMessage(user.ID, "type wizard-uncensored-13b")
+	msg := tgbotapi.NewMessage(user.ID, "Please use provided keyboard")
 	c.bot.Send(msg)
 
-	user.DialogStatus = 4
-	db.UsersMap[chatID] = user
 }
 
 // update Dialog_Status = 0
@@ -301,11 +298,11 @@ func (c *Commander) WrongNetwork(updateMessage *tgbotapi.Message) {
 }
 
 // update update Dialog_Status 5 -> 6
-func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.Message, ai_endpoint string) {
+func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.CallbackQuery, ai_endpoint string) {
 	_ = godotenv.Load()
-
+	messageID := updateMessage.Message.MessageID
 	chatID := updateMessage.From.ID
-	language := updateMessage.Text
+	language := updateMessage.Data
 	user := db.UsersMap[chatID]
 	log.Println("check gpt key exist:", user.AiSession.GptKey)
 
@@ -332,6 +329,12 @@ func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.Message, 
 		log.Println("network: ", network)
 		go langchain.SetupSequenceWithKey(c.bot, user, language, ctx, "") //openai
 	}
+
+	callbackResponse := tgbotapi.NewCallback(updateMessage.ID, "🐈💨")
+	c.bot.Send(callbackResponse)
+
+	deleteMsg := tgbotapi.NewDeleteMessage(chatID, messageID)
+	c.bot.Send(deleteMsg)
 
 }
 
