@@ -1,4 +1,4 @@
-# Package: dialog
+## Package: dialog
 
 ### Imports:
 - log
@@ -9,8 +9,8 @@
 
 ### External Data, Input Sources:
 - Updates from Telegram bot API
-- Command data from Telegram bot API
-- Database for user information
+- Command data from command package
+- Database for user data
 
 ### Summary:
 The `HandleUpdates` function is responsible for handling incoming updates from the Telegram bot API and managing user interactions. It iterates through the updates and processes each message based on the command provided by the user.
@@ -22,7 +22,7 @@ The `HandleUpdates` function is responsible for handling incoming updates from t
 - `/search_doc`: Searches for documents based on the provided prompt and returns the top 3 results.
 - `/rag`: Performs a RAG (Retrieval Augmented Generation) task based on the provided prompt.
 - `/instruct`: Calls a local AI model to generate content based on the provided prompt and user's AI session settings.
-- `/usage`: Displays the usage statistics for the user.
+- `/usage`: Displays the user's current usage statistics.
 - `/helper`: Sends a media helper message to the user.
 
 #### User Interaction:
@@ -38,7 +38,7 @@ The `HandleUpdates` function is responsible for handling incoming updates from t
 - The function connects the user to the chosen AI model using the provided API key and base URL.
 
 #### Dialog Sequence:
-- The function manages the dialog sequence by calling the appropriate functions based on the user's dialog status and input.
+- Once connected to the AI, the function initiates a dialog sequence with the user, allowing them to interact with the AI and receive responses.
 
-This summary provides a comprehensive overview of the `HandleUpdates` function and its role in managing user interactions and dialog flow within the `dialog` package.
+The `HandleUpdates` function provides a comprehensive framework for handling user interactions, managing dialog states, and connecting users to their chosen AI models. It ensures a smooth and efficient user experience by providing a clear and organized structure for handling various commands and user interactions.
 

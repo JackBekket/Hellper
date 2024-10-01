@@ -15,7 +15,7 @@ github.com/joho/godotenv
 
 ### Code Summary:
 
-The package provides functions to load and retrieve environment variables from the `.env` file. It also parses and stores admin data, including admin IDs and GPT keys, from the environment variables. Additionally, it retrieves the Telegram token, local password, local AI endpoint, and admin token from the environment variables.
+The package provides functions to load and retrieve environment variables from the `.env` file. It also includes functions to parse and store admin data, such as admin IDs and GPT keys, as well as functions to retrieve the Telegram token, local password, local AI endpoint, and admin token.
 
 #### Load() function:
 
@@ -45,4 +45,16 @@ The package provides functions to load and retrieve environment variables from t
 #### GetAdminToken() function:
 
 - Retrieves the admin token from the environment variables.
+
+### Edge Cases:
+
+- If the `.env` file is not found or is empty, the package will return an error when attempting to load environment variables.
+- If any of the required environment variables are missing, the corresponding functions will return an error.
+
+### Project Package Structure:
+
+```
+lib/bot/env/
+├── newEvn.go
+```
 

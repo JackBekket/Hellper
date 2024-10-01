@@ -5,11 +5,10 @@
 - github.com/tmc/langchaingo/memory
 
 ### External Data, Input Sources:
-- UsersMap: A map that stores user data, where the key is the Telegram user ID (int64) and the value is a User struct.
-- UsageMap: A map that stores session usage data, where the key is the Telegram user ID (int64) and the value is a SessionUsage struct.
+- UsersMap: A map that stores user data, where the key is the telegram user ID and the value is a User struct.
+- UsageMap: A map that stores session usage data, where the key is the session ID and the value is a SessionUsage struct.
 
 ### Code Summary:
-
 #### User Struct:
 - Represents a user in the database.
 - Contains fields for user ID, username, dialog status, admin status, AI session, and network.
@@ -33,10 +32,10 @@
 - Updates the usage data for a specific user in the UsersMap.
 
 #### UpdateSessionUsage Function:
-- Updates the session usage data for a specific user in the UsageMap.
+- Updates the usage data for a specific session in the UsageMap.
 
 #### GetSessionUsage Function:
-- Retrieves the session usage data for a specific user from the UsageMap.
+- Retrieves the usage data for a specific session from the UsageMap.
 
 ### Package: database
 
