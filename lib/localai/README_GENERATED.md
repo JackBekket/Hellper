@@ -1,33 +1,4 @@
-## Package: localai
-
-### Imports:
-- context
-- log
-- db "github.com/JackBekket/hellper/lib/database"
-- tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-
-### External Data, Input Sources:
-- db.UsersMap: A map containing user data from the database.
-- chatID: The ID of the chat to which the message should be sent.
-- promt: The prompt to be sent to the AI model.
-- ctx: A context object for managing the request.
-- ai_endpoint: The endpoint for the AI model.
-
-### Code Summary:
-
-#### errorMessage Function:
-This function handles errors that occur during the process of creating a request. It logs the error, sends an error message to the user, and removes the user from the database.
-
-#### StartDialogSequence Function:
-This function initiates a dialog sequence with the AI model. It retrieves the user's AI session data, logs the GPT model and prompt, and calls the GenerateCompletion function to get the AI's response. If an error occurs, it calls the errorMessage function. Otherwise, it logs the response, formats the response text, and sends it to the user. Finally, it updates the user's dialog status and saves the changes to the database.
-
-#### LogResponse Function:
-This function logs the full response object, including the created timestamp, response ID, model, object, choices, and usage information.
-
-
-
-lib/localai/localai.go
-## localai package
+# localai package
 
 This package provides functions for interacting with a local AI model and generating images using Stable Diffusion.
 
@@ -49,8 +20,6 @@ import (
 ```
 
 ### External Data, Input Sources
-
-The package uses the following external data and input sources:
 
 1. Local AI model: The package assumes that a local AI model is available at the specified URL.
 2. Stable Diffusion model: The package uses the Stable Diffusion model for image generation.
@@ -82,14 +51,22 @@ lib/localai/setupSequenceWithKey.go
 ## Package: localai
 
 ### Imports:
-- context
-- log
-- sync
 
-- db "github.com/JackBekket/hellper/lib/database"
-- tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+```
+import (
+	"context"
+	"log"
+	"sync"
+
+	db "github.com/JackBekket/hellper/lib/database"
+	//"github.com/sashabaranov/go-openai"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+)
+```
 
 ### External Data, Input Sources:
+
 - Database: `db.User` struct, which contains information about the user, including their AI session data.
 - Telegram Bot API: `tgbotapi.BotAPI` struct, which is used to interact with the Telegram bot.
 - AI Endpoint: `ai_endpoint` string, which specifies the URL of the AI service to be used.
@@ -126,6 +103,35 @@ This function logs the AI service's response to the console.
 #### errorMessage Function:
 
 This function handles any errors that occur during the process and sends an error message to the user via the Telegram bot.
+
+
+
+lib/localai/startDialogSequence.go
+## Package: localai
+
+### Imports:
+- context
+- log
+- db "github.com/JackBekket/hellper/lib/database"
+- tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+
+### External Data, Input Sources:
+- db.UsersMap: A map containing user data from the database.
+- chatID: The ID of the chat to which the message should be sent.
+- promt: The prompt to be sent to the AI model.
+- ctx: A context object for managing the request.
+- ai_endpoint: The endpoint for the AI model.
+
+### Code Summary:
+
+#### errorMessage Function:
+This function handles errors that occur during the process of creating a request. It logs the error, sends an error message to the user, and removes the user from the database.
+
+#### StartDialogSequence Function:
+This function initiates a dialog sequence with the AI model. It retrieves the user's AI session data, logs the GPT model and prompt, and calls the GenerateCompletion function to get the AI's response. If an error occurs, it calls the errorMessage function. Otherwise, it logs the response, formats the response text, and sends it to the user. Finally, it updates the user's dialog status and saves the changes to the database.
+
+#### LogResponse Function:
+This function logs the full response object, including the created timestamp, response ID, model, object, choices, and usage information.
 
 
 

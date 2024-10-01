@@ -1,3 +1,45 @@
+## Package: langchain
+
+### Imports:
+- context
+- encoding/json
+- log
+- github.com/JackBekket/hellper/lib/database
+- github.com/tmc/langchaingo/llms
+- github.com/tmc/langchaingo/schema
+
+### External Data, Input Sources:
+- Database: The code uses a database (likely a relational database like PostgreSQL or MySQL) to store user information and session usage data. The database is accessed through the `db` package.
+
+### Code Summary:
+#### ChainCallbackHandler:
+- This struct implements a callback handler for various events in a LangChain agent.
+- It includes methods for handling agent actions, agent finishes, chain ends, chain errors, chain starts, LLM errors, LLM content generation starts, LLM starts, retriever ends, retriever starts, streaming functions, tool ends, tool errors, and tool starts.
+- The `HandleLLMGenerateContentEnd` method is responsible for logging the content choice, stop reason, context, and generation information.
+- The `LogResponseContentChoice` method is called within `HandleLLMGenerateContentEnd` to log the content choice, stop reason, context, and generation information.
+- It also updates the user's session usage information based on the number of prompt tokens, completion tokens, and total tokens.
+
+#### Other Methods:
+- The code includes other methods like `HandleText` and `HandleLLMGenerateContentEnd` that can be implemented as needed.
+
+#### Database Interaction:
+- The code uses the `db` package to interact with the database.
+- It retrieves user information from the context and updates the user's session usage information based on the number of prompt tokens, completion tokens, and total tokens.
+
+#### Logging:
+- The code uses the `log` package to log various events and information, such as content choices, stop reasons, generation information, and user information.
+
+#### Usage Information:
+- The code updates the user's session usage information based on the number of prompt tokens, completion tokens, and total tokens.
+- This information is stored in a separate structure to avoid race conditions.
+
+#### Summary:
+- The code provides a callback handler for various events in a LangChain agent.
+- It includes methods for handling agent actions, agent finishes, chain ends, chain errors, chain starts, LLM errors, LLM content generation starts, LLM starts, retriever ends, retriever starts, streaming functions, tool ends, tool errors, and tool starts.
+- The code also interacts with a database to store user information and session usage data.
+- It uses the `log` package to log various events and information.
+
+lib/langchain/langchain.go
 ## Package: langchain_controller
 
 ### Imports:
@@ -20,14 +62,12 @@ import (
 ```
 
 ### External Data, Input Sources:
-
 - API token for OpenAI or local AI model
 - Model name for OpenAI or local AI model
 - Base URL for local AI model (if applicable)
 - User initial prompt
 
 ### Code Summary:
-
 #### InitializeNewChatWithContextNoLimit:
 
 This function initializes a new chat session with a given API token, model name, base URL (for local AI), and user initial prompt. It creates a new conversation using the specified LLM (OpenAI or local AI) and a memory buffer to store the conversation history. The function returns a new chat session object and an error if any.
@@ -125,7 +165,6 @@ github.com/go-telegram-bot-api/telegram-bot-api/v5
 2. Telegram Bot API: The code uses the `tgbotapi` package to interact with the Telegram Bot API. This allows the code to send messages and receive updates from users via Telegram.
 
 ### Code Summary:
-
 #### errorMessage Function:
 
 This function is called when an error occurs during the process of creating a request. It logs the error, sends an error message to the user, and then sends a helper video to the user. The helper video is selected randomly from a directory containing media files.
@@ -147,46 +186,4 @@ The function first retrieves the user's session information from the database. T
 This function is not used in the provided code but is commented out. It would have been used to log the full response object from the AI model, including information about the model, the response ID, and the usage statistics.
 
 
-
-lib/langchain/handler.go
-## Package: langchain
-
-### Imports:
-- context
-- encoding/json
-- log
-- github.com/JackBekket/hellper/lib/database
-- github.com/tmc/langchaingo/llms
-- github.com/tmc/langchaingo/schema
-
-### External Data, Input Sources:
-- Database: The code uses a database (likely a relational database like PostgreSQL or MySQL) to store user information and session usage data. The database is accessed through the `db` package.
-
-### Code Summary:
-#### ChainCallbackHandler:
-- This struct implements a callback handler for various events in a LangChain agent.
-- It includes methods for handling agent actions, agent finishes, chain ends, chain errors, chain starts, LLM errors, LLM content generation starts, LLM starts, retriever ends, retriever starts, streaming functions, tool ends, tool errors, and tool starts.
-- The `HandleLLMGenerateContentEnd` method is responsible for logging the content choice, stop reason, context, and generation information.
-- The `LogResponseContentChoice` method is called within `HandleLLMGenerateContentEnd` to log the content choice, stop reason, context, and generation information.
-- It also updates the user's session usage information based on the number of prompt tokens, completion tokens, and total tokens.
-
-#### Other Methods:
-- The code includes other methods like `HandleText` and `HandleLLMGenerateContentEnd` that can be implemented as needed.
-
-#### Database Interaction:
-- The code uses the `db` package to interact with the database.
-- It retrieves user information from the context and updates the user's session usage information based on the number of prompt tokens, completion tokens, and total tokens.
-
-#### Logging:
-- The code uses the `log` package to log various events and information, such as content choices, stop reasons, generation information, and user information.
-
-#### Usage Information:
-- The code updates the user's session usage information based on the number of prompt tokens, completion tokens, and total tokens.
-- This information is stored in a separate structure to avoid race conditions.
-
-#### Summary:
-- The code provides a callback handler for various events in a LangChain agent.
-- It includes methods for handling agent actions, agent finishes, chain ends, chain errors, chain starts, LLM errors, LLM content generation starts, LLM starts, retriever ends, retriever starts, streaming functions, tool ends, tool errors, and tool starts.
-- The code also interacts with a database to store user information and session usage data.
-- It uses the `log` package to log various events and information.
 
