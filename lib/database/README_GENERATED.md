@@ -1,14 +1,18 @@
-# Package: database
+## Package: database
 
 ### Imports:
+- gogpt
 - github.com/tmc/langchaingo/chains
 - github.com/tmc/langchaingo/memory
 
 ### External Data, Input Sources:
+- AiSessionMap: A map that stores AiSession objects, where the key is an int64 and the value is an AiSession object.
 - UsersMap: A map that stores user data, where the key is the telegram user ID and the value is a User struct.
 - UsageMap: A map that stores session usage data, where the key is the session ID and the value is a SessionUsage struct.
 
 ### Code Summary:
+The package provides a database for storing and managing AI session data, user data, and session usage data. It includes structures for representing users, sessions, and usage records, as well as functions for adding, updating, and retrieving data from the database.
+
 #### User Struct:
 - Represents a user in the database.
 - Contains fields for user ID, username, dialog status, admin status, AI session, and network.
@@ -37,18 +41,7 @@
 #### GetSessionUsage Function:
 - Retrieves the usage data for a specific session from the UsageMap.
 
-### Package: database
-
-### Imports:
-- gogpt
-
-### External Data, Input Sources:
-- AiSessionMap: A map that stores AiSession objects, where the key is an int64 and the value is an AiSession object.
-
-### Code Summary:
-The code defines a map called AiSessionMap, which stores AiSession objects. Each AiSession object has three fields: GptKey, GptClient, and GptModel. The GptKey field is a string, the GptClient field is a pointer to a gogpt.Client object, and the GptModel field is a string. The AiSessionMap is initialized as an empty map.
-
-### Project Package Structure:
-- lib/database/newUserDataBase.go
+### File Structure:
 - lib/database/newAiSessionDataBase.go
+- lib/database/newUserDataBase.go
 

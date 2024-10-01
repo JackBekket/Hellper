@@ -1,28 +1,3 @@
-# lib/bot/command/addAdminTomap.go  
-## Package: command  
-  
-### Imports:  
-- log  
-- db "github.com/JackBekket/hellper/lib/database"  
-- tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"  
-  
-### External Data:  
-- msgTemplates (not shown in the code, but mentioned in the code)  
-  
-### Code Summary:  
-#### AddAdminToMap function:  
-This function is responsible for adding a new admin to the database and sending a confirmation message to the user. It takes two arguments: adminKey (the API key for the admin's GPT model) and updateMessage (a telegram message object containing information about the user).  
-  
-1. It extracts the chatID from the updateMessage and creates a new User object with the chatID, username, dialog status, admin status, and AI session information (including the adminKey).  
-  
-2. It adds the new User object to the UsersMap (a database or in-memory storage for users).  
-  
-3. It logs a message indicating that the admin has been authorized.  
-  
-4. It sends a confirmation message to the admin using the bot.  
-  
-5. It sends another message to the admin with a one-time reply keyboard containing a button for selecting the GPT model (in this case, only GPT-3.5 is available).  
-  
 # lib/bot/command/addNewUsertoMap.go  
 ## Package: command  
   
@@ -41,50 +16,6 @@ This function is responsible for adding a new user to the database and assigning
 After adding the user to the database, the function logs the user's ID and username. It then creates a new message using the "hello" template from the msgTemplates map and sends it to the user with a one-time reply keyboard containing a "Start!" button.  
   
 The function also includes a commented-out section that checks if the user is already registered and updates the user's Dialog_status accordingly. However, this section is not currently being used.  
-  
-# lib/bot/command/cases.go  
-  
-  
-# lib/bot/command/checkAdmin.go  
-## Package: command  
-  
-### Imports:  
-- fmt  
-- github.com/JackBekket/hellper/lib/bot/env  
-- github.com/go-telegram-bot-api/telegram-bot-api/v5  
-  
-### External data, input sources:  
-- adminData: map[string]env.AdminData  
-- updateMessage: *tgbotapi.Message  
-  
-### CheckAdmin function:  
-This function checks if the user is an admin and updates the "dialogStatus" in the database accordingly. It iterates through the adminData map and compares the chatID of the updateMessage with the ID of each admin. If a match is found, it checks if the admin has a valid GPTKey. If the GPTKey is not empty, the admin is added to the admin map and the function returns. Otherwise, a message is sent to the user informing them that the environment variable is missing, and the user is added to the user map. If no match is found in the adminData map, the user is added to the user map.  
-  
-# lib/bot/command/newCommander.go  
-## Package: command  
-  
-### Imports:  
-- `context`  
-- `github.com/JackBekket/hellper/lib/database`  
-- `github.com/go-telegram-bot-api/telegram-bot-api/v5`  
-  
-### External Data, Input Sources:  
-- `bot`: Telegram bot API instance  
-- `usersDb`: Map of user IDs to database.User objects  
-- `ctx`: Context for the command execution  
-  
-### Commander struct:  
-- `bot`: Telegram bot API instance  
-- `usersDb`: Map of user IDs to database.User objects  
-- `ctx`: Context for the command execution  
-  
-### NewCommander function:  
-- Creates a new Commander instance with the provided bot, users database, and context.  
-  
-### GetCommander function:  
-- (Incomplete)  
-  
-  
   
 # lib/bot/command/msgTemplates.go  
 Package: command  
@@ -116,23 +47,23 @@ The code snippet provides a concise and organized way to manage and access vario
 Package: command  
   
 Imports:  
-- tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"  
+- github.com/go-telegram-bot-api/telegram-bot-api/v5  
   
 External data, input sources:  
 - msgTemplates: A map of message templates used in the code.  
   
 Summary:  
-### RenderModelMenuOAI  
-This function renders a menu for choosing an OAI model. It creates a new message with a predefined template and a one-time reply keyboard containing two buttons: "gpt-3.5" and "gpt-4". The message is sent to the specified chat ID using the bot.  
+### Render OpenAI Model Menu with Inline Keyboard  
+This function renders a menu of OpenAI models with an inline keyboard. It creates a new message with the specified chatID and the message template "case1". The message also includes an inline keyboard with two buttons: "gpt-3.5" and "gpt-4". The message is then sent to the chat using the bot.  
   
-### RenderModelMenuLAI  
-This function renders a menu for choosing an LAI model. It creates a new message with a predefined template and a one-time reply keyboard containing four buttons: "wizard-uncensored-13b", "wizard-uncensored-30b", "tiger-gemma-9b-v1-i1", and "tiger-gemma-9b-v1-i1". The message is sent to the specified chat ID using the bot.  
+### Render LLaMA-based Model Menu with Inline Keyboard  
+This function renders a menu of LLaMA-based models with an inline keyboard. It creates a new message with the specified chatID and the message template "case1". The message also includes an inline keyboard with three rows of buttons: "wizard-uncensored-13b", "wizard-uncensored-30b", and "tiger-gemma-9b-v1-i1". The message is then sent to the chat using the bot.  
   
-### RenderModelMenuVAI  
-This function renders a menu for choosing a VAI model. It creates a new message with a predefined template and a one-time reply keyboard containing two rows of buttons. The first row contains two buttons: "deepseek-coder-6b-instruct" and "wizard-uncensored-code-34b". The second row contains two buttons: "tiger-gemma-9b-v1-i1" and "big-tiger-gemma-27b-v1". The message is sent to the specified chat ID using the bot.  
+### Render Various AI Models Menu with Inline Keyboard  
+This function renders a menu of various AI models with an inline keyboard. It creates a new message with the specified chatID and the message template "case1". The message also includes an inline keyboard with four rows of buttons: "deepseek-coder-6b-instruct", "wizard-uncensored-code-34b", "tiger-gemma-9b-v1-i1", and "big-tiger-gemma-27b-v1". The message is then sent to the chat using the bot.  
   
-### RenderLanguage  
-This function renders a menu for choosing a language. It creates a new message with a predefined template and a one-time reply keyboard containing two buttons: "English" and "Russian". The message is sent to the specified chat ID using the bot.  
+### Render Language Menu with Inline Keyboard  
+This function renders a menu of languages with an inline keyboard. It creates a new message with the specified chatID and a message asking the user to choose a language or send "Hello" in their desired language. The message also includes an inline keyboard with two buttons: "English" and "Russian". The message is then sent to the chat using the bot.  
   
   
   
@@ -179,6 +110,75 @@ This function retrieves and displays the usage statistics for a user. It takes t
 #### SendMediaHelper:  
   
 This function sends a random video from the media directory to the user. It first reads the files in the media directory and selects a random file. Then, it opens the video file, creates a new video message, and sends it to the user.  
+  
+  
+  
+# lib/bot/command/addAdminTomap.go  
+## Package: command  
+  
+### Imports:  
+- log  
+- db "github.com/JackBekket/hellper/lib/database"  
+- tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"  
+  
+### External Data:  
+- msgTemplates (not shown in the code, but mentioned in the code)  
+  
+### Code Summary:  
+#### AddAdminToMap function:  
+This function is responsible for adding a new admin to the database and sending a confirmation message to the user. It takes two arguments: adminKey (the API key for the admin's GPT model) and updateMessage (a telegram message object containing information about the user).  
+  
+1. It extracts the chatID from the updateMessage and creates a new User object with the chatID, username, dialog status, admin status, and AI session information (including the adminKey).  
+  
+2. It adds the new User object to the UsersMap (a database or in-memory storage for users).  
+  
+3. It logs a message indicating that the admin has been authorized.  
+  
+4. It sends a confirmation message to the admin using the bot.  
+  
+5. It sends another message to the admin with a one-time reply keyboard containing a button for selecting the GPT model (in this case, only GPT-3.5 is available).  
+  
+# lib/bot/command/cases.go  
+  
+  
+# lib/bot/command/checkAdmin.go  
+## Package: command  
+  
+### Imports:  
+- fmt  
+- github.com/JackBekket/hellper/lib/bot/env  
+- github.com/go-telegram-bot-api/telegram-bot-api/v5  
+  
+### External data, input sources:  
+- adminData: map[string]env.AdminData  
+- updateMessage: *tgbotapi.Message  
+  
+### CheckAdmin function:  
+This function checks if the user is an admin and updates the "dialogStatus" in the database accordingly. It iterates through the adminData map and compares the chatID of the updateMessage with the ID of each admin. If a match is found, it checks if the admin has a valid GPTKey. If the GPTKey is not empty, the admin is added to the admin map and the function returns. Otherwise, a message is sent to the user informing them that the environment variable is missing, and the user is added to the user map. If no match is found in the adminData map, the user is added to the user map.  
+  
+# lib/bot/command/newCommander.go  
+## Package: command  
+  
+### Imports:  
+- `context`  
+- `github.com/JackBekket/hellper/lib/database`  
+- `github.com/go-telegram-bot-api/telegram-bot-api/v5`  
+  
+### External Data, Input Sources:  
+- `bot`: Telegram bot API instance  
+- `usersDb`: Map of user IDs to database.User objects  
+- `ctx`: Context for the command execution  
+  
+### Commander struct:  
+- `bot`: Telegram bot API instance  
+- `usersDb`: Map of user IDs to database.User objects  
+- `ctx`: Context for the command execution  
+  
+### NewCommander function:  
+- Creates a new Commander instance with the provided bot, users database, and context.  
+  
+### GetCommander function:  
+- (Incomplete)  
   
   
   

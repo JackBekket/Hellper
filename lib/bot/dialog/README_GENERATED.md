@@ -1,44 +1,65 @@
-## Package: dialog
+# Package: dialog
 
 ### Imports:
-- log
-- github.com/JackBekket/hellper/lib/bot/command
-- github.com/JackBekket/hellper/lib/database
-- github.com/JackBekket/hellper/lib/langchain
-- tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+
+```
+"log"
+"github.com/JackBekket/hellper/lib/bot/command"
+"github.com/JackBekket/hellper/lib/database"
+"github.com/JackBekket/hellper/lib/langchain"
+"github.com/go-telegram-bot-api/telegram-bot-api/v5"
+```
 
 ### External Data, Input Sources:
-- Updates from Telegram bot API
-- Command data from command package
-- Database for user data
 
-### Summary:
-The `HandleUpdates` function is responsible for handling incoming updates from the Telegram bot API and managing user interactions. It iterates through the updates and processes each message based on the command provided by the user.
+1. `updates <-chan tgbotapi.Update`: A channel of Telegram updates, providing information about incoming messages, commands, and other events.
+2. `bot *tgbotapi.BotAPI`: A pointer to the Telegram bot API instance, allowing interaction with the Telegram platform.
+3. `comm command.Commander`: A pointer to the command handler, responsible for processing commands and managing user interactions.
 
-#### Command Handling:
-- `/image`: Generates an image based on the provided prompt or a default prompt if none is given.
-- `/restart`: Restarts the user's session by deleting their data from the database.
-- `/help`: Displays a help message with available commands.
-- `/search_doc`: Searches for documents based on the provided prompt and returns the top 3 results.
-- `/rag`: Performs a RAG (Retrieval Augmented Generation) task based on the provided prompt.
-- `/instruct`: Calls a local AI model to generate content based on the provided prompt and user's AI session settings.
-- `/usage`: Displays the user's current usage statistics.
-- `/helper`: Sends a media helper message to the user.
+### Code Summary:
 
-#### User Interaction:
-- The function checks if the user is already in the database and adds them if not.
-- It then determines the user's dialog status and handles the corresponding interaction based on the status.
-- The dialog status is updated as the user progresses through the interaction, and the function logs the user's status and other relevant information.
+The `dialog` package handles user interactions with the Telegram bot, managing dialog flow, command processing, and AI interaction. It iterates through incoming Telegram updates and processes each one, handling callback queries and messages. The package also manages user data, such as AI session details and dialog status, and interacts with the chosen AI model to generate images and provide responses.
 
-#### Network and Model Selection:
-- The function allows the user to choose their preferred network and AI model.
-- It handles the selection process and updates the user's AI session settings accordingly.
+#### 1. HandleUpdates Function:
 
-#### Connecting to AI:
-- The function connects the user to the chosen AI model using the provided API key and base URL.
+This function iterates through the incoming Telegram updates and processes each one. It first checks if the update contains a callback query, which indicates an inline action. If so, it handles the callback logic for inlines. Otherwise, it processes the message and its associated command.
 
-#### Dialog Sequence:
-- Once connected to the AI, the function initiates a dialog sequence with the user, allowing them to interact with the AI and receive responses.
+#### 2. Command Handling:
 
-The `HandleUpdates` function provides a comprehensive framework for handling user interactions, managing dialog states, and connecting users to their chosen AI models. It ensures a smooth and efficient user experience by providing a clear and organized structure for handling various commands and user interactions.
+The code handles various commands, such as "/image", "/restart", "/help", "/search_doc", "/rag", "/instruct", "/usage", and "/helper". Each command has a specific function that is called to process the command and its arguments.
+
+#### 3. User Management:
+
+The code maintains a database of users and their corresponding information, such as their AI session details and dialog status. It also handles adding new users to the database and updating their status based on their interactions with the bot.
+
+#### 4. Dialog Flow:
+
+The code implements a dialog flow for users, guiding them through a series of steps to configure their AI session and interact with the bot. The dialog status is updated based on the user's actions, and the appropriate function is called to handle the next step in the dialog.
+
+#### 5. AI Interaction:
+
+The code interacts with the user's chosen AI model by sending requests to the specified API endpoint. It also handles the generation of images using the specified AI model and parameters.
+
+#### 6. Error Handling:
+
+The code includes error handling for various scenarios, such as when a user is not found in the database or when an error occurs during the AI interaction.
+
+#### 7. Logging:
+
+The code logs various events, such as user dialog status, user ID, and username, to help with debugging and monitoring the bot's behavior.
+
+### Edge Cases:
+
+1. If the Telegram bot is not properly configured or the API key is invalid, the bot will not be able to receive updates and process commands.
+2. If the database connection fails, the bot will not be able to store or retrieve user data, which may lead to issues with user management and dialog flow.
+3. If the AI model is not accessible or returns an error, the bot will not be able to generate images or provide responses based on the user's input.
+
+### Project Package Structure:
+
+```
+lib/
+  bot/
+    dialog/
+      dialog.go
+```
 
