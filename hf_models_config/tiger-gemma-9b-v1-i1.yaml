@@ -3,7 +3,7 @@ context_size: 8192
 mmap: true   
 name: tiger-gemma-9b-v1-i1
 parameters:   
-  model: hugginface://TheDrummer/Tiger-Gemma-9B-v1-GGUF/Tiger-Gemma-9B-v1a-Q4_K_M.gguf
+  model: huggingface://TheDrummer/Tiger-Gemma-9B-v1-GGUF/Tiger-Gemma-9B-v1a-Q4_K_M.gguf
   # https://huggingface.co/TheDrummer/Tiger-Gemma-9B-v1
 stopwords:
 - <|im_end|>
