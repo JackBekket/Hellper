@@ -12,9 +12,8 @@ import (
 
 
 
-func Rag(ai_url string,api_token string,question string, numOfResults int,store vectorstores.VectorStore) (result string,err error) {
+func Rag(ai_url string,api_token string,question string, numOfResults int,store vectorstores.VectorStore, option ...vectorstores.Option) (result string,err error) {
 
-	//base_url := os.Getenv("AI_BASEURL")
 	base_url := ai_url
 
 	// Create an embeddings client using the. 
@@ -23,7 +22,7 @@ func Rag(ai_url string,api_token string,question string, numOfResults int,store 
 		openai.WithBaseURL(base_url),
 		openai.WithAPIVersion("v1"),
 		openai.WithToken(api_token),
-    	openai.WithModel("wizard-uncensored-13b"),
+    	openai.WithModel("tiger-gemma-9b-v1-i1"),
     	openai.WithEmbeddingModel("text-embedding-ada-002"),
 	)
 	if err != nil {
@@ -34,38 +33,25 @@ func Rag(ai_url string,api_token string,question string, numOfResults int,store 
 		context.Background(),
 		chains.NewRetrievalQAFromLLM(
 			llm,
-			vectorstores.ToRetriever(store, numOfResults),
+			vectorstores.ToRetriever(store, numOfResults, option...),
 		),
 		question,
-		chains.WithMaxTokens(2048),
+		chains.WithMaxTokens(8192),
 	)
 	if err != nil {
 		return "",err
 	}
 
 	fmt.Println("====final answer====\n", result)
-
 	return result,nil
-
 }
 
 func SemanticSearch(searchQuery string, maxResults int, store vectorstores.VectorStore, options ...vectorstores.Option) (searchResults []schema.Document, err error) {
-	//var store vectorstores.VectorStore
-
-
-	/*
-	store, err := GetVectorStore()
-	if err != nil {
-		return nil,err
-	}
-	*/
 
 	searchResults, err = store.SimilaritySearch(context.Background(), searchQuery, maxResults, options...)
-
 	if err != nil {
 		return nil,err
 	}
-
 	fmt.Println("============== similarity search results ==============")
 
 	for _, doc := range searchResults {
@@ -74,8 +60,6 @@ func SemanticSearch(searchQuery string, maxResults int, store vectorstores.Vecto
 		fmt.Println("============================")
 
 	}
-
 	return searchResults,nil
-
 }
 
