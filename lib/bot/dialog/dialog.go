@@ -2,6 +2,7 @@ package dialog
 
 import (
 	"log"
+	"os"
 
 	"github.com/JackBekket/hellper/lib/bot/command"
 	"github.com/JackBekket/hellper/lib/database"
@@ -13,8 +14,7 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 
 	for update := range updates {
 		if update.CallbackQuery == nil {
-			var chatID int64
-			chatID = int64(update.Message.From.ID)
+			chatID := int64(update.Message.From.ID)
 			db := comm.GetUsersDb()
 			user, ok := db[int64(chatID)]
 			if !ok {
@@ -30,16 +30,18 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 				case "image":
 					msg := tgbotapi.NewMessage(user.ID, "Image link generation...")
 					bot.Send(msg)
-
+					baseUrl := os.Getenv("AI_ENDPOINT")
 					promt := update.Message.CommandArguments()
 					log.Printf("Command /image arg: %s\n", promt)
 					if promt == "" {
-						comm.GenerateNewImageLAI_SD("evangelion, neon, anime", chatID, bot)
+						comm.GenerateNewImageLAI_SD("evangelion, neon, anime", baseUrl, chatID, bot)
 					} else {
-						comm.GenerateNewImageLAI_SD(promt, chatID, bot)
+						comm.GenerateNewImageLAI_SD(promt, baseUrl, chatID, bot)
 					}
 					//go openaibot.StartImageSequence(c.bot, updateMessage, chatID, promt, c.ctx)
 
+					//TODO: Consider adding continue to all other command options, since Hellper actively tries to answer on commands after their execution x)
+					continue
 				case "restart":
 					msg := tgbotapi.NewMessage(user.ID, "Restarting session..., type any key")
 					bot.Send(msg)

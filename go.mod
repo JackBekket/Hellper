@@ -3,7 +3,6 @@ module github.com/JackBekket/hellper
 go 1.22.3
 
 require (
-	github.com/StarkBotsIndustries/telegraph v1.0.0
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
 	github.com/joho/godotenv v1.5.1
 	github.com/tmc/langchaingo v0.1.11-0.20240523170143-078e88b77de4
@@ -17,7 +16,6 @@ require (
 	github.com/Masterminds/semver/v3 v3.2.1 // indirect
 	github.com/Masterminds/sprig/v3 v3.2.3 // indirect
 	github.com/PuerkitoBio/goquery v1.9.2 // indirect
-	github.com/anaskhan96/soup v1.2.5 // indirect
 	github.com/andybalholm/cascadia v1.3.2 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
