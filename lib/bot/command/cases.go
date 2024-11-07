@@ -3,10 +3,14 @@ package command
 import (
 	"context"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"net/url"
 	"os"
 	"path"
+	"path/filepath"
 
 	db "github.com/JackBekket/hellper/lib/database"
 	"github.com/JackBekket/hellper/lib/langchain"
@@ -353,45 +357,87 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint 
 }
 
 // stable diffusion
-func (c *Commander) GenerateNewImageLAI_SD(promt string, chatID int64, bot *tgbotapi.BotAPI) {
+func (c *Commander) GenerateNewImageLAI_SD(promt, url string, chatID int64, bot *tgbotapi.BotAPI) {
 	size := "256x256"
-	filepath, err := localai.GenerateImageStableDissusion(promt, size)
+	model := os.Getenv("IMAGE_GENERATION_MODEL")
+	if model == "" {
+		model = "stablediffusion"
+	}
+	urlSuffix := os.Getenv("IMAGE_GENERATION_SUFFIX")
+	if urlSuffix == "" {
+		urlSuffix = "/v1/images/generations"
+	}
+	url += urlSuffix
+
+	filepath, err := localai.GenerateImageStableDiffusion(promt, size, url, model)
 	if err != nil {
 		//return nil, err
 		log.Println(err)
 	}
 	log.Println("url_path: ", filepath)
+
 	sendImage(bot, chatID, filepath)
 }
 
 func sendImage(bot *tgbotapi.BotAPI, chatID int64, path string) {
-	// Prepare a photo message
-	fileName := transformURL(path)
-	log.Println("local file name: ", fileName)
 
-	telegraphLink := localai.UploadToTelegraph(fileName)
-	log.Println("uploaded to telegraph successfully, link is: ", telegraphLink)
+	auth := os.Getenv("OPENAI_API_KEY")
 
-	// Path to the image/file locally
-	// filePath := "/path/to/image.png" + local_path
-	/*
-			 // Creating a LocalFile object from the local path
-			photoBytes, err := ioutil.ReadFile(filePath)
-			if err != nil {
-		    	log.Println(err)
-						}
-			photoFileBytes := tgbotapi.FileBytes{
-				Name:  "picture",
-				Bytes: photoBytes,
-				}
-	*/
-	//message, err := bot.Send(tgbotapi.NewPhotoUpload(int64(chatID), photoFileBytes))
-	/* photo := tgbotapi.NewPhoto(chatID, tgbotapi.FilePath(local_path))
-	if _, err := bot.Send(photo); err != nil {
-	log.Fatalln(err)
-	} */
-	msg := tgbotapi.NewMessage(chatID, telegraphLink)
-	bot.Send(msg)
+	fileName, err := getImage(path, auth)
+	if err != nil {
+		fmt.Errorf("getImageFail: %w", err)
+	}
+	filePath := filepath.Join("tmp", "generated", "images", fileName)
+	photoBytes, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		panic(err)
+	}
+	photoFileBytes := tgbotapi.FileBytes{
+		Name:  "picture",
+		Bytes: photoBytes,
+	}
+	bot.Send(tgbotapi.NewPhoto(int64(chatID), photoFileBytes))
+	deleteFile(fileName)
+}
+
+func getImage(imageURL, authHeader string) (string, error) {
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", imageURL, nil)
+	if err != nil {
+		return "", fmt.Errorf("failed to create GET request: %w", err)
+	}
+	req.Header.Add("Authorization", "Bearer "+authHeader)
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("failed to fetch the image: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("failed to fetch image, status code: %d", resp.StatusCode)
+	}
+
+	fileName := transformURL(imageURL)
+
+	dir := filepath.Join("tmp", "generated", "images")
+	filePath := filepath.Join(dir, fileName)
+	file, err := os.Create(filePath)
+	if err != nil {
+		return "", fmt.Errorf("failed to create file: %v", err)
+	}
+
+	_, err = io.Copy(file, resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("failed to write file: %v", err)
+	}
+
+	return fileName, nil
+
+}
+
+func deleteFile(fileName string) {
+	filePath := filepath.Join("tmp", "generated", "images", fileName)
+	os.Remove(filePath)
 }
 
 func transformURL(inputURL string) string {

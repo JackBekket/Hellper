@@ -8,9 +8,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
-
-	"github.com/StarkBotsIndustries/telegraph"
 )
 
 type ChatRequest struct {
@@ -151,13 +148,14 @@ func GenerateCompletionWithPWD(prompt, modelName string, url string, s_pwd strin
 	}
 }
 
-func GenerateImageStableDissusion(prompt, size string) (string, error) {
-	url := "http://localhost:8080/v1/images/generations"
-
+func GenerateImageStableDiffusion(prompt, size, url, model string) (string, error) {
+	fmt.Println("Request URL:", url)
 	payload := struct {
+		Model  string `json:"model"`
 		Prompt string `json:"prompt"`
 		Size   string `json:"size"`
 	}{
+		Model:  model,
 		Prompt: prompt,
 		Size:   size,
 	}
@@ -167,14 +165,30 @@ func GenerateImageStableDissusion(prompt, size string) (string, error) {
 		return "", err
 	}
 
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(payloadBytes))
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(payloadBytes))
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	// Get the API key from the environment and add it to the Authorization header
+	key := os.Getenv("OPENAI_API_KEY")
+	if key == "" {
+		return "", fmt.Errorf("API key not found in environment variables")
+	}
+	req.Header.Set("Authorization", "Bearer "+key)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
 		return "", err
 	}
 	defer resp.Body.Close()
 
+	// Log if the request fails
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("Request failed with status code %d", resp.StatusCode)
+		errorBody, _ := ioutil.ReadAll(resp.Body)
+		return "", fmt.Errorf("request failed with status code %d: %s", resp.StatusCode, string(errorBody))
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
@@ -187,48 +201,8 @@ func GenerateImageStableDissusion(prompt, size string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	image_url := generationResp.Data[0]
-	fmt.Println("image url from localai pkg: ", image_url.URL)
+	imageURL := generationResp.Data[0].URL
+	fmt.Println("Image URL from localai pkg:", imageURL)
 
-	/* uploadURL := uploadToTelegraph(generationResp.Data[0].URL)
-	if err != nil {
-		return "", err
-	} */
-
-	return image_url.URL, nil
-}
-
-func UploadToTelegraph(fileName string) string {
-	// Get the absolute path to the file
-	absFilePath, err := filepath.Abs(filepath.Join("tmp/generated/images", fileName))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Open the file using the absolute path
-	file, err := os.Open(absFilePath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	// os.File is io.Reader so just pass it.
-	link, err := telegraph.Upload(file, "photo")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	//uncomment line below for automatic file deletion from local machine
-	deleteFromTemp(fileName)
-
-	link = "telegra.ph" + link
-	return link
-}
-
-func deleteFromTemp(fileName string) {
-	absFilePath, err := filepath.Abs(filepath.Join("tmp/generated/images", fileName))
-	if err != nil {
-		log.Fatal(err)
-	}
-	os.Remove(absFilePath)
+	return imageURL, nil
 }
