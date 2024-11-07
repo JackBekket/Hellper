@@ -148,17 +148,14 @@ func GenerateCompletionWithPWD(prompt, modelName string, url string, s_pwd strin
 	}
 }
 
-func GenerateImageStableDiffusion(prompt, size, url string) (string, error) {
-	//TODO: envvvvv
-	url += "/v1/images/generations"
+func GenerateImageStableDiffusion(prompt, size, url, model string) (string, error) {
 	fmt.Println("Request URL:", url)
 	payload := struct {
 		Model  string `json:"model"`
 		Prompt string `json:"prompt"`
 		Size   string `json:"size"`
 	}{
-		//TODO: update to get it from .env
-		Model:  "stablediffusion-cpp",
+		Model:  model,
 		Prompt: prompt,
 		Size:   size,
 	}

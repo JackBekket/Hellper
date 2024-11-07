@@ -359,7 +359,17 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint 
 // stable diffusion
 func (c *Commander) GenerateNewImageLAI_SD(promt, url string, chatID int64, bot *tgbotapi.BotAPI) {
 	size := "256x256"
-	filepath, err := localai.GenerateImageStableDiffusion(promt, size, url)
+	model := os.Getenv("IMAGE_GENERATION_MODEL")
+	if model == "" {
+		model = "stablediffusion"
+	}
+	urlSuffix := os.Getenv("IMAGE_GENERATION_SUFFIX")
+	if urlSuffix == "" {
+		urlSuffix = "/v1/images/generations"
+	}
+	url += urlSuffix
+
+	filepath, err := localai.GenerateImageStableDiffusion(promt, size, url, model)
 	if err != nil {
 		//return nil, err
 		log.Println(err)
