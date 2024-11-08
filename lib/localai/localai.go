@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 type ChatRequest struct {
@@ -211,90 +212,82 @@ func GenerateImageStableDiffusion(prompt, size, url, model string) (string, erro
 }
 
 func TranscribeWhisper(url, model, path string) (string, error) {
-	fmt.Println(model)
-	payload := struct {
-		Model string `json:"model"`
-	}{
-		Model: model,
-	}
-
-	var buf bytes.Buffer
-	writer := multipart.NewWriter(&buf)
-	jsonPart, err := writer.CreateFormField("data")
-	if err != nil {
-		return "", fmt.Errorf("error creating form field for JSON: %v", err)
-	}
-
-	jsonData, err := json.Marshal(payload)
-	if err != nil {
-		return "", fmt.Errorf("error marshalling payload: %v", err)
-	}
-
-	_, err = jsonPart.Write(jsonData)
-	if err != nil {
-		return "", fmt.Errorf("error writing JSON to form field: %v", err)
-	}
 
 	file, err := os.Open(path)
 	if err != nil {
-		return "", fmt.Errorf("error opening .ogg file: %v", err)
+		fmt.Println("Error opening file:", err)
+		return "", err
 	}
 	defer file.Close()
 
-	fileName := filepath.Base(path)
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
 
-	filePart, err := writer.CreateFormFile("file", fileName)
+	err = writer.WriteField("model", model)
 	if err != nil {
-		return "", fmt.Errorf("error creating form file part: %v", err)
+		fmt.Println("Error adding model field:", err)
+		return "", err
 	}
 
-	_, err = io.Copy(filePart, file)
+	part, err := writer.CreateFormFile("file", filepath.Base(path))
 	if err != nil {
-		return "", fmt.Errorf("error copying file to form data: %v", err)
+		fmt.Println("Error creating file field:", err)
+		return "", err
+	}
+	_, err = io.Copy(part, file)
+	if err != nil {
+		fmt.Println("Error copying file data:", err)
+		return "", err
 	}
 
 	err = writer.Close()
 	if err != nil {
-		return "", fmt.Errorf("error closing multipart writer: %v", err)
+		fmt.Println("Error closing writer:", err)
+		return "", err
 	}
 
-	req, err := http.NewRequest("POST", url, &buf)
+	req, err := http.NewRequest("POST", url, body)
 	if err != nil {
-		return "", fmt.Errorf("error creating HTTP request: %v", err)
+		fmt.Println("Error creating request:", err)
+		return "", err
 	}
 
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-
-	key := os.Getenv("OPENAI_API_KEY")
-	if key == "" {
-		return "", fmt.Errorf("API key not found in environment variables")
-	}
-	req.Header.Set("Authorization", "Bearer "+key)
+	req.Header.Set("accept", "application/json")
+	req.Header.Set("Authorization", "Bearer "+os.Getenv("OPENAI_API_KEY"))
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("error sending HTTP request: %v", err)
+		fmt.Println("Error sending request:", err)
+		return "", err
 	}
 	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		errorBody, _ := ioutil.ReadAll(resp.Body)
-		return "", fmt.Errorf("request failed with status code %d: %s", resp.StatusCode, string(errorBody))
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
+	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", fmt.Errorf("error reading response body: %v", err)
+		fmt.Println("Error reading response:", err)
+		return "", err
 	}
 
 	var response struct {
 		Text string `json:"text"`
 	}
-	err = json.Unmarshal(body, &response)
+	err = json.Unmarshal(respBody, &response)
 	if err != nil {
 		return "", fmt.Errorf("error unmarshalling response: %v", err)
 	}
 
-	return response.Text, nil
+	text := response.Text
+
+	//uncomment to remove [BLANK_AUDIO] from output.
+	text = cleanText(text)
+
+	return text, nil
+}
+
+func cleanText(input string) string {
+	if strings.Contains(input, "[BLANK_AUDIO]") && len(strings.Trim(input, "[BLANK_AUDIO]")) == 0 {
+		return "[BLANK_AUDIO]"
+	}
+	return strings.ReplaceAll(input, "[BLANK_AUDIO]", "")
 }

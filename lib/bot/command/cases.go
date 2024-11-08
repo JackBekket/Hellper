@@ -346,7 +346,7 @@ func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.CallbackQ
 //
 // update Dialog_Status 6 -> 6 (loop),
 func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint string) {
-	chatID := updateMessage.From.ID
+	chatID := updateMessage.Chat.ID
 	user := db.UsersMap[chatID]
 
 	if updateMessage != nil {
@@ -355,17 +355,18 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint 
 			ctx := context.WithValue(c.ctx, "user", user)
 			go langchain.StartDialogSequence(c.bot, chatID, promt, ctx, ai_endpoint)
 		} else if updateMessage.Voice != nil {
-			//TODO: delete file afterwards
 			voicePath, err := stt.HandleVoiceMessage(updateMessage, *c.bot)
 			if err != nil {
-				log.Fatal(err)
+				log.Println(err)
 			}
 			url, model := stt.GetEnvsForSST()
 			transcription, err := localai.TranscribeWhisper(url, model, voicePath)
 			if err != nil {
-				log.Fatal(err)
+				log.Println(err)
 			}
-			fmt.Println(transcription)
+			msg := tgbotapi.NewMessage(chatID, transcription)
+			c.bot.Send(msg)
+			DeleteFile(voicePath)
 		}
 	}
 }
