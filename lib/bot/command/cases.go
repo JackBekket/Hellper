@@ -15,6 +15,7 @@ import (
 	db "github.com/JackBekket/hellper/lib/database"
 	"github.com/JackBekket/hellper/lib/langchain"
 	"github.com/JackBekket/hellper/lib/localai"
+	stt "github.com/JackBekket/hellper/lib/localai/audioRecognition"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
 )
@@ -349,10 +350,18 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint 
 	user := db.UsersMap[chatID]
 
 	if updateMessage != nil {
-
-		promt := updateMessage.Text
-		ctx := context.WithValue(c.ctx, "user", user)
-		go langchain.StartDialogSequence(c.bot, chatID, promt, ctx, ai_endpoint)
+		if updateMessage.Text != "" {
+			promt := updateMessage.Text
+			ctx := context.WithValue(c.ctx, "user", user)
+			go langchain.StartDialogSequence(c.bot, chatID, promt, ctx, ai_endpoint)
+		} else if updateMessage.Voice != nil {
+			//TODO: delete file afterwards
+			voicePath, err := stt.HandleVoiceMessage(updateMessage, *c.bot)
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Println(voicePath)
+		}
 	}
 }
 
@@ -397,7 +406,7 @@ func sendImage(bot *tgbotapi.BotAPI, chatID int64, path string) {
 		Bytes: photoBytes,
 	}
 	bot.Send(tgbotapi.NewPhoto(int64(chatID), photoFileBytes))
-	deleteFile(fileName)
+	DeleteFile(filePath)
 }
 
 func getImage(imageURL, authHeader string) (string, error) {
@@ -435,9 +444,8 @@ func getImage(imageURL, authHeader string) (string, error) {
 
 }
 
-func deleteFile(fileName string) {
-	filePath := filepath.Join("tmp", "generated", "images", fileName)
-	os.Remove(filePath)
+func DeleteFile(fileName string) {
+	os.Remove(fileName)
 }
 
 func transformURL(inputURL string) string {
