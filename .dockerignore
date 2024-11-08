@@ -3,11 +3,7 @@
 *.gguf
 
 
-# ignore tmps..?
-tmp
 models
 grpc-build
 cuda-repo-ubuntu2204-12-5-local_12.5.1-555.42.06-1_amd64.deb
 .git
-*.png
-*.img
