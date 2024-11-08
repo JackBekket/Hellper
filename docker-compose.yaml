@@ -9,6 +9,7 @@ services:
     volumes:
       - ./models:/models
       - ./tmp/generated/images:/tmp/generated/images
+      - ./tmp/audio:/tmp/audio
       - ./configuration:/configuration
     ports:
       - 8080:8080
@@ -31,6 +32,7 @@ services:
     volumes:
       - ./models:/models
       - ./tmp/generated/images:/tmp/generated/images
+      - ./tmp/audio:/tmp/audio
       - ./configuration:/configuration
     ports:
       - 8090:8090
