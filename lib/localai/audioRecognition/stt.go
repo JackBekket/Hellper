@@ -11,10 +11,6 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func Smth() {
-	fmt.Println("test")
-}
-
 func HandleVoiceMessage(updateMessage *tgbotapi.Message, bot tgbotapi.BotAPI) (string, error) {
 
 	fileID := updateMessage.Voice.FileID
@@ -64,4 +60,20 @@ func DownloadFile(url, localFilePath string) error {
 	// Write the body to the file
 	_, err = io.Copy(out, resp.Body)
 	return err
+}
+
+// url, model
+func GetEnvsForSST() (string, string) {
+	url := os.Getenv("AI_ENDPOINT")
+	URLSuffix := os.Getenv("VOICE_RECOGNITION_SUFFIX")
+	if URLSuffix == "" {
+		URLSuffix = "/v1/audio/transcriptions"
+	}
+	url += URLSuffix
+
+	model := os.Getenv("VOICE_RECOGNITION_MODEL")
+	if model == "" {
+		model = "whisper-1"
+	}
+	return url, model
 }

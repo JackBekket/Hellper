@@ -360,7 +360,12 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint 
 			if err != nil {
 				log.Fatal(err)
 			}
-			fmt.Println(voicePath)
+			url, model := stt.GetEnvsForSST()
+			transcription, err := localai.TranscribeWhisper(url, model, voicePath)
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Println(transcription)
 		}
 	}
 }

@@ -4,10 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
+	"mime/multipart"
 	"net/http"
 	"os"
+	"path/filepath"
 )
 
 type ChatRequest struct {
@@ -205,4 +208,93 @@ func GenerateImageStableDiffusion(prompt, size, url, model string) (string, erro
 	fmt.Println("Image URL from localai pkg:", imageURL)
 
 	return imageURL, nil
+}
+
+func TranscribeWhisper(url, model, path string) (string, error) {
+	fmt.Println(model)
+	payload := struct {
+		Model string `json:"model"`
+	}{
+		Model: model,
+	}
+
+	var buf bytes.Buffer
+	writer := multipart.NewWriter(&buf)
+	jsonPart, err := writer.CreateFormField("data")
+	if err != nil {
+		return "", fmt.Errorf("error creating form field for JSON: %v", err)
+	}
+
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		return "", fmt.Errorf("error marshalling payload: %v", err)
+	}
+
+	_, err = jsonPart.Write(jsonData)
+	if err != nil {
+		return "", fmt.Errorf("error writing JSON to form field: %v", err)
+	}
+
+	file, err := os.Open(path)
+	if err != nil {
+		return "", fmt.Errorf("error opening .ogg file: %v", err)
+	}
+	defer file.Close()
+
+	fileName := filepath.Base(path)
+
+	filePart, err := writer.CreateFormFile("file", fileName)
+	if err != nil {
+		return "", fmt.Errorf("error creating form file part: %v", err)
+	}
+
+	_, err = io.Copy(filePart, file)
+	if err != nil {
+		return "", fmt.Errorf("error copying file to form data: %v", err)
+	}
+
+	err = writer.Close()
+	if err != nil {
+		return "", fmt.Errorf("error closing multipart writer: %v", err)
+	}
+
+	req, err := http.NewRequest("POST", url, &buf)
+	if err != nil {
+		return "", fmt.Errorf("error creating HTTP request: %v", err)
+	}
+
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	key := os.Getenv("OPENAI_API_KEY")
+	if key == "" {
+		return "", fmt.Errorf("API key not found in environment variables")
+	}
+	req.Header.Set("Authorization", "Bearer "+key)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("error sending HTTP request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		errorBody, _ := ioutil.ReadAll(resp.Body)
+		return "", fmt.Errorf("request failed with status code %d: %s", resp.StatusCode, string(errorBody))
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("error reading response body: %v", err)
+	}
+
+	var response struct {
+		Text string `json:"text"`
+	}
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		return "", fmt.Errorf("error unmarshalling response: %v", err)
+	}
+
+	return response.Text, nil
 }
