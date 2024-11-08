@@ -4,10 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
+	"mime/multipart"
 	"net/http"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
 type ChatRequest struct {
@@ -205,4 +209,85 @@ func GenerateImageStableDiffusion(prompt, size, url, model string) (string, erro
 	fmt.Println("Image URL from localai pkg:", imageURL)
 
 	return imageURL, nil
+}
+
+func TranscribeWhisper(url, model, path string) (string, error) {
+
+	file, err := os.Open(path)
+	if err != nil {
+		fmt.Println("Error opening file:", err)
+		return "", err
+	}
+	defer file.Close()
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+
+	err = writer.WriteField("model", model)
+	if err != nil {
+		fmt.Println("Error adding model field:", err)
+		return "", err
+	}
+
+	part, err := writer.CreateFormFile("file", filepath.Base(path))
+	if err != nil {
+		fmt.Println("Error creating file field:", err)
+		return "", err
+	}
+	_, err = io.Copy(part, file)
+	if err != nil {
+		fmt.Println("Error copying file data:", err)
+		return "", err
+	}
+
+	err = writer.Close()
+	if err != nil {
+		fmt.Println("Error closing writer:", err)
+		return "", err
+	}
+
+	req, err := http.NewRequest("POST", url, body)
+	if err != nil {
+		fmt.Println("Error creating request:", err)
+		return "", err
+	}
+
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	req.Header.Set("accept", "application/json")
+	req.Header.Set("Authorization", "Bearer "+os.Getenv("OPENAI_API_KEY"))
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println("Error sending request:", err)
+		return "", err
+	}
+	defer resp.Body.Close()
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("Error reading response:", err)
+		return "", err
+	}
+
+	var response struct {
+		Text string `json:"text"`
+	}
+	err = json.Unmarshal(respBody, &response)
+	if err != nil {
+		return "", fmt.Errorf("error unmarshalling response: %v", err)
+	}
+
+	text := response.Text
+
+	//uncomment to remove [BLANK_AUDIO] from output.
+	text = cleanText(text)
+
+	return text, nil
+}
+
+func cleanText(input string) string {
+	if strings.Contains(input, "[BLANK_AUDIO]") && len(strings.Trim(input, "[BLANK_AUDIO]")) == 0 {
+		return "[BLANK_AUDIO]"
+	}
+	return strings.ReplaceAll(input, "[BLANK_AUDIO]", "")
 }
