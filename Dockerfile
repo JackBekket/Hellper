@@ -14,7 +14,7 @@ FROM golang:1.22-bookworm
 
 WORKDIR /app
 
-
+COPY ./tmp ./tmp
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
