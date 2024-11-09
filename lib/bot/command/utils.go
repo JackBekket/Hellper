@@ -15,14 +15,14 @@ import (
 
 
 func (c *Commander) HelpCommandMessage(updateMessage *tgbotapi.Message)  {
-	chatID := updateMessage.From.ID
+	chatID := updateMessage.Chat.ID
 	user := db.UsersMap[chatID]
 	msg := tgbotapi.NewMessage(user.ID, msgTemplates["help_command"])
 	c.bot.Send(msg)
 }
 
 func (c *Commander) SearchDocuments(chatID int64, promt string, maxResults int) {
-	//chatID := updateMessage.From.ID
+	
 	_ = godotenv.Load()
 
 	conn_pg_link := os.Getenv("PG_LINK")

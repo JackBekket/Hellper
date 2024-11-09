@@ -28,28 +28,6 @@ func main() {
 	api_token := os.Getenv("OPENAI_API_KEY") // this is not openai key actually, it's local key for localai
 	//conn_pg_link := os.Getenv("PG_LINK")
 
-	/*
-		err := env.Load()
-		if err != nil {
-			log.Panicf("could not load env from: %v", err)
-		}
-
-		token, err := env.LoadTGToken()
-		if err != nil {
-			log.Panic(err)
-		}
-		log.Println("TG token is: ", token)
-
-		adminData := env.LoadAdminData()
-		//local_access_pwd:= env.LoadLocalPD()
-		ai_endpoint := env.LoadLocalAI_Endpoint()
-		log.Println("ai endpoint is: ", ai_endpoint)
-
-		bot, err := tgbotapi.NewBotAPI(token)
-		if err != nil {
-			log.Fatalf("tg token missing: %v\n", err)
-		}
-	*/
 
 	//token := api_token
 	token := os.Getenv("TG_KEY")
@@ -101,7 +79,7 @@ func main() {
 		if update.CallbackQuery != nil {
 			chatID = update.CallbackQuery.Message.Chat.ID
 		} else {
-			chatID = update.Message.From.ID
+			chatID = update.Message.Chat.ID
 		}
 		_, ok := usersDatabase[chatID]
 		if !ok {

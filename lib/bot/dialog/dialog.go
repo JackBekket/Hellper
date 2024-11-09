@@ -14,7 +14,7 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 
 	for update := range updates {
 		if update.CallbackQuery == nil {
-			chatID := int64(update.Message.From.ID)
+			chatID := int64(update.Message.Chat.ID)
 			db := comm.GetUsersDb()
 			user, ok := db[int64(chatID)]
 			if !ok {

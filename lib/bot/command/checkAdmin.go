@@ -11,7 +11,7 @@ import (
 //
 // Loads the key from env into the database.
 func (c *Commander) CheckAdmin(adminData map[string]env.AdminData, updateMessage *tgbotapi.Message) {
-	chatID := updateMessage.From.ID
+	chatID := updateMessage.Chat.ID
 	for evn, admin := range adminData {
 		if admin.ID == chatID {
 			if admin.GPTKey != "" {

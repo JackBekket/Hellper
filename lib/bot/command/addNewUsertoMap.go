@@ -9,7 +9,7 @@ import (
 
 // Adds a new user to the database and assigns "Dialog_status" = 0.
 func (c *Commander) AddNewUserToMap(updateMessage *tgbotapi.Message) {
-	chatID := updateMessage.From.ID
+	chatID := updateMessage.Chat.ID
 	user := database.User{
 		ID:           chatID,
 		Username:     updateMessage.From.UserName,
