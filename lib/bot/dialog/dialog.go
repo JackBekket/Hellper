@@ -22,6 +22,7 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 				comm.AddNewUserToMap(update.Message)
 			}
 			ai_endpoint := user.AiSession.Base_url
+			
 			if ok {
 				//chatID = int64(chatID)
 
@@ -102,7 +103,7 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 
 				}
 
-			}
+			} // usual handle end
 
 		} else {
 			//here goes the callback logic for inlines

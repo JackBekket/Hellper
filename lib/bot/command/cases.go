@@ -11,6 +11,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 
 	db "github.com/JackBekket/hellper/lib/database"
 	"github.com/JackBekket/hellper/lib/langchain"
@@ -348,12 +349,16 @@ func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.CallbackQ
 func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint string) {
 	chatID := updateMessage.Chat.ID
 	user := db.UsersMap[chatID]
-
+	
 	if updateMessage != nil {
 		if updateMessage.Text != "" {
+			if strings.Contains(updateMessage.Text, c.bot.Self.UserName) {
 			promt := updateMessage.Text
 			ctx := context.WithValue(c.ctx, "user", user)
-			go langchain.StartDialogSequence(c.bot, chatID, promt, ctx, ai_endpoint)
+			go langchain.StartDialogSequence(c.bot, chatID, promt, ctx, ai_endpoint) 
+			} else {
+				//log.Println("user prompt without calling bot: ", updateMessage.Text)
+			}
 		} else if updateMessage.Voice != nil {
 			voicePath, err := stt.HandleVoiceMessage(updateMessage, *c.bot)
 			if err != nil {
