@@ -3,6 +3,7 @@ package dialog
 import (
 	"log"
 	"os"
+	"strings"
 
 	"github.com/JackBekket/hellper/lib/bot/command"
 	"github.com/JackBekket/hellper/lib/database"
@@ -22,6 +23,7 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 				comm.AddNewUserToMap(update.Message)
 			}
 			ai_endpoint := user.AiSession.Base_url
+			if strings.Contains(update.Message.Text, bot.Self.UserName) {
 			if ok {
 				//chatID = int64(chatID)
 
@@ -102,7 +104,8 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 
 				}
 
-			}
+			} // usual handle end
+			} // check bot username call end
 
 		} else {
 			//here goes the callback logic for inlines
