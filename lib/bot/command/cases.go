@@ -357,7 +357,7 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint 
 			ctx := context.WithValue(c.ctx, "user", user)
 			go langchain.StartDialogSequence(c.bot, chatID, promt, ctx, ai_endpoint) 
 			} else {
-				log.Println("user prompt without calling bot: ", updateMessage.Text)
+				//log.Println("user prompt without calling bot: ", updateMessage.Text)
 			}
 		} else if updateMessage.Voice != nil {
 			voicePath, err := stt.HandleVoiceMessage(updateMessage, *c.bot)
