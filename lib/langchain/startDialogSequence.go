@@ -14,6 +14,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
+//TODO: investigate why meme videos with helper are not sent by this func!
 // Notifies the user that an error occurred while creating the request.
 // "An error has occured. In order to proceed we need to recreate client and initialize new session"
 // Removes a user from the database (тemporary solution).

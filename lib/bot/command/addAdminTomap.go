@@ -12,7 +12,7 @@ func (c *Commander) AddAdminToMap(
 	updateMessage *tgbotapi.Message,
 
 ) {
-	chatID := updateMessage.From.ID
+	chatID := updateMessage.Chat.ID
 	db.UsersMap[chatID] = db.User{
 		ID:           chatID,
 		Username:     updateMessage.From.UserName,

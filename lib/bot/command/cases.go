@@ -28,7 +28,7 @@ const UserKey contextKey = "user"
 //
 //	DialogStatus 2 -> 3
 func (c *Commander) InputYourAPIKey(updateMessage *tgbotapi.Message) {
-	chatID := updateMessage.From.ID
+	chatID := updateMessage.Chat.ID
 	user := db.UsersMap[chatID]
 
 	msg := tgbotapi.NewMessage(
@@ -43,7 +43,7 @@ func (c *Commander) InputYourAPIKey(updateMessage *tgbotapi.Message) {
 
 // DialogStatus 0 - > 1
 func (c *Commander) ChooseNetwork(updateMessage *tgbotapi.Message) {
-	chatID := updateMessage.From.ID
+	chatID := updateMessage.Chat.ID
 	user := db.UsersMap[chatID]
 	c.HelpCommandMessage(updateMessage)
 	// render menu
@@ -63,7 +63,7 @@ func (c *Commander) ChooseNetwork(updateMessage *tgbotapi.Message) {
 
 // Dialog status 1 -> 2
 func (c *Commander) HandleNetworkChoose(updateMessage *tgbotapi.Message) {
-	chatID := updateMessage.From.ID
+	chatID := updateMessage.Chat.ID
 	network := updateMessage.Text
 	user := db.UsersMap[chatID]
 	switch network {
@@ -95,7 +95,7 @@ func (c *Commander) HandleNetworkChoose(updateMessage *tgbotapi.Message) {
 
 // update Dialog_Status 3 -> 4
 func (c *Commander) ChooseModel(updateMessage *tgbotapi.Message) {
-	chatID := updateMessage.From.ID
+	chatID := updateMessage.Chat.ID
 	gptKey := updateMessage.Text // handling previouse message
 	user := db.UsersMap[chatID]
 	network := user.Network
@@ -127,7 +127,7 @@ func (c *Commander) ChooseModel(updateMessage *tgbotapi.Message) {
 
 // DialogStatus 4 -> 5
 func (c *Commander) HandleModelChoose(updateMessage *tgbotapi.CallbackQuery) {
-	chatID := updateMessage.From.ID
+	chatID := updateMessage.Message.Chat.ID
 	messageID := updateMessage.Message.MessageID
 	model_name := updateMessage.Data
 	user := db.UsersMap[chatID]
@@ -279,7 +279,7 @@ func (c *Commander) ChangeDialogStatus(chatID int64, ds int8) {
 }
 
 func (c *Commander) WrongResponse(updateMessage *tgbotapi.Message) {
-	chatID := updateMessage.From.ID
+	chatID := updateMessage.Chat.ID
 	user := db.UsersMap[chatID]
 
 	msg := tgbotapi.NewMessage(user.ID, "Please use provided keyboard")
@@ -289,7 +289,7 @@ func (c *Commander) WrongResponse(updateMessage *tgbotapi.Message) {
 
 // update Dialog_Status = 0
 func (c *Commander) WrongNetwork(updateMessage *tgbotapi.Message) {
-	chatID := updateMessage.From.ID
+	chatID := updateMessage.Chat.ID
 	user := db.UsersMap[chatID]
 
 	msg := tgbotapi.NewMessage(user.ID, "type openai or localai")
@@ -303,7 +303,7 @@ func (c *Commander) WrongNetwork(updateMessage *tgbotapi.Message) {
 func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.CallbackQuery, ai_endpoint string) {
 	_ = godotenv.Load()
 	messageID := updateMessage.Message.MessageID
-	chatID := updateMessage.From.ID
+	chatID := updateMessage.Message.Chat.ID
 	language := updateMessage.Data
 	user := db.UsersMap[chatID]
 	log.Println("check gpt key exist:", user.AiSession.GptKey)
