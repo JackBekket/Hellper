@@ -127,7 +127,7 @@ func (c *Commander) ChooseModel(updateMessage *tgbotapi.Message) {
 
 // DialogStatus 4 -> 5
 func (c *Commander) HandleModelChoose(updateMessage *tgbotapi.CallbackQuery) {
-	chatID := updateMessage.From.ID
+	chatID := updateMessage.Message.Chat.ID
 	messageID := updateMessage.Message.MessageID
 	model_name := updateMessage.Data
 	user := db.UsersMap[chatID]
@@ -303,7 +303,7 @@ func (c *Commander) WrongNetwork(updateMessage *tgbotapi.Message) {
 func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.CallbackQuery, ai_endpoint string) {
 	_ = godotenv.Load()
 	messageID := updateMessage.Message.MessageID
-	chatID := updateMessage.From.ID
+	chatID := updateMessage.Message.Chat.ID
 	language := updateMessage.Data
 	user := db.UsersMap[chatID]
 	log.Println("check gpt key exist:", user.AiSession.GptKey)
