@@ -3,6 +3,7 @@ package dialog
 import (
 	"log"
 	"os"
+	"strings"
 
 	"github.com/JackBekket/hellper/lib/bot/command"
 	"github.com/JackBekket/hellper/lib/database"
@@ -14,6 +15,15 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 
 	for update := range updates {
 		if update.CallbackQuery == nil {
+
+			var group = false
+			if update.Message.Chat.ID < 0 {
+				group = true
+			}
+			if group && !strings.Contains(update.Message.Text, bot.Self.UserName) {
+				continue
+			}
+
 			chatID := int64(update.Message.Chat.ID)
 			db := comm.GetUsersDb()
 			user, ok := db[int64(chatID)]
@@ -22,7 +32,7 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 				comm.AddNewUserToMap(update.Message)
 			}
 			ai_endpoint := user.AiSession.Base_url
-			
+
 			if ok {
 				//chatID = int64(chatID)
 
@@ -83,6 +93,10 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 					log.Println("user dialog status:", user.DialogStatus)
 					log.Println(user.ID)
 					log.Println(user.Username)
+
+					if group && update.Message.Voice != nil && user.DialogStatus != 6 {
+						continue
+					}
 					switch user.DialogStatus {
 					// first check for user status, (for a new user status 0 is set automatically),
 					// then user reply for the first bot message is logged to a database as name AND user status is updated

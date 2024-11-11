@@ -249,7 +249,7 @@ func (c *Commander) HandleModelChoose(updateMessage *tgbotapi.CallbackQuery) {
 // low level attach model name to user profile
 func (c *Commander) attachModel(model_name string, chatID int64) {
 	fmt.Println(model_name)
-	// TODO: Write down user choise
+	// TODO: Write down user choie
 	log.Printf("Model selected: %s\n", model_name)
 
 	user := db.UsersMap[chatID]
@@ -347,7 +347,7 @@ func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.CallbackQ
 // update Dialog_Status 6 -> 6 (loop),
 func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint string) {
 	chatID := updateMessage.Chat.ID
-	var group bool;
+	var group bool
 	if chatID < 0 {
 		group = true
 	} else {
@@ -356,9 +356,8 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint 
 
 	log.Println("is group: ", group)
 
-
 	user := db.UsersMap[chatID]
-	
+
 	if updateMessage != nil {
 		if updateMessage.Text != "" {
 
@@ -367,14 +366,14 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint 
 				if strings.Contains(updateMessage.Text, c.bot.Self.UserName) {
 					promt := updateMessage.Text
 					ctx := context.WithValue(c.ctx, "user", user)
-					go langchain.StartDialogSequence(c.bot, chatID, promt, ctx, ai_endpoint) 
-					} else {
-						log.Println("user prompt without calling bot: ")
-					}
+					go langchain.StartDialogSequence(c.bot, chatID, promt, ctx, ai_endpoint)
+				} else {
+					log.Println("user prompt without calling bot: ")
+				}
 			} else {
-					promt := updateMessage.Text
-					ctx := context.WithValue(c.ctx, "user", user)
-					go langchain.StartDialogSequence(c.bot, chatID, promt, ctx, ai_endpoint) 
+				promt := updateMessage.Text
+				ctx := context.WithValue(c.ctx, "user", user)
+				go langchain.StartDialogSequence(c.bot, chatID, promt, ctx, ai_endpoint)
 			}
 		} else if updateMessage.Voice != nil {
 			voicePath, err := stt.HandleVoiceMessage(updateMessage, *c.bot)
