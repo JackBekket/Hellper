@@ -28,6 +28,7 @@ const UserKey contextKey = "user"
 //
 //	DialogStatus 2 -> 3
 func (c *Commander) InputYourAPIKey(updateMessage *tgbotapi.Message) {
+	updateMessage.Text = strings.ReplaceAll(updateMessage.Text, " ", "")
 	chatID := updateMessage.Chat.ID
 	user := db.UsersMap[chatID]
 
@@ -63,6 +64,7 @@ func (c *Commander) ChooseNetwork(updateMessage *tgbotapi.Message) {
 
 // Dialog status 1 -> 2
 func (c *Commander) HandleNetworkChoose(updateMessage *tgbotapi.Message) {
+	updateMessage.Text = strings.ReplaceAll(updateMessage.Text, " ", "")
 	chatID := updateMessage.Chat.ID
 	network := updateMessage.Text
 	user := db.UsersMap[chatID]
@@ -95,6 +97,7 @@ func (c *Commander) HandleNetworkChoose(updateMessage *tgbotapi.Message) {
 
 // update Dialog_Status 3 -> 4
 func (c *Commander) ChooseModel(updateMessage *tgbotapi.Message) {
+	updateMessage.Text = strings.ReplaceAll(updateMessage.Text, " ", "")
 	chatID := updateMessage.Chat.ID
 	gptKey := updateMessage.Text // handling previouse message
 	user := db.UsersMap[chatID]
@@ -347,34 +350,13 @@ func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.CallbackQ
 // update Dialog_Status 6 -> 6 (loop),
 func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint string) {
 	chatID := updateMessage.Chat.ID
-	var group bool
-	if chatID < 0 {
-		group = true
-	} else {
-		group = false
-	}
-
-	log.Println("is group: ", group)
-
 	user := db.UsersMap[chatID]
 
 	if updateMessage != nil {
 		if updateMessage.Text != "" {
-
-			//
-			if group == true {
-				if strings.Contains(updateMessage.Text, c.bot.Self.UserName) {
-					promt := updateMessage.Text
-					ctx := context.WithValue(c.ctx, "user", user)
-					go langchain.StartDialogSequence(c.bot, chatID, promt, ctx, ai_endpoint)
-				} else {
-					log.Println("user prompt without calling bot: ")
-				}
-			} else {
-				promt := updateMessage.Text
-				ctx := context.WithValue(c.ctx, "user", user)
-				go langchain.StartDialogSequence(c.bot, chatID, promt, ctx, ai_endpoint)
-			}
+			promt := updateMessage.Text
+			ctx := context.WithValue(c.ctx, "user", user)
+			go langchain.StartDialogSequence(c.bot, chatID, promt, ctx, ai_endpoint)
 		} else if updateMessage.Voice != nil {
 			voicePath, err := stt.HandleVoiceMessage(updateMessage, *c.bot)
 			if err != nil {

@@ -26,7 +26,6 @@ func (c *Commander) AddNewUserToMap(updateMessage *tgbotapi.Message) {
 		user.Username,
 	)
 
-
 	msg := tgbotapi.NewMessage(user.ID, msgTemplates["hello"])
 	msg.ReplyMarkup = tgbotapi.NewOneTimeReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(

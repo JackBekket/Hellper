@@ -3,6 +3,7 @@ package dialog
 import (
 	"log"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/JackBekket/hellper/lib/bot/command"
@@ -20,7 +21,7 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 			if update.Message.Chat.ID < 0 {
 				group = true
 			}
-			if group && !strings.Contains(update.Message.Text, bot.Self.UserName) {
+			if group && !strings.Contains(update.Message.Text, bot.Self.UserName) && update.Message.Voice == nil && update.Message.Command() == "" {
 				continue
 			}
 
@@ -96,6 +97,10 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 
 					if group && update.Message.Voice != nil && user.DialogStatus != 6 {
 						continue
+					}
+					if update.Message.Text != "" {
+						re := regexp.MustCompile(`@?` + regexp.QuoteMeta(bot.Self.UserName))
+						update.Message.Text = re.ReplaceAllString(update.Message.Text, "")
 					}
 					switch user.DialogStatus {
 					// first check for user status, (for a new user status 0 is set automatically),
