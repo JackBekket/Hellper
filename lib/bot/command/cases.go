@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -348,16 +347,34 @@ func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.CallbackQ
 // update Dialog_Status 6 -> 6 (loop),
 func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint string) {
 	chatID := updateMessage.Chat.ID
+	var group bool;
+	if chatID < 0 {
+		group = true
+	} else {
+		group = false
+	}
+
+	log.Println("is group: ", group)
+
+
 	user := db.UsersMap[chatID]
 	
 	if updateMessage != nil {
 		if updateMessage.Text != "" {
-			if strings.Contains(updateMessage.Text, c.bot.Self.UserName) {
-			promt := updateMessage.Text
-			ctx := context.WithValue(c.ctx, "user", user)
-			go langchain.StartDialogSequence(c.bot, chatID, promt, ctx, ai_endpoint) 
+
+			//
+			if group == true {
+				if strings.Contains(updateMessage.Text, c.bot.Self.UserName) {
+					promt := updateMessage.Text
+					ctx := context.WithValue(c.ctx, "user", user)
+					go langchain.StartDialogSequence(c.bot, chatID, promt, ctx, ai_endpoint) 
+					} else {
+						log.Println("user prompt without calling bot: ")
+					}
 			} else {
-				//log.Println("user prompt without calling bot: ", updateMessage.Text)
+					promt := updateMessage.Text
+					ctx := context.WithValue(c.ctx, "user", user)
+					go langchain.StartDialogSequence(c.bot, chatID, promt, ctx, ai_endpoint) 
 			}
 		} else if updateMessage.Voice != nil {
 			voicePath, err := stt.HandleVoiceMessage(updateMessage, *c.bot)
@@ -408,7 +425,7 @@ func sendImage(bot *tgbotapi.BotAPI, chatID int64, path string) {
 		fmt.Errorf("getImageFail: %w", err)
 	}
 	filePath := filepath.Join("tmp", "generated", "images", fileName)
-	photoBytes, err := ioutil.ReadFile(filePath)
+	photoBytes, err := os.ReadFile(filePath)
 	if err != nil {
 		panic(err)
 	}
