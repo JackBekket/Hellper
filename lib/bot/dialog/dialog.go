@@ -77,6 +77,7 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 					comm.GetUsage(chatID)
 				case "helper":
 					comm.SendMediaHelper(chatID)
+				case "":
 				default:
 					continue
 				}
