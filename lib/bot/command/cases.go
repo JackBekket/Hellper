@@ -65,7 +65,7 @@ func (c *Commander) ChooseNetwork(updateMessage *tgbotapi.Message) {
 
 // Dialog status 1 -> 2
 func (c *Commander) HandleNetworkChoose(updateMessage *tgbotapi.Message) {
-	updateMessage.Text = strings.ReplaceAll(updateMessage.Text, " ", "")
+	updateMessage.Text = strings.TrimSpace(updateMessage.Text)
 	chatID := updateMessage.Chat.ID
 	network := updateMessage.Text
 	user := db.UsersMap[chatID]
@@ -98,7 +98,7 @@ func (c *Commander) HandleNetworkChoose(updateMessage *tgbotapi.Message) {
 
 // update Dialog_Status 3 -> 4
 func (c *Commander) ChooseModel(updateMessage *tgbotapi.Message) {
-	updateMessage.Text = strings.ReplaceAll(updateMessage.Text, " ", "")
+	updateMessage.Text = strings.TrimSpace(updateMessage.Text)
 	chatID := updateMessage.Chat.ID
 	gptKey := updateMessage.Text // handling previouse message
 	user := db.UsersMap[chatID]

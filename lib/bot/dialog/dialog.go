@@ -25,6 +25,14 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 				continue
 			}
 
+			if group && update.Message.Photo != nil && !strings.Contains(update.Message.Caption, bot.Self.UserName) {
+				continue
+			} else {
+				re := regexp.MustCompile(`@?` + regexp.QuoteMeta(bot.Self.UserName))
+				update.Message.Caption = re.ReplaceAllString(update.Message.Caption, "")
+				update.Message.Caption = strings.TrimSpace(update.Message.Caption)
+			}
+
 			chatID := int64(update.Message.Chat.ID)
 			db := comm.GetUsersDb()
 			user, ok := db[int64(chatID)]

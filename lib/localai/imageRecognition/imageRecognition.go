@@ -30,6 +30,7 @@ func getEnvsForImgRec() (string, string, string) {
 }
 
 func RecognizeImage(bot *tgbotapi.BotAPI, msg *tgbotapi.Message) (string, error) {
+
 	imgLink, err := handleImageMessage(bot, msg)
 	if err != nil {
 		return "", err
