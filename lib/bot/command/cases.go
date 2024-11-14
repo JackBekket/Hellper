@@ -16,6 +16,7 @@ import (
 	"github.com/JackBekket/hellper/lib/langchain"
 	"github.com/JackBekket/hellper/lib/localai"
 	stt "github.com/JackBekket/hellper/lib/localai/audioRecognition"
+	imgrec "github.com/JackBekket/hellper/lib/localai/imageRecognition"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
 )
@@ -252,7 +253,7 @@ func (c *Commander) HandleModelChoose(updateMessage *tgbotapi.CallbackQuery) {
 // low level attach model name to user profile
 func (c *Commander) attachModel(model_name string, chatID int64) {
 	fmt.Println(model_name)
-	// TODO: Write down user choie
+	// TODO: Write down user choice
 	log.Printf("Model selected: %s\n", model_name)
 
 	user := db.UsersMap[chatID]
@@ -353,7 +354,8 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint 
 	user := db.UsersMap[chatID]
 
 	if updateMessage != nil {
-		if updateMessage.Text != "" {
+
+		if updateMessage.Text != "" && updateMessage.Photo == nil {
 			promt := updateMessage.Text
 			ctx := context.WithValue(c.ctx, "user", user)
 			go langchain.StartDialogSequence(c.bot, chatID, promt, ctx, ai_endpoint)
@@ -370,6 +372,13 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint 
 			msg := tgbotapi.NewMessage(chatID, transcription)
 			c.bot.Send(msg)
 			DeleteFile(voicePath)
+		} else if updateMessage.Photo != nil {
+			response, err := imgrec.RecognizeImage(c.bot, updateMessage)
+			if err != nil {
+				log.Println(err)
+			}
+			msg := tgbotapi.NewMessage(chatID, response)
+			c.bot.Send(msg)
 		}
 	}
 }
