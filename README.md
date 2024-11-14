@@ -2,7 +2,17 @@
 
 ![alt text](https://github.com/JackBekket/hellper/blob/master/img/helper.jpg)
 
-# We are under heavy development!
+# Possabilities
+- image generation
+- local-ai integration
+- langchain integration (support memory and context)
+- voice recognition and translation
+- multi-modal LLM's support  (can understand images)
+- hugginface auto-download models files
+- vectorstores and RAG integration (can chat with document collection (as QA))
+- can be used as a lib
+
+#### We are under heavy development!
 it may work unexpectedly
 
 
@@ -132,6 +142,7 @@ Authorize for additional commands: /help -- print this message.
 /rag -- process Retrival-Augmented Generation.   
 /instruct -- use system promt template instead of langchain (higher priority, see examples).   
 /image -- generate image ....all funcs are experimental so bot can halt and catch fire.  
+
 
 
 ### DEV
