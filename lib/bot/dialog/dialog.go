@@ -21,7 +21,7 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 			if update.Message.Chat.ID < 0 {
 				group = true
 			}
-			if group && !strings.Contains(update.Message.Text, bot.Self.UserName) && update.Message.Voice == nil && update.Message.Command() == "" {
+			if group && !strings.Contains(update.Message.Text, bot.Self.UserName) && update.Message.Voice == nil && update.Message.Photo == nil && update.Message.Command() == "" {
 				continue
 			}
 
