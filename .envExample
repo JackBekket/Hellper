@@ -5,5 +5,7 @@ OPENAI_API_KEY=
 PG_LINK=postgresql://
 IMAGE_GENERATION_MODEL=stablediffusion-cpp
 IMAGE_GENERATION_SUFFIX=/v1/images/generations
+IMAGE_RECOGNITION_MODEL=bunny-llama-3-8b-v
+IMAGE_RECOGNITION_SUFFIX=/v1/chat/completions
 VOICE_RECOGNITION_MODEL=whisper-small
 VOICE_RECOGNITION_SUFFIX=/v1/audio/transcriptions

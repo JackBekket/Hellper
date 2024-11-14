@@ -21,8 +21,16 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 			if update.Message.Chat.ID < 0 {
 				group = true
 			}
-			if group && !strings.Contains(update.Message.Text, bot.Self.UserName) && update.Message.Voice == nil && update.Message.Command() == "" {
+			if group && !strings.Contains(update.Message.Text, bot.Self.UserName) && update.Message.Voice == nil && update.Message.Photo == nil && update.Message.Command() == "" {
 				continue
+			}
+
+			if group && update.Message.Photo != nil && !strings.Contains(update.Message.Caption, bot.Self.UserName) {
+				continue
+			} else {
+				re := regexp.MustCompile(`@?` + regexp.QuoteMeta(bot.Self.UserName))
+				update.Message.Caption = re.ReplaceAllString(update.Message.Caption, "")
+				update.Message.Caption = strings.TrimSpace(update.Message.Caption)
 			}
 
 			chatID := int64(update.Message.Chat.ID)
