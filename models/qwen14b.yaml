@@ -1,0 +1,21 @@
+name: qwen14b   # model from Alibaba, probably pirated, understand english, russian, chinese
+context_size: 32000  # max is 32k context but I got out of mem on my machine if I use it in full forse.
+f16: false # true to GPU acceleration
+cuda: false # true to GPU acceleration
+gpu_layers: 0 # 0 is CPU only
+
+parameters:
+  model:  qwen1_5-14b-chat-q5_0.gguf
+stopwords:
+- "HUMAN:"
+cutstrings:
+- "<|im_end|>"
+template:
+
+  chat: &template |
+    Below is an instruction that describes a task. Write a response that appropriately completes the request.
+    Instruction: {{.Input}}
+    Response:
+  # Modify the prompt template here ^^^ as per your requirements
+  completion: *template
+  downloadfiles: [https://huggingface.co/Qwen/Qwen1.5-14B-Chat-GGUF/raw/main/qwen1_5-14b-chat-q5_0.gguf]

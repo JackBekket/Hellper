@@ -1,31 +1,9 @@
 version: '3.8'
 services:
-  local-ai-head:
-    image: localai/localai:latest-aio-gpu-nvidia-cuda-12
-    command: --models-path /models --p2ptoken ${P2PTOKEN} --federated
-     --context-size 2048 --threads 10 --localai-config-dir /configuration 
-    environment:
-      - DEBUG=true
-    volumes:
-      - ./models:/models
-      - ./tmp/generated/images:/tmp/generated/images
-      - ./tmp/audio:/tmp/audio
-      - ./configuration:/configuration
-    ports:
-      - 8080:8080
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
-    restart: unless-stopped
-
   local-ai-worker:
     image: localai/localai:latest-aio-gpu-nvidia-cuda-12
     command: --models-path /models 
-     --context-size 2048 --threads 6 --localai-config-dir /configuration 
+     --context-size 2048 --threads 10 --localai-config-dir /configuration 
      worker p2p-llama-cpp-rpc --token ${P2PTOKEN}
     environment:
       - DEBUG=true
@@ -44,16 +22,4 @@ services:
               count: all
               capabilities: [gpu]
     restart: unless-stopped
-    depends_on:
-      - local-ai-head
 
-  helper-bot:
-    build: .
-    depends_on:
-      - local-ai-head
-    ports:
-      - 8085:8085
-    environment:
-      - AI_BASEURL=http://local-ai-head:8080
-      - AI_ENDPOINT=http://local-ai-head:8080
-    restart: unless-stopped
