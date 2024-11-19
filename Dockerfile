@@ -1,26 +1,15 @@
-# Use the specified image
-FROM localai/localai:latest-aio-gpu-nvidia-cuda-12
+FROM golang:1.22-bookworm
 
-# Set the working directory
 WORKDIR /app
 
 
-RUN mkdir /models
-# Copy the local directories into the container
-COPY ./models /models
-RUN mkdir tmp && cd tmp
-RUN mkdir generated && cd generated
-RUN mkdir images && cd images
-RUN cd .. && cd .. && cd ..
-#COPY ./tmp/generated/images /tmp/generated/images
-COPY ./configuration /configuration
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
 
-# Set the environment variable
-ENV DEBUG=true
+RUN apt update && apt install -y ca-certificates
+RUN go build -o main .
 
-# Expose the specified port
-EXPOSE 8090
-EXPOSE 8080
+EXPOSE 8085
 
-# Run the command
-CMD ["--models-path", "/models", "--context-size", "2048", "--threads", "10", "--localai-config-dir", "/configuration", "worker", "p2p-llama-cpp-rpc", "--token", "${P2PTOKEN}"]
+CMD [ "./main" ]
