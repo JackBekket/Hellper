@@ -2,7 +2,7 @@
 
 ![alt text](https://github.com/JackBekket/hellper/blob/master/img/helper.jpg)
 
-# Possabilities
+# Possibilities
 - image generation
 - local-ai integration
 - langchain integration (support memory and context)
