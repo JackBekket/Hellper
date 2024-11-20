@@ -250,6 +250,7 @@ func (c *Commander) HandleModelChoose(updateMessage *tgbotapi.CallbackQuery) {
 
 }
 
+
 // low level attach model name to user profile
 func (c *Commander) attachModel(model_name string, chatID int64) {
 	fmt.Println(model_name)
@@ -264,6 +265,7 @@ func (c *Commander) attachModel(model_name string, chatID int64) {
 	c.bot.Send(msg)
 	db.UsersMap[chatID] = user
 }
+
 
 // internal for attach api key to a user
 func (c *Commander) AttachKey(gpt_key string, chatID int64) {

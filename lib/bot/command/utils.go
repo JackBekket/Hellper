@@ -66,16 +66,19 @@ func (c *Commander) RAG(chatID int64, promt string, maxResults int) {
 	user := db.UsersMap[chatID]
 	_ = godotenv.Load()
 
-	conn_pg_link := os.Getenv("PG_LINK")
+	//conn_pg_link := os.Getenv("PG_LINK")
 	base_url := os.Getenv("AI_BASEURL")
-	db_conn := conn_pg_link
+	//db_conn := conn_pg_link
 	api_token := user.AiSession.GptKey
-	store,err := embeddings.GetVectorStore(base_url,api_token,db_conn)
+	store := user.VectorStore
+	//store,err := embeddings.GetVectorStore(base_url,api_token,db_conn)
+	/*
 	if err != nil {
 		//return nil, err
 		msg := tgbotapi.NewMessage(user.ID, "error occured when getting store: " + err.Error())
 		c.bot.Send(msg)
 	}
+		*/
 
 	result, err := embeddings.Rag(base_url,api_token,promt,maxResults,store)
 	if err != nil {
@@ -151,5 +154,9 @@ func (c *Commander) SendMediaHelper(chatID int64) {
 		log.Println("Could not send video message:", err)
 	  }
 
+}
+
+func (c *Commander) SetContext (collection_name string){
+	
 }
 

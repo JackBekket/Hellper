@@ -85,6 +85,7 @@ func SetContext(user User, collectionName string) error {
 
     vectorStore, err := e.GetVectorStoreWithOptions(ai_endpoint, api_token, db_link, collectionName)
     if err != nil {
+		log.Println("error getting vectorstore")
         return err
     }
     user.VectorStore = vectorStore
