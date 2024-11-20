@@ -109,7 +109,11 @@ func GetVectorStore(ai_url string, api_token string, db_link string) (vectorstor
 
 	fmt.Println("vector store ready")
 
+	
+
 	return store, nil
+
+	
 }
 
 func GetVectorStoreWithOptions(ai_url string, api_token string, db_link string, name string) (vectorstores.VectorStore, error) {
