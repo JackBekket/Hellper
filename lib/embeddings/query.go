@@ -3,11 +3,13 @@ package embeddings
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
+	"github.com/tmc/langchaingo/vectorstores/pgvector"
 )
 
 
@@ -43,6 +45,18 @@ func Rag(ai_url string,api_token string,question string, numOfResults int,store 
 	}
 
 	fmt.Println("====final answer====\n", result)
+
+
+	defer func() {
+		var pgvStore pgvector.Store
+		pgvStore, ok := store.(pgvector.Store)
+		if !ok {
+		  log.Fatalf("store does not implement pgvector.Store")
+		}
+		pgvStore.Close()
+	  }()
+
+	  
 	return result,nil
 }
 
@@ -60,6 +74,15 @@ func SemanticSearch(searchQuery string, maxResults int, store vectorstores.Vecto
 		fmt.Println("============================")
 
 	}
+
+	defer func() {
+		var pgvStore pgvector.Store
+		pgvStore, ok := store.(pgvector.Store)
+		if !ok {
+		  log.Fatalf("store does not implement pgvector.Store")
+		}
+		pgvStore.Close()
+	  }()
 	return searchResults,nil
 }
 

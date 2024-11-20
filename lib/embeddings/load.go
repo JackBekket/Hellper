@@ -11,6 +11,7 @@ import (
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/textsplitter"
 	"github.com/tmc/langchaingo/vectorstores"
+	"github.com/tmc/langchaingo/vectorstores/pgvector"
 )
 
 
@@ -19,26 +20,23 @@ import (
 func LoadDocsToStore(docs []schema.Document, store vectorstores.VectorStore)  {
 	fmt.Println("loading data from")
 
-	/*
-	store, err := GetVectorStore()
-
-	if err != nil {
-		log.Panic(err)
-	}
-	*/
-	//docs := getSampleDocs()
-
 	fmt.Println("no. of documents to be loaded", len(docs))
 
 	_, err := store.AddDocuments(context.Background(), docs)
-
 	if err != nil {
 		log.Panic(err)
 	}
-
 	fmt.Println("data successfully loaded into vector store")
-
 	log.Println(err)
+
+	defer func() {
+		var pgvStore pgvector.Store
+		pgvStore, ok := store.(pgvector.Store)
+		if !ok {
+		  log.Fatalf("store does not implement pgvector.Store")
+		}
+		pgvStore.Close()
+	  }()
 }
 
 /*
