@@ -40,7 +40,7 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 				//comm.CheckAdmin(adminData, update.Message)
 				comm.AddNewUserToMap(update.Message)
 			}
-			ai_endpoint := user.AiSession.Base_url
+			ai_endpoint := os.Getenv("AI_ENDPOINT")
 
 			if ok {
 				//chatID = int64(chatID)
@@ -124,9 +124,9 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 					// first check for user status, (for a new user status 0 is set automatically),
 					// then user reply for the first bot message is logged to a database as name AND user status is updated
 					case 0:
-						comm.ChooseNetwork(update.Message)
+						fallthrough
 					case 1:
-						comm.HandleNetworkChoose(update.Message)
+						fallthrough
 					case 2:
 						comm.InputYourAPIKey(update.Message)
 					case 3:
@@ -147,7 +147,7 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 			chatID := int64(update.CallbackQuery.Message.Chat.ID)
 			db := comm.GetUsersDb()
 			user := db[int64(chatID)]
-			ai_endpoint := user.AiSession.Base_url
+			ai_endpoint := os.Getenv("AI_ENDPOINT")
 
 			switch user.DialogStatus {
 			case 4:

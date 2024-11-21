@@ -11,6 +11,7 @@
 *.secret
 api_keys.json
 ./configuration/api_keys.json
+*.vscode
 
 # Test binary, built with `go test -c`
 *.test

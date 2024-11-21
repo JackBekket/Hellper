@@ -43,58 +43,6 @@ func (c *Commander) InputYourAPIKey(updateMessage *tgbotapi.Message) {
 	db.UsersMap[chatID] = user
 }
 
-// DialogStatus 0 - > 1
-func (c *Commander) ChooseNetwork(updateMessage *tgbotapi.Message) {
-	chatID := updateMessage.Chat.ID
-	user := db.UsersMap[chatID]
-	c.HelpCommandMessage(updateMessage)
-	// render menu
-	msg := tgbotapi.NewMessage(user.ID, msgTemplates["ch_network"])
-	msg.ReplyMarkup = tgbotapi.NewOneTimeReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("openai"),
-			tgbotapi.NewKeyboardButton("localai"),
-			tgbotapi.NewKeyboardButton("vastai")),
-	)
-	c.bot.Send(msg)
-
-	user.DialogStatus = 1      // this is output dialog status
-	db.UsersMap[chatID] = user // commit changes
-
-}
-
-// Dialog status 1 -> 2
-func (c *Commander) HandleNetworkChoose(updateMessage *tgbotapi.Message) {
-	updateMessage.Text = strings.TrimSpace(updateMessage.Text)
-	chatID := updateMessage.Chat.ID
-	network := updateMessage.Text
-	user := db.UsersMap[chatID]
-	switch network {
-	case "openai":
-
-		user.Network = network
-		user.AiSession.AI_Type = 0
-		user.DialogStatus = 2
-		db.UsersMap[chatID] = user
-		c.InputYourAPIKey(updateMessage)
-	case "localai":
-
-		user.Network = network
-		user.AiSession.AI_Type = 1
-		user.DialogStatus = 2
-		db.UsersMap[chatID] = user
-		c.InputYourAPIKey(updateMessage)
-	case "vastai":
-		user.Network = network
-		user.AiSession.AI_Type = 2
-		user.DialogStatus = 2
-		db.UsersMap[chatID] = user
-		c.InputYourAPIKey(updateMessage)
-	default:
-		c.WrongNetwork(updateMessage)
-	}
-
-}
 
 // update Dialog_Status 3 -> 4
 func (c *Commander) ChooseModel(updateMessage *tgbotapi.Message) {
@@ -102,31 +50,14 @@ func (c *Commander) ChooseModel(updateMessage *tgbotapi.Message) {
 	chatID := updateMessage.Chat.ID
 	gptKey := updateMessage.Text // handling previouse message
 	user := db.UsersMap[chatID]
-	network := user.Network
 
 	// I can't validate key at this stage. The only way to validate key is to send test sequence (see case 3)
 	// Since this part is oftenly get an usernamecaught exeption, we debug what user input as key. It's bad, I know, but usernametil we got key validation we need this part.
 	log.Println("Key promt: ", gptKey)
 	user.AiSession.GptKey = gptKey // store key in memory
-
-	switch network {
-	case "localai":
 		c.RenderModelMenuLAI(chatID)
 		user.DialogStatus = 4
 		db.UsersMap[chatID] = user
-
-	case "openai":
-		c.RenderModelMenuOAI(chatID)
-		user.DialogStatus = 4
-		db.UsersMap[chatID] = user
-
-	case "vastai":
-		c.RenderModelMenuVAI(chatID)
-		user.DialogStatus = 4
-		db.UsersMap[chatID] = user
-	default:
-		c.WrongNetwork(updateMessage)
-	}
 }
 
 // DialogStatus 4 -> 5
@@ -135,9 +66,6 @@ func (c *Commander) HandleModelChoose(updateMessage *tgbotapi.CallbackQuery) {
 	messageID := updateMessage.Message.MessageID
 	model_name := updateMessage.Data
 	user := db.UsersMap[chatID]
-	network := user.Network
-	switch network {
-	case "localai":
 		switch model_name {
 		case "wizard-uncensored-13b":
 			c.attachModel(model_name, chatID)
@@ -176,72 +104,7 @@ func (c *Commander) HandleModelChoose(updateMessage *tgbotapi.CallbackQuery) {
 			db.UsersMap[chatID] = user
 
 		}
-
-	case "openai":
-		switch model_name {
-		case "gpt-3.5":
-			model_name = "gpt-3.5-turbo"
-			c.attachModel(model_name, chatID)
-			user.AiSession.GptModel = model_name
-			c.RenderLanguage(chatID)
-
-			user.DialogStatus = 5
-			db.UsersMap[chatID] = user
-		case "gpt-4":
-			c.attachModel(model_name, chatID)
-			user.AiSession.GptModel = model_name
-			c.RenderLanguage(chatID)
-
-			user.DialogStatus = 5
-			db.UsersMap[chatID] = user
-		}
-	case "vastai":
-		switch model_name {
-		case "wizard-uncensored-13b":
-			c.attachModel(model_name, chatID)
-			user.AiSession.GptModel = model_name
-			c.RenderLanguage(chatID)
-
-			user.DialogStatus = 5
-			db.UsersMap[chatID] = user
-		case "wizard-uncensored-30b":
-			c.attachModel(model_name, chatID)
-			user.AiSession.GptModel = model_name
-			c.RenderLanguage(chatID)
-
-			user.DialogStatus = 5
-			db.UsersMap[chatID] = user
-		case "deepseek-coder-6b-instruct":
-			c.attachModel(model_name, chatID)
-			user.AiSession.GptModel = model_name
-			c.RenderLanguage(chatID)
-
-			user.DialogStatus = 5
-			db.UsersMap[chatID] = user
-		case "tiger-gemma-9b-v1-i1":
-			c.attachModel(model_name, chatID)
-			user.AiSession.GptModel = model_name
-			c.RenderLanguage(chatID)
-
-			user.DialogStatus = 5
-			db.UsersMap[chatID] = user
-		case "big-tiger-gemma-27b-v1":
-			c.attachModel(model_name, chatID)
-			user.AiSession.GptModel = model_name
-			c.RenderLanguage(chatID)
-
-			user.DialogStatus = 5
-			db.UsersMap[chatID] = user
-		case "wizard-uncensored-code-34b":
-			c.attachModel(model_name, chatID)
-			user.AiSession.GptModel = model_name
-			c.RenderLanguage(chatID)
-
-			user.DialogStatus = 5
-			db.UsersMap[chatID] = user
-		}
-
-	}
+	
 	callbackResponse := tgbotapi.NewCallback(updateMessage.ID, "🐈💨")
 	c.bot.Send(callbackResponse)
 
@@ -293,17 +156,6 @@ func (c *Commander) WrongResponse(updateMessage *tgbotapi.Message) {
 
 }
 
-// update Dialog_Status = 0
-func (c *Commander) WrongNetwork(updateMessage *tgbotapi.Message) {
-	chatID := updateMessage.Chat.ID
-	user := db.UsersMap[chatID]
-
-	msg := tgbotapi.NewMessage(user.ID, "type openai or localai")
-	c.bot.Send(msg)
-
-	user.DialogStatus = 0
-	db.UsersMap[chatID] = user
-}
 
 // update update Dialog_Status 5 -> 6
 func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.CallbackQuery, ai_endpoint string) {
@@ -314,29 +166,15 @@ func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.CallbackQ
 	user := db.UsersMap[chatID]
 	log.Println("check gpt key exist:", user.AiSession.GptKey)
 
-	network := user.Network
+	//network := user.Network
 
 	msg := tgbotapi.NewMessage(user.ID, "connecting to ai node")
 	c.bot.Send(msg)
 
 	ctx := context.WithValue(c.ctx, "user", user)
-
-	if network == "localai" {
-		log.Println("network: ", network)
-		if ai_endpoint == "" {
-			ai_endpoint = os.Getenv("AI_ENDPOINT")
-		}
-		log.Println("local-ai endpoint is: ", ai_endpoint)
-		go langchain.SetupSequenceWithKey(c.bot, user, language, ctx, ai_endpoint) //local-ai
-	} else if network == "vastai" {
-		log.Println("network: ", network)
-		ai_endpoint := os.Getenv("VASTAI_ENDPOINT")
-		log.Println("vast-ai endpoint is: ", ai_endpoint)
-		go langchain.SetupSequenceWithKey(c.bot, user, language, ctx, ai_endpoint) //vast-ai
-	} else {
-		log.Println("network: ", network)
-		go langchain.SetupSequenceWithKey(c.bot, user, language, ctx, "") //openai
-	}
+	//ai_endpoint = os.Getenv("AI_ENDPOINT")
+	log.Println("local-ai endpoint is: ", ai_endpoint)
+	go langchain.SetupSequenceWithKey(c.bot, user, language, ctx, ai_endpoint) //local-ai
 
 	callbackResponse := tgbotapi.NewCallback(updateMessage.ID, "🐈💨")
 	c.bot.Send(callbackResponse)
