@@ -124,9 +124,9 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 					// first check for user status, (for a new user status 0 is set automatically),
 					// then user reply for the first bot message is logged to a database as name AND user status is updated
 					case 0:
-						comm.ChooseNetwork(update.Message)
+						fallthrough
 					case 1:
-						comm.HandleNetworkChoose(update.Message)
+						fallthrough
 					case 2:
 						comm.InputYourAPIKey(update.Message)
 					case 3:
