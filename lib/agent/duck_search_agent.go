@@ -10,11 +10,10 @@ import (
 	"github.com/tmc/langchaingo/tools/duckduckgo"
 
 	//"github.com/tmc/langgraphgo/graph"
-	"github.com/JackBekket/hellper/lib/embeddings"
 	"github.com/JackBekket/langgraphgo/graph"
 )
 
-func main() {
+func MainDuckSearch() {
 
   model, err := openai.New(openai.WithModel("gpt-4o"))
   if err != nil {
@@ -42,36 +41,7 @@ func main() {
         },
       },
     },
-    {
-      Type: "function",
-      Function: &llms.FunctionDefinition{
-        Name:        "semanticSearch",
-        Description: "Performs semantic search using a vector store",
-        Parameters: map[string]any{
-          "type": "object",
-          "properties": map[string]any{
-            "searchQuery": map[string]any{
-              "type":        "string",
-              "description": "The search query",
-            },
-            "maxResults": map[string]any{
-              "type":        "integer",
-              "description": "Maximum number of results",
-            },
-            "store": map[string]any{
-              "type":        "object",
-              "description": "Vector store",
-            },
-            "options": map[string]any{
-              "type":        "array",
-              "description": "Optional parameters for the search",
-            },
-          },
-        },
-      },
-    },
   }
-
 
   agent := func(ctx context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
     response, err := model.GenerateContent(ctx, state, llms.WithTools(tools))
@@ -80,49 +50,16 @@ func main() {
     }
 
     msg := llms.TextParts(llms.ChatMessageTypeAI, response.Choices[0].Content)
-    
 
     if len(response.Choices[0].ToolCalls) > 0 {
       for _, toolCall := range response.Choices[0].ToolCalls {
-        if toolCall.FunctionCall.Name == "semanticSearch" {
-          // Parse the arguments from the tool call
-          var args struct {
-            SearchQuery string `json:"searchQuery"`
-            MaxResults int    `json:"maxResults"`
-            Store       any    `json:"store"`
-            Options     []any  `json:"options"`
-          }  
-          if err := json.Unmarshal([]byte(toolCall.FunctionCall.Arguments), &args); err != nil {
-            return state, err
-          }
-        // Call your SemanticSearch function
-        searchResults, err := embeddings.SemanticSearch(args.SearchQuery, args.MaxResults, args.Store, args.Options...)
-        if err != nil {
-          return state, err
-        }
-
-                // Construct a tool response and append it to the state
-                msg := llms.MessageContent{
-                  Role: llms.ChatMessageTypeTool,
-                  Parts: []llms.ContentPart{
-                    llms.ToolCallResponse{
-                      ToolCallID: toolCall.ID,
-                      Name:       toolCall.FunctionCall.Name,
-                      Content:    searchResults,
-                    },
-                  },
-                }
-
         msg.Parts = append(msg.Parts, toolCall)
       }
     }
-  }
-
 
     state = append(state, msg)
     return state, nil
   }
-
 
   search := func(ctx context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
     lastMsg := state[len(state)-1]
@@ -168,11 +105,6 @@ func main() {
 
     return state, nil
   }
-
-
-
-
-
 
   shouldSearch := func(ctx context.Context, state []llms.MessageContent) string {
     lastMsg := state[len(state)-1]
