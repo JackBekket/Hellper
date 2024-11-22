@@ -4,48 +4,48 @@
 ### Imports:  
   
 ```  
-"log"  
-"github.com/JackBekket/hellper/lib/bot/command"  
-"github.com/JackBekket/hellper/lib/database"  
-"github.com/JackBekket/hellper/lib/langchain"  
-"github.com/go-telegram-bot-api/telegram-bot-api/v5"  
+log  
+os  
+regexp  
+strings  
+  
+github.com/JackBekket/hellper/lib/bot/command  
+github.com/JackBekket/hellper/lib/database  
+github.com/JackBekket/hellper/lib/langchain  
+tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"  
 ```  
   
 ### External Data, Input Sources:  
   
-1. `updates <-chan tgbotapi.Update`: A channel of Telegram updates, providing information about incoming messages, commands, and other events.  
-2. `bot *tgbotapi.BotAPI`: A pointer to the Telegram bot API instance, allowing interaction with the Telegram platform.  
-3. `comm command.Commander`: A pointer to the command handler, responsible for processing commands and managing user interactions.  
+1. `os.Getenv("AI_ENDPOINT")`: This variable holds the endpoint for the AI model, which is used for image generation and other AI-related tasks.  
+2. `os.Getenv("AI_ENDPOINT")`: This variable holds the endpoint for the AI model, which is used for image generation and other AI-related tasks.  
+3. `database.UsersMap`: This is a map that stores user data, including their AI session information and other relevant details.  
   
 ### Code Summary:  
   
-#### 1. HandleUpdates Function:  
+#### Function: HandleUpdates  
   
-This function iterates through the incoming Telegram updates and processes each one. It first checks if the update contains a callback query, which indicates an inline action. If so, it handles the callback logic for inlines. Otherwise, it processes the message and its associated command.  
+This function handles incoming updates from the Telegram bot API. It iterates through the updates and processes each one based on its type.  
   
-#### 2. Command Handling:  
+1. It first checks if the update is a callback query. If it is, it handles the callback logic for inline buttons and other interactive elements.  
   
-The code handles various commands, such as "/image", "/restart", "/help", "/search_doc", "/rag", "/instruct", "/usage", and "/helper". Each command has a specific function that is called to process the command and its arguments.  
+2. If the update is not a callback query, it checks if the message is from a group chat. If it is, it skips the message if it doesn't contain the bot's username or if it's a voice or photo message.  
   
-#### 3. User Management:  
+3. It then extracts the chat ID and user data from the database. If the user doesn't exist in the database, it adds them to the map.  
   
-The code maintains a database of users and their corresponding information, such as their AI session details and dialog status. It also handles adding new users to the database and updating their status based on their interactions with the bot.  
+4. Based on the command in the message, it performs the corresponding action. For example, if the command is "/image", it generates an image using the AI model and sends it back to the user.  
   
-#### 4. Dialog Flow:  
+5. It also handles other commands like "/restart", "/help", "/search_doc", "/rag", "/instruct", "/usage", "/helper", "/setContext", and "/clearContext".  
   
-The code implements a dialog flow for users, guiding them through a series of steps to configure their AI session and interact with the bot. The dialog status is updated based on the user's actions, and the appropriate function is called to handle the next step in the dialog.  
+6. Finally, it updates the user's dialog status based on the current state of the conversation.  
   
-#### 5. AI Interaction:  
+#### Other Code Parts:  
   
-The code interacts with the user's chosen AI model by sending requests to the specified API endpoint. It also handles the generation of images using the specified AI model and parameters.  
+1. The code also includes functions for handling model selection, connecting to the AI model, and generating content using the chosen model.  
   
-#### 6. Error Handling:  
+2. It also has functions for handling user input, such as getting the API key, choosing a model, and providing feedback on the AI's response.  
   
-The code includes error handling for various scenarios, such as when a user is not found in the database or when an error occurs during the AI interaction.  
-  
-#### 7. Logging:  
-  
-The code logs various events, such as user dialog status, user ID, and username, to help with debugging and monitoring the bot's behavior.  
+3. The code is well-structured and modular, making it easy to understand and maintain.  
   
   
   
