@@ -87,11 +87,17 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 					comm.SendMediaHelper(chatID)
 				case "setContext":
 					name := update.Message.CommandArguments()
-					user := comm.GetUser(chatID)
-					database.SetContext(user,name)
+					userDb :=database.UsersMap
+					user := userDb[chatID]
+					log.Println("comnmand set context")
+					log.Println("argument: ", name)
+					log.Println("user:", user)
+					user.SetContext(name)
+
+					//continue
 				case "clearContext":
 					user := comm.GetUser(chatID)
-					database.ClearContext(user)
+					user.ClearContext()
 				case "":
 				default:
 					continue
