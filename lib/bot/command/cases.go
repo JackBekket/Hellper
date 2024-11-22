@@ -3,13 +3,7 @@ package command
 import (
 	"context"
 	"fmt"
-	"io"
 	"log"
-	"net/http"
-	"net/url"
-	"os"
-	"path"
-	"path/filepath"
 	"strings"
 
 	db "github.com/JackBekket/hellper/lib/database"
@@ -221,98 +215,6 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint 
 			c.bot.Send(msg)
 		}
 	}
-}
-
-// stable diffusion
-func (c *Commander) GenerateNewImageLAI_SD(promt, url string, chatID int64, bot *tgbotapi.BotAPI) {
-	size := "256x256"
-	model := os.Getenv("IMAGE_GENERATION_MODEL")
-	if model == "" {
-		model = "stablediffusion"
-	}
-	urlSuffix := os.Getenv("IMAGE_GENERATION_SUFFIX")
-	if urlSuffix == "" {
-		urlSuffix = "/v1/images/generations"
-	}
-	url += urlSuffix
-
-	filepath, err := localai.GenerateImageStableDiffusion(promt, size, url, model)
-	if err != nil {
-		//return nil, err
-		log.Println(err)
-	}
-	log.Println("url_path: ", filepath)
-
-	sendImage(bot, chatID, filepath)
-}
-
-func sendImage(bot *tgbotapi.BotAPI, chatID int64, path string) {
-
-	auth := os.Getenv("OPENAI_API_KEY")
-
-	fileName, err := getImage(path, auth)
-	if err != nil {
-		fmt.Errorf("getImageFail: %w", err)
-	}
-	filePath := filepath.Join("tmp", "generated", "images", fileName)
-	photoBytes, err := os.ReadFile(filePath)
-	if err != nil {
-		panic(err)
-	}
-	photoFileBytes := tgbotapi.FileBytes{
-		Name:  "picture",
-		Bytes: photoBytes,
-	}
-	bot.Send(tgbotapi.NewPhoto(int64(chatID), photoFileBytes))
-	DeleteFile(filePath)
-}
-
-func getImage(imageURL, authHeader string) (string, error) {
-	client := &http.Client{}
-	req, err := http.NewRequest("GET", imageURL, nil)
-	if err != nil {
-		return "", fmt.Errorf("failed to create GET request: %w", err)
-	}
-	req.Header.Add("Authorization", "Bearer "+authHeader)
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("failed to fetch the image: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("failed to fetch image, status code: %d", resp.StatusCode)
-	}
-
-	fileName := transformURL(imageURL)
-
-	dir := filepath.Join("tmp", "generated", "images")
-	filePath := filepath.Join(dir, fileName)
-	file, err := os.Create(filePath)
-	if err != nil {
-		return "", fmt.Errorf("failed to create file: %v", err)
-	}
-
-	_, err = io.Copy(file, resp.Body)
-	if err != nil {
-		return "", fmt.Errorf("failed to write file: %v", err)
-	}
-
-	return fileName, nil
-
-}
-
-func DeleteFile(fileName string) {
-	os.Remove(fileName)
-}
-
-func transformURL(inputURL string) string {
-	// Replace "http://localhost:8080" with "/tmp" using strings.Replace
-	parsedURL, _ := url.Parse(inputURL)
-
-	// Use path.Base to get the filename from the URL path
-	fileName := path.Base(parsedURL.Path)
-	return fileName
 }
 
 func (c *Commander) GetUsersDb() map[int64]db.User {

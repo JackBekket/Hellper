@@ -4,15 +4,9 @@ package database
 // user should be fully functional user class and all operation with user should be placed here (in separate user.go package)
 
 import (
-	"log"
-	"os"
-
-	e "github.com/JackBekket/hellper/lib/embeddings"
-	"github.com/joho/godotenv"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/memory"
 	"github.com/tmc/langchaingo/vectorstores"
-	"github.com/tmc/langchaingo/vectorstores/pgvector"
 )
 
 // main database for dialogs, key (int64) is telegram user id
@@ -76,36 +70,10 @@ func GetSessionUsage(id int64) map[string]int {
 	return usage
 }
 
-func SetContext(user User, collectionName string) error {
-	_ = godotenv.Load()
-	api_token := os.Getenv("OPENAI_API_KEY")
-	ai_endpoint := os.Getenv("AI_ENDPOINT")
-	//log.Println("ai endpoint is: ", ai_endpoint)
-	db_link := os.Getenv("EMBEDDINGS_DB_URL")
-
-    vectorStore, err := e.GetVectorStoreWithOptions(ai_endpoint, api_token, db_link, collectionName)
-    if err != nil {
-		log.Println("error getting vectorstore")
-        return err
-    }
-    user.VectorStore = vectorStore
-
-	defer func() {
-		var pgvStore pgvector.Store
-		pgvStore, ok := vectorStore.(pgvector.Store)
-		if !ok {
-		  log.Fatalf("store does not implement pgvector.Store")
-		}
-		pgvStore.Close()
-	  }()
-
-
-    return nil
+func NewChatSession(buffer  memory.ConversationBuffer, thread chains.LLMChain) *ChatSession {
+	return &ChatSession{
+		ConversationBuffer: buffer,
+		DialogThread: thread,
+	}
 }
-
-
-func ClearContext(user User) {
-	user.VectorStore = nil
-}
-
 
