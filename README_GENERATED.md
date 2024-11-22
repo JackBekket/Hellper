@@ -1,46 +1,62 @@
-# Package: hellper/lib/bot
+# Package: main
 
 ### Imports:
 
-- context
-- log
-- os
-- strconv
-- github.com/JackBekket/hellper/lib/bot/command
-- github.com/JackBekket/hellper/lib/bot/dialog
-- github.com/JackBekket/hellper/lib/bot/env
-- github.com/JackBekket/hellper/lib/database
-- github.com/go-telegram-bot-api/telegram-bot-api/v5
-- github.com/joho/godotenv
+* context
+* log
+* os
+* strconv
+* github.com/JackBekket/hellper/lib/bot/command
+* github.com/JackBekket/hellper/lib/bot/dialog
+* github.com/JackBekket/hellper/lib/bot/env
+* github.com/JackBekket/hellper/lib/database
+* github.com/go-telegram-bot-api/telegram-bot-api/v5
+* github.com/joho/godotenv
 
 ### External Data, Input Sources:
 
-- Environment variables: OPENAI_API_KEY, PG_LINK, TG_KEY, ADMIN_ID, AI_ENDPOINT
+* OPENAI_API_KEY (local key for localai)
+* PG_LINK (not used in the code)
+* TG_KEY (telegram bot token)
+* ADMIN_ID (admin user ID)
+* AI_ENDPOINT (endpoint for AI model)
 
-### Code Summary:
+### Summary:
+
+#### Initialization:
 
 1. Loads environment variables using godotenv.Load().
-2. Retrieves API token from OPENAI_API_KEY environment variable.
-3. Initializes a Telegram bot using the TG_KEY environment variable.
-4. Retrieves admin ID and GPT key from environment variables.
-5. Initializes a map of admin data.
-6. Initializes a database for users using database.UsersMap.
-7. Creates a context for the bot.
-8. Creates a new commander using the bot, database, and context.
-9. Sets up a channel for handling updates.
-10. Starts a goroutine to handle updates using dialog.HandleUpdates.
-11. Continuously listens for updates from the bot and sends them to the update channel.
-12. Checks if a user is new based on their ID in the database.
-13. If a user is new, their entry is created in the database.
-14. Handles inline keyboards by checking for callback queries.
-15. Retrieves the chat ID from the update.
-16. Checks if the user is new based on their ID in the database.
-17. If the user is new, their entry is created in the database.
+2. Retrieves the telegram bot token from the TG_KEY environment variable.
+3. Retrieves the admin user ID from the ADMIN_ID environment variable and parses it as an integer.
+4. Retrieves the AI endpoint from the AI_ENDPOINT environment variable.
+5. Creates a new Telegram bot instance using the retrieved token.
 
-#### Project Package Structure:
+#### Database and Commander:
 
-- hellper/lib/bot/command
-- hellper/lib/bot/dialog
-- hellper/lib/bot/env
-- hellper/lib/database
+1. Initializes a database for storing user data using the database.UsersMap variable.
+2. Creates a new command commander instance using the bot, database, and a context.
+
+#### Update Handling:
+
+1. Sets up a channel for handling incoming updates from the Telegram bot.
+2. Starts a goroutine to handle updates using the dialog.HandleUpdates function.
+3. Continuously listens for updates from the bot and checks if the user is new. If the user is new, the entry in the database is created.
+
+#### Inline Keyboards:
+
+1. Handles inline keyboards by checking if the update contains a callback query.
+2. If a callback query is present, it retrieves the chat ID from the message.
+3. If the user is new, the update is sent to the update channel for processing.
+
+#### Edge Cases:
+
+1. If the TG_KEY environment variable is not set, the bot will not be able to connect to Telegram.
+2. If the ADMIN_ID environment variable is not set or is not a valid integer, the bot will not be able to identify the admin user.
+3. If the AI_ENDPOINT environment variable is not set or is not a valid URL, the bot will not be able to access the AI model.
+
+#### File Structure:
+
+```
+main.go
+```
 

@@ -1,45 +1,110 @@
-# Package: embeddings
+## Package: embeddings
 
 ### Imports:
 
 ```
 "context"
 "fmt"
-"github.com/tmc/langchaingo/chains"
+"log"
+"github.com/tmc/langchaingo/embeddings"
 "github.com/tmc/langchaingo/llms/openai"
-"github.com/tmc/langchaingo/schema"
 "github.com/tmc/langchaingo/vectorstores"
+"github.com/tmc/langchaingo/vectorstores/pgvector"
+"github.com/jackc/pgx/v5/pgxpool"
 ```
 
 ### External Data, Input Sources:
 
-- `ai_url`: URL of the AI service (e.g., OpenAI API).
-- `api_token`: API token for the AI service.
-- `question`: The question to be answered.
-- `numOfResults`: The number of results to return.
-- `store`: A vector store to store and retrieve embeddings.
-- `searchQuery`: The query for semantic search.
-- `maxResults`: The maximum number of results to return for semantic search.
-- `options`: Additional options for the vector store.
+- `ai_url`: AI URL (localhost or openai or docker)
+- `api_token`: AI token
+- `db_link`: Database link
+- `name`: Collection name for vector store
 
 ### Code Summary:
 
-The package provides two main functions: `Rag` and `SemanticSearch`.
+#### LoadEnv()
 
-The `Rag` function performs a retrieval-augmented generation (RAG) task using a language model (LLM) and a vector store. It takes the AI service URL, API token, question, number of results, and vector store as input. The function first creates an embeddings client using the provided AI service URL and API token. Then, it runs a retrieval-augmented generation chain using the LLM and the vector store to generate a response to the question. Finally, it returns the generated response and any errors encountered during the process.
+This function is not implemented in the provided code.
 
-The `SemanticSearch` function performs a semantic search using a vector store. It takes the search query, maximum number of results, vector store, and additional options as input. The function first retrieves the vector store (if not provided) and then performs a similarity search using the provided search query and maximum number of results. Finally, it returns the search results and any errors encountered during the process.
+#### GetVectorStore()
 
-The package also includes a function called `LoadDocsToStore` that takes a list of documents and a vector store as input. It adds the documents to the vector store using the AddDocuments method. If there is an error during the process, it logs the error and panics.
+This function takes `ai_url`, `api_token`, and `db_link` as input and returns a vector store. It first sets up the OpenAI API client using the provided `api_token` and `base_url`. Then, it creates an embeddings client using the OpenAI API and an embedder using the embeddings client. Finally, it creates a vector store using the provided database link and embedder.
 
-The package provides a way to perform RAG tasks and semantic searches using a vector store. It also includes a function to load documents into a vector store.
+#### GetVectorStoreWithOptions()
 
-Project package structure:
+This function is similar to `GetVectorStore()` but also takes an additional input, `name`, which is used to specify the collection name for the vector store. It follows the same steps as `GetVectorStore()` but also sets the collection name using `pgvector.WithCollectionName(name)`.
+
+
+
+lib/embeddings/load.go
+## Package: embeddings
+
+### Imports:
 
 ```
-embeddings/
-  - common.go
-  - load.go
-  - query.go
+"context"
+"fmt"
+"net/http"
+"log"
+"github.com/tmc/langchaingo/documentloaders"
+"github.com/tmc/langchaingo/schema"
+"github.com/tmc/langchaingo/textsplitter"
+"github.com/tmc/langchaingo/vectorstores"
+"github.com/tmc/langchaingo/vectorstores/pgvector"
 ```
+
+### External Data, Input Sources:
+
+1. `source` string: This is used in the `getDocs` function to fetch data from a given URL.
+
+### Code Summary:
+
+#### LoadDocsToStore:
+
+This function takes a slice of `schema.Document` and a `vectorstores.VectorStore` as input. It first prints the number of documents to be loaded and then calls the `AddDocuments` method of the vector store to add the documents. If there is an error during the process, it logs the error and panics. After the documents are loaded, it closes the vector store using a defer statement.
+
+#### getDocs:
+
+This function takes a `source` string as input and returns a slice of `schema.Document` and an error. It first fetches the data from the given URL using `http.Get`. Then, it loads and splits the data using `documentloaders.NewHTML` and `textsplitter.NewRecursiveCharacter`. Finally, it returns the slice of documents and any error encountered during the process.
+
+
+
+lib/embeddings/query.go
+## Package: embeddings
+
+### Imports:
+
+```
+"context"
+"fmt"
+"log"
+"github.com/tmc/langchaingo/chains"
+"github.com/tmc/langchaingo/llms/openai"
+"github.com/tmc/langchaingo/schema"
+"github.com/tmc/langchaingo/vectorstores"
+"github.com/tmc/langchaingo/vectorstores/pgvector"
+```
+
+### External Data, Input Sources:
+
+1. `ai_url`: URL of the AI service (e.g., OpenAI API).
+2. `api_token`: API token for authentication with the AI service.
+3. `question`: The question to be answered or the query for semantic search.
+4. `numOfResults`: The number of results to return for the retrieval-based QA.
+5. `store`: A vector store to store and retrieve embeddings.
+6. `option`: Additional options for the vector store.
+7. `searchQuery`: The query for semantic search.
+8. `maxResults`: The maximum number of results to return for semantic search.
+
+### Code Summary:
+
+#### Rag Function:
+
+This function performs retrieval-augmented generation (RAG) using an LLM and a vector store. It first creates an embeddings client using the provided AI URL and API token. Then, it runs a retrieval-based QA chain using the embeddings client and the vector store. The chain takes the question as input and returns the answer. Finally, it prints the final answer and closes the vector store.
+
+#### SemanticSearch Function:
+
+This function performs semantic search using a vector store. It takes a search query, maximum number of results, and a vector store as input. It then performs a similarity search on the vector store using the provided query and returns the top `maxResults` results. The function also prints the similarity search results, including the page content and score for each result. Finally, it closes the vector store.
+
+
 

@@ -1,54 +1,69 @@
-# lib/database/newAiSessionDataBase.go  
-Package: database  
-  
-Imports:  
-- gogpt  
-  
-External data, input sources:  
-- AiSessionMap: A map that stores AiSession objects, where the key is an int64 and the value is an AiSession object.  
-  
-Summary:  
-The code defines a map called AiSessionMap, which stores AiSession objects. Each AiSession object has three fields: GptKey, GptClient, and GptModel. The GptKey field is a string, the GptClient field is a pointer to a gogpt.Client object, and the GptModel field is a string. The AiSessionMap is initialized as an empty map.  
-  
-  
-  
 # lib/database/newUserDataBase.go  
 ## Package: database  
   
 ### Imports:  
+  
 - github.com/tmc/langchaingo/chains  
 - github.com/tmc/langchaingo/memory  
+- github.com/tmc/langchaingo/vectorstores  
   
 ### External Data, Input Sources:  
-- UsersMap: A map that stores user data, where the key is the telegram user ID and the value is a User struct.  
-- UsageMap: A map that stores session usage data, where the key is the session ID and the value is a SessionUsage struct.  
+  
+- UsersMap: A map that stores user data, where the key is the user's ID and the value is a User struct.  
+- UsageMap: A map that stores session usage data, where the key is the user's ID and the value is a SessionUsage struct.  
   
 ### Code Summary:  
+  
 #### User Struct:  
-- Represents a user in the database.  
-- Contains fields for user ID, username, dialog status, admin status, AI session, and network.  
+  
+The User struct represents a user in the database. It contains the user's ID, username, dialog status, admin status, AI session, network, topics, and a vector store.  
   
 #### SessionUsage Struct:  
-- Represents a session usage record.  
-- Contains fields for session ID and usage data.  
+  
+The SessionUsage struct represents the usage of an AI session. It contains the session ID and a map of usage data.  
   
 #### AiSession Struct:  
-- Represents an AI session.  
-- Contains fields for GPT key, GPT model, AI type, dialog thread, base URL, and usage data.  
+  
+The AiSession struct represents an AI session. It contains the GPT key, GPT model, AI type, chat session, base URL, and usage data.  
   
 #### ChatSession Struct:  
-- Represents a chat session.  
-- Contains fields for conversation buffer and dialog thread.  
   
-#### AddUser Function:  
-- Adds a new user to the UsersMap.  
+The ChatSession struct represents a chat session. It contains a conversation buffer and a dialog thread.  
   
-#### UpdateUserUsage Function:  
-- Updates the usage data for a specific user in the UsersMap.  
+#### Functions:  
   
-#### UpdateSessionUsage Function:  
-- Updates the usage data for a specific session in the UsageMap.  
+- AddUser: Adds a new user to the UsersMap.  
+- UpdateUserUsage: Updates the usage data for a user's AI session.  
+- UpdateSessionUsage: Updates the usage data for a session.  
+- GetSessionUsage: Retrieves the usage data for a session.  
+- NewChatSession: Creates a new chat session with a conversation buffer and dialog thread.  
   
-#### GetSessionUsage Function:  
-- Retrieves the usage data for a specific session from the UsageMap.  
+The code provides a basic framework for managing user data, AI sessions, and chat sessions. It includes functions for adding users, updating usage data, and creating new chat sessions.  
+  
+# lib/database/user.go  
+## Package: database  
+  
+### Imports:  
+  
+- log  
+- os  
+- e (github.com/JackBekket/hellper/lib/embeddings)  
+- godotenv  
+- pgvector (github.com/tmc/langchaingo/vectorstores/pgvector)  
+  
+### External Data and Input Sources:  
+  
+- AI_ENDPOINT: Environment variable containing the API endpoint for the AI service.  
+- EMBEDDINGS_DB_URL: Environment variable containing the URL for the embeddings database.  
+- GptKey: Field in the User struct containing the API key for the GPT service.  
+  
+### Code Summary:  
+  
+#### SetContext Function:  
+  
+This function sets the context for a User object by establishing a connection to the embeddings database and initializing a vector store. It first loads the environment variables, retrieves the API key and endpoint for the AI service, and the URL for the embeddings database. Then, it uses the provided information to create a vector store using the GetVectorStoreWithOptions function from the embeddings package. The vector store is stored in the VectorStore field of the User object. Finally, it sets up a defer function to ensure that the vector store is closed when the function exits.  
+  
+#### ClearContext Function:  
+  
+This function clears the context for a User object by setting the VectorStore field to nil.  
   
