@@ -24,6 +24,7 @@ func MainDuckSearch() {
     llms.TextParts(llms.ChatMessageTypeSystem, "You are an agent that has access to a Duck Duck go search engine. Please provide the user with the information they are looking for by using the search tool provided."),
   }
 
+  //tools definition interface
   tools := []llms.Tool{
     {
       Type: "function",
@@ -43,6 +44,8 @@ func MainDuckSearch() {
     },
   }
 
+
+  // executor agent node
   agent := func(ctx context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
     response, err := model.GenerateContent(ctx, state, llms.WithTools(tools))
     if err != nil {
@@ -61,6 +64,7 @@ func MainDuckSearch() {
     return state, nil
   }
 
+  // tool function 
   search := func(ctx context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
     lastMsg := state[len(state)-1]
 
@@ -106,6 +110,7 @@ func MainDuckSearch() {
     return state, nil
   }
 
+  // condition function -- handle if the tool call has been maid
   shouldSearch := func(ctx context.Context, state []llms.MessageContent) string {
     lastMsg := state[len(state)-1]
     for _, part := range lastMsg.Parts {

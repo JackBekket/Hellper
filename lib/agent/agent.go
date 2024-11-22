@@ -72,6 +72,8 @@ func main() {
     },
   }
 
+  //TODO: REWORK
+
 
   agent := func(ctx context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
     response, err := model.GenerateContent(ctx, state, llms.WithTools(tools))
@@ -79,51 +81,30 @@ func main() {
       return state, err
     }
 
-    msg := llms.TextParts(llms.ChatMessageTypeAI, response.Choices[0].Content)
-    
-
     if len(response.Choices[0].ToolCalls) > 0 {
       for _, toolCall := range response.Choices[0].ToolCalls {
-        if toolCall.FunctionCall.Name == "semanticSearch" {
-          // Parse the arguments from the tool call
-          var args struct {
-            SearchQuery string `json:"searchQuery"`
-            MaxResults int    `json:"maxResults"`
-            Store       any    `json:"store"`
-            Options     []any  `json:"options"`
-          }  
-          if err := json.Unmarshal([]byte(toolCall.FunctionCall.Arguments), &args); err != nil {
+        if toolCall.FunctionCall.Name == "search" {
+
+          // ... Extract parameters from toolCall.FunctionCall.Arguments (e.g., query, maxResults, vectorStore, options)
+          // ... Create instance of your vector store using extracted parameters or options
+
+          searchResults, err := embeddings.SemanticSearch(query, maxResults, vectorStore, options...)
+          if err != nil {
             return state, err
           }
-        // Call your SemanticSearch function
-        searchResults, err := embeddings.SemanticSearch(args.SearchQuery, args.MaxResults, args.Store, args.Options...)
-        if err != nil {
-          return state, err
+
+          // ... Format the search results to match the expected output format for your messaging system
+          // ... Return the formatted search results as part of the response
+
         }
-
-                // Construct a tool response and append it to the state
-                msg := llms.MessageContent{
-                  Role: llms.ChatMessageTypeTool,
-                  Parts: []llms.ContentPart{
-                    llms.ToolCallResponse{
-                      ToolCallID: toolCall.ID,
-                      Name:       toolCall.FunctionCall.Name,
-                      Content:    searchResults,
-                    },
-                  },
-                }
-
-        msg.Parts = append(msg.Parts, toolCall)
       }
     }
-  }
 
-
-    state = append(state, msg)
     return state, nil
   }
 
 
+  // tool func
   search := func(ctx context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
     lastMsg := state[len(state)-1]
 
