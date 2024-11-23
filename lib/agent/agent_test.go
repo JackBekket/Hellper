@@ -1,10 +1,11 @@
-package agent
+package agent_test
 
 import (
 	"context"
 	"encoding/json"
 	"log"
 	"os"
+	"testing"
 
 	"github.com/joho/godotenv"
 	"github.com/tmc/langchaingo/llms"
@@ -16,7 +17,7 @@ import (
 	"github.com/JackBekket/langgraphgo/graph"
 )
 
-func Run() {
+func Test_Run (t *testing.T) {
 
 
   model_name := "tiger-gemma-9b-v1-i1"
