@@ -9,7 +9,6 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/tools/duckduckgo"
 
 	//"github.com/tmc/langgraphgo/graph"
 	"github.com/JackBekket/hellper/lib/embeddings"
@@ -36,10 +35,18 @@ func Run() {
     log.Fatal(err)
   }
 
+  //completion_test := model.GenerateContent()
 
   intialState := []llms.MessageContent{
-    llms.TextParts(llms.ChatMessageTypeSystem, "You are an agent that has access to a Document Search. Please provide the user with the information they are looking for by using the semantic_search tool provided."),
+    llms.TextParts(llms.ChatMessageTypeSystem, "You are an agent that has access to a semanticSearch. Please provide the user with the information they are looking for by using the semanticSearch tool provided."),
   }
+
+  completion_test, err := model.GenerateContent(context.Background(),intialState)
+  if err != nil {
+	log.Println("error with simple generate content",err)
+  }
+  log.Println("completion test: ", completion_test)
+
 
 // toolS definition interfaces
   tools := []llms.Tool{
@@ -67,21 +74,13 @@ func Run() {
         Parameters: map[string]any{
           "type": "object",
           "properties": map[string]any{
-            "searchQuery": map[string]any{
+            "query": map[string]any{
               "type":        "string",
               "description": "The search query",
             },
-            "maxResults": map[string]any{
-              "type":        "integer",
-              "description": "Maximum number of results",
-            },
-            "store": map[string]any{
-              "type":        "object",
-              "description": "Vector store",
-            },
-            "options": map[string]any{
-              "type":        "array",
-              "description": "Optional parameters for the search",
+            "name": map[string]any{
+              "type":        "string",
+              "description": "name of a document collection",
             },
           },
         },
@@ -102,7 +101,7 @@ func Run() {
 
     if len(response.Choices[0].ToolCalls) > 0 {
       for _, toolCall := range response.Choices[0].ToolCalls {
-        if toolCall.FunctionCall.Name == "semantic_search" {
+        if toolCall.FunctionCall.Name == "semanticSearch" {
 
           msg.Parts = append(msg.Parts, toolCall)
 
@@ -115,50 +114,6 @@ func Run() {
 
 
 // TOOL FUNCTIONS
-  search := func(ctx context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
-    lastMsg := state[len(state)-1]
-
-    for _, part := range lastMsg.Parts {
-      toolCall, ok := part.(llms.ToolCall)
-
-      if ok && toolCall.FunctionCall.Name == "search" {
-        var args struct {
-          Query string `json:"query"`
-        }
-
-        if err := json.Unmarshal([]byte(toolCall.FunctionCall.Arguments), &args); err != nil {
-          return state, err
-        }
-
-        search, err := duckduckgo.New(1, duckduckgo.DefaultUserAgent)
-        if err != nil {
-          log.Printf("search error: %v", err)
-          return state, err
-        }
-
-        toolResponse, err := search.Call(ctx, args.Query)
-        if err != nil {
-          log.Printf("search error: %v", err)
-          return state, err
-        }
-
-        msg := llms.MessageContent{
-          Role: llms.ChatMessageTypeTool,
-          Parts: []llms.ContentPart{
-            llms.ToolCallResponse{
-              ToolCallID: toolCall.ID,
-              Name:       toolCall.FunctionCall.Name,
-              Content:    toolResponse,
-            },
-          },
-        }
-
-        state = append(state, msg)
-      }
-    }
-
-    return state, nil
-  }
 
   // Custom semantic search function
   semanticSearch := func(ctx context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
@@ -166,7 +121,7 @@ func Run() {
 
       for _, part := range lastMsg.Parts {
         toolCall, ok := part.(llms.ToolCall)
-        if ok && toolCall.FunctionCall.Name == "semantic_search" {
+        if ok && toolCall.FunctionCall.Name == "semanticSearch" {
 
           // TODO: Extract query and store parameters from the arguments
           // ... (logic to extract necessary values for SemanticSearch call)
@@ -178,6 +133,7 @@ func Run() {
           }
           if err := json.Unmarshal([]byte(toolCall.FunctionCall.Arguments), &args); err != nil {
             // Handle any errors in deserializing the arguments
+			log.Println("error unmurshal json")
             return state, err
           }
           // Extract query from the args structure
@@ -195,6 +151,7 @@ func Run() {
           store, err := embeddings.GetVectorStoreWithOptions(ai_url,api_token,db_link,args.Name) // Implement this method
           if err != nil {
             // Handle errors in retrieving the vector store
+			log.Println("error getting store")
             return state, err
           }
 
@@ -245,22 +202,6 @@ func Run() {
 
 //CONDITIONS
 
-  /*
-  //should use duck_duck_go search engine
-  shouldSearch := func(ctx context.Context, state []llms.MessageContent) string {
-    lastMsg := state[len(state)-1]
-    for _, part := range lastMsg.Parts {
-      toolCall, ok := part.(llms.ToolCall)
-
-      if ok && toolCall.FunctionCall.Name == "search" {
-        log.Printf("agent should use search")
-        return "search"
-      }
-    }
-
-    return graph.END
-  }
-  */
 
   // should use semantc search tool we defined earlier
   shouldSearchDocuments := func(ctx context.Context, state []llms.MessageContent) string {
@@ -268,9 +209,9 @@ func Run() {
     for _, part := range lastMsg.Parts {
       toolCall, ok := part.(llms.ToolCall)
 
-      if ok && toolCall.FunctionCall.Name == "semantic_search" {
+      if ok && toolCall.FunctionCall.Name == "semanticSearch" {
         log.Printf("agent should use SemanticSearch (embeddings similarity search aka DocumentsSearch)")
-        return "semantic_search"
+        return "semanticSearch"
       }
     }
 
@@ -282,12 +223,12 @@ func Run() {
   workflow := graph.NewMessageGraph()
 
   workflow.AddNode("agent", agent)
-  workflow.AddNode("search", search)
-  workflow.AddNode("semantic_search", semanticSearch)
+  //workflow.AddNode("search", search)
+  workflow.AddNode("semanticSearch", semanticSearch)
 
   workflow.SetEntryPoint("agent")
   workflow.AddConditionalEdge("agent", shouldSearchDocuments)
-  workflow.AddEdge("semantic_search", "agent")
+  workflow.AddEdge("semanticSearch", "agent")
 
   app, err := workflow.Compile()
   if err != nil {
@@ -307,5 +248,5 @@ func Run() {
   }
 
   lastMsg := response[len(response)-1]
-  log.Printf("last msg: %v", lastMsg.Parts[0])
+  log.Printf("last msg: %v", lastMsg.Parts[0]) //TODO: find out why llm answer only '<eos>` token without any completion response, error or tool call.`
 }
