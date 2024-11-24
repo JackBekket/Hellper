@@ -24,12 +24,6 @@ func GetVectorStore(ai_url string, api_token string, db_link string) (vectorstor
 
 	//_ = godotenv.Load()
 
-	/*
-		api_token = os.Getenv("OPENAI_API_KEY")	// this is not openai key actually, it's local key for localai
-		conn_pg_link := os.Getenv("PG_LINK")
-	*/
-
-	//base_url := os.Getenv("AI_BASEURL")
 
 	/*
 		host := os.Getenv("PG_HOST")
@@ -58,12 +52,6 @@ func GetVectorStore(ai_url string, api_token string, db_link string) (vectorstor
 	*/
 	pgConnURL := db_link
 
-	/*
-		cfg, err := config.LoadDefaultConfig(context.Background())
-		if err != nil {
-			return nil, err
-		}
-	*/
 
 	config, err := pgxpool.ParseConfig(pgConnURL)
 	if err != nil {
@@ -109,7 +97,10 @@ func GetVectorStore(ai_url string, api_token string, db_link string) (vectorstor
 
 	fmt.Println("vector store ready")
 
-	
+	defer func() {
+		pgvStore := store
+		pgvStore.Close()
+	  }()
 
 	return store, nil
 
@@ -165,6 +156,11 @@ func GetVectorStoreWithOptions(ai_url string, api_token string, db_link string, 
 	}
 
 	fmt.Println("vector store ready")
+
+	defer func() {
+		pgvStore := store
+		pgvStore.Close()
+	  }()
 
 	return store, nil
 }

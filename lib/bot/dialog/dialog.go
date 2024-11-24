@@ -93,7 +93,7 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 					log.Println("argument: ", name)
 					log.Println("user:", user)
 					user.SetContext(name)
-
+					
 					//continue
 				case "clearContext":
 					user := comm.GetUser(chatID)
