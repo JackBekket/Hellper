@@ -78,11 +78,11 @@ func Run() {
               "type":        "string",
               "description": "The search query",
             },
-            "name": map[string]any{                     //TODO: there should NOT exist arguments which called NAME cause it cause COLLISION with actual function name.    .....more like confusion then collision so there are no error
+            "collection": map[string]any{                     //TODO: there should NOT exist arguments which called NAME cause it cause COLLISION with actual function name.    .....more like confusion then collision so there are no error
               "type":        "string",
-              "description": "name of a document collection",
+              "description": "name of collection store in which we perform the search",
             },
-          },
+          }, 
         },
       },
     },
@@ -129,7 +129,7 @@ func Run() {
             Query string `json:"query"`
             //Store string `json:"store"`
             //Options []map[string]any `json:"options"`
-            Name string `json:"name"`
+            Collection string `json:"collection"`   //TODO: ALWAYS CHECK THIS JSON REFERENCE WHEN ALTERING VARS
           }
           if err := json.Unmarshal([]byte(toolCall.FunctionCall.Arguments), &args); err != nil {
             // Handle any errors in deserializing the arguments
@@ -145,15 +145,21 @@ func Run() {
           api_token := os.Getenv("ADNIN_KEY")
           db_link := os.Getenv("EMBEDDINGS_DB_URL")
 
+          log.Println("Collection Name: ", args.Collection)
+          log.Println("db_link: ", db_link)
+
+
           // Retrieve your vector store based on the store value in the args
           // You'll likely need to have a method for getting the vector store based
           // on the store string ("store" value in the args)
-          store, err := embeddings.GetVectorStoreWithOptions(ai_url,api_token,db_link,args.Name) // TODO: changed argument 'Name' to 'CollectionName' or something like that
+          store, err := embeddings.GetVectorStoreWithOptions(ai_url,api_token,db_link,args.Collection) // TODO: changed argument 'Name' to 'CollectionName' or something like that
           if err != nil {
             // Handle errors in retrieving the vector store
 			log.Println("error getting store")
             return state, err
           }
+
+          log.Println("store:", store)
 
           maxResults := 2 // Set your desired maxResults here
           //options := args.Options // Pass in any additional options as needed
@@ -238,7 +244,7 @@ func Run() {
 
   intialState = append(
     intialState,  //TODO: check if we can somehow set collection name in initial state
-    llms.TextParts(llms.ChatMessageTypeHuman, "Collection Name: Hellper Query: How does embeddings package works?"),
+    llms.TextParts(llms.ChatMessageTypeHuman, "Collection Name: 'Hellper' Query: How does embeddings package works?"),
   )
 
   response, err := app.Invoke(context.Background(), intialState)
