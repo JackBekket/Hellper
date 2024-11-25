@@ -15,24 +15,38 @@
 
 ### External Data, Input Sources:
 
-- `ai_url`: AI URL (localhost or openai or docker)
-- `api_token`: AI token
-- `db_link`: Database link
-- `name`: Collection name for vector store
+1. Environment variables:
+    - `AI_BASEURL`: Base URL for the AI service (e.g., "http://localhost:8080/v1/").
+    - `OPENAI_API_KEY`: API key for the OpenAI service.
+    - `PG_HOST`: Hostname or IP address of the PostgreSQL database.
+    - `PG_USER`: Username for the PostgreSQL database.
+    - `PG_PASSWORD`: Password for the PostgreSQL database.
+    - `PG_DB`: Database name for the PostgreSQL database.
+2. Command-line arguments:
+    - `ai_url`: URL for the AI service.
+    - `api_token`: API token for the AI service.
+    - `db_link`: Connection string for the PostgreSQL database.
 
 ### Code Summary:
 
-#### LoadEnv()
+#### LoadEnv() function:
 
-This function is not implemented in the provided code.
+- This function is not implemented in the provided code.
 
-#### GetVectorStore()
+#### GetVectorStore() function:
 
-This function takes `ai_url`, `api_token`, and `db_link` as input and returns a vector store. It first sets up the OpenAI API client using the provided `api_token` and `base_url`. Then, it creates an embeddings client using the OpenAI API and an embedder using the embeddings client. Finally, it creates a vector store using the provided database link and embedder.
+- This function creates a vector store using the PostgreSQL database and the OpenAI API.
+- It first retrieves the necessary environment variables or command-line arguments for the AI service, API token, and database connection.
+- Then, it creates a connection pool for the PostgreSQL database using the provided connection string.
+- Next, it creates an embeddings client using the OpenAI API, specifying the base URL, API version, embedding model, and API token.
+- An embedder is created using the embeddings client.
+- Finally, a vector store is created using the PostgreSQL database connection, embedder, and collection name.
 
-#### GetVectorStoreWithOptions()
+#### GetVectorStoreWithOptions() function:
 
-This function is similar to `GetVectorStore()` but also takes an additional input, `name`, which is used to specify the collection name for the vector store. It follows the same steps as `GetVectorStore()` but also sets the collection name using `pgvector.WithCollectionName(name)`.
+- This function is similar to GetVectorStore() but allows specifying a collection name for the vector store.
+- It takes the same input parameters as GetVectorStore() and adds an additional parameter for the collection name.
+- The rest of the logic is the same as GetVectorStore(), except for the collection name being passed to the vector store creation.
 
 
 
@@ -55,17 +69,17 @@ lib/embeddings/load.go
 
 ### External Data, Input Sources:
 
-1. `source` string: This is used in the `getDocs` function to fetch data from a given URL.
+1. `source` string: This is used to fetch documents from a given URL.
 
 ### Code Summary:
 
-#### LoadDocsToStore:
+#### LoadDocsToStore Function:
 
-This function takes a slice of `schema.Document` and a `vectorstores.VectorStore` as input. It first prints the number of documents to be loaded and then calls the `AddDocuments` method of the vector store to add the documents. If there is an error during the process, it logs the error and panics. After the documents are loaded, it closes the vector store using a defer statement.
+This function takes a slice of `schema.Document` and a `vectorstores.VectorStore` as input. It first prints the number of documents to be loaded and then adds the documents to the vector store using the `AddDocuments` method. If there is an error during the process, it logs the error and panics. After the documents are loaded, it closes the vector store using the `Close` method.
 
-#### getDocs:
+#### getDocs Function:
 
-This function takes a `source` string as input and returns a slice of `schema.Document` and an error. It first fetches the data from the given URL using `http.Get`. Then, it loads and splits the data using `documentloaders.NewHTML` and `textsplitter.NewRecursiveCharacter`. Finally, it returns the slice of documents and any error encountered during the process.
+This function takes a `source` string as input and returns a slice of `schema.Document` and an error. It first fetches the content from the given URL using `http.Get`. Then, it loads and splits the content into documents using the `documentloaders.NewHTML` and `textsplitter.NewRecursiveCharacter` functions. Finally, it returns the slice of documents and any error encountered during the process.
 
 
 

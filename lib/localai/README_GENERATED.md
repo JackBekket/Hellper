@@ -1,6 +1,6 @@
 ## Package: localai
 
-This package provides functions for interacting with various AI models, including chat completion, image generation, and transcription.
+This package provides functions for interacting with various AI models, including chat models and image generation models. It also includes a function for transcribing audio using the Whisper model.
 
 ### Imports
 
@@ -22,213 +22,28 @@ The package imports the following packages:
 
 The package uses the following external data and input sources:
 
-- API endpoints for various AI models (e.g., chat completion, image generation, transcription)
-- Environment variables (e.g., OPENAI_API_KEY)
+- API endpoints for chat models and image generation models (e.g., "http://localhost:8080/v1/chat/completions")
+- Whisper model for audio transcription
+- Environment variable "OPENAI_API_KEY" for authentication with the API
 
 ### Code Summary
 
-#### Chat Completion
+1. Chat Request and Response Structures: The package defines structures for chat requests and responses, including fields for model, messages, temperature, created, object, ID, model, choices, and usage statistics.
 
-The `GenerateCompletion` function sends a chat completion request to a specified API endpoint. It takes the prompt, model name, and API URL as input. The function first creates a JSON payload containing the prompt, model name, and temperature. Then, it sends a POST request to the API endpoint with the JSON payload. The response is parsed as a ChatResponse object, which contains the assistant's response.
+2. Generation Response Structure: A structure for generation responses is also defined, including fields for created, ID, data, and usage.
 
-#### Image Generation
+3. Wrong Password Error: A custom error type, WrongPwdError, is defined to handle incorrect passwords.
 
-The `GenerateImageStableDiffusion` function generates an image using the Stable Diffusion model. It takes the prompt, image size, API URL, and model name as input. The function creates a JSON payload containing the prompt, model name, and image size. It then sends a POST request to the API endpoint with the JSON payload. The response is parsed as a GenerationResponse object, which contains the URL of the generated image.
+4. Main Function: The main function demonstrates how to use the package by sending a chat request to a chat model and printing the assistant's response.
 
-#### Transcription
+5. GenerateCompletion Function: This function takes a prompt, model name, and API URL as input and returns a chat response. It creates a chat request, converts it to JSON, sends the request to the API, and parses the response.
 
-The `TranscribeWhisper` function transcribes an audio file using the Whisper model. It takes the API URL, model name, and path to the audio file as input. The function first opens the audio file and creates a multipart form data payload containing the model name and the audio file. It then sends a POST request to the API endpoint with the multipart form data payload. The response is parsed as a struct containing the transcribed text.
+6. GenerateCompletionWithPWD Function: This function is similar to GenerateCompletion but also takes a secret password as input and returns an error if the password is incorrect.
 
-#### Wrong Password Handling
+7. GenerateImageStableDiffusion Function: This function takes a prompt, size, API URL, and model as input and returns an image URL. It creates a payload with the prompt, size, and model, sends a POST request to the API, and parses the response to extract the image URL.
 
-The `GenerateCompletionWithPWD` function checks if the provided user password matches the stored password. If they match, it calls the `GenerateCompletion` function to generate the chat completion. Otherwise, it returns an error indicating that the password is incorrect.
+8. TranscribeWhisper Function: This function takes a URL, model, and path to an audio file as input and returns the transcribed text. It opens the audio file, creates a multipart request body, sends the request to the API, and parses the response to extract the transcribed text.
 
-#### Text Cleaning
+9. cleanText Function: This function removes "[BLANK_AUDIO]" from the output of the TranscribeWhisper function.
 
-The `cleanText` function removes the "[BLANK_AUDIO]" string from the input text if it is present and the input text is empty after removing the "[BLANK_AUDIO]" string. Otherwise, it returns the input text with the "[BLANK_AUDIO]" string removed.
-
-
-
-lib/localai/localai.go
-## Package: localai
-
-### Imports:
-
-```
-import (
-	"context"
-	"fmt"
-	"log"
-	"net/http"
-	"os"
-	"strings"
-
-	"github.com/JackBekket/hellper/lib/database"
-	"github.com/JackBekket/hellper/lib/localai/setupSequenceWithKey"
-	"github.com/JackBekket/hellper/lib/localai/startDialogSequence"
-)
-```
-
-### External Data, Input Sources:
-
-- Database: `database.UsersMap` for storing user data.
-- Environment variables: `ai_endpoint` for the AI model endpoint.
-
-### Code Summary:
-
-#### main Function:
-
-This function is the entry point for the application. It initializes the database connection, sets up the AI endpoint, and starts the HTTP server.
-
-#### setupSequenceWithKey Function:
-
-This function is responsible for setting up the AI sequence for a given user. It takes the following parameters:
-
-- `bot`: Telegram bot API instance.
-- `user`: Database record containing user information.
-- `language`: Language preference for the user.
-- `ctx`: Context for the operation.
-- `spwd`: Password for authentication with the AI model.
-- `ai_endpoint`: Endpoint for communication with the AI model.
-
-The function first acquires a mutex lock to ensure thread safety. It then retrieves the user's GPT key and model from the `user.AiSession` field. It also retrieves the user's ID and network from the `user` struct.
-
-The function then uses a switch statement to handle different language preferences. For each language, it calls the `tryLanguage` function to generate a response from the AI model. The response is then sent to the user via the Telegram bot.
-
-#### tryLanguage Function:
-
-This function takes the following parameters:
-
-- `user`: Database record containing user information.
-- `language`: Language preference for the user.
-- `languageCode`: Code representing the language (0 - default, 1 - Russian, 2 - English).
-- `ctx`: Context for the operation.
-- `ai_endpoint`: Endpoint for communication with the AI model.
-- `spwd`: Password for authentication with the AI model.
-- `upwd`: User's password for authentication with the AI model.
-
-The function first constructs a language prompt based on the `languageCode`. It then calls the `GenerateCompletionWithPWD` function to generate a response from the AI model. The response is then logged and returned as a string.
-
-#### GenerateCompletionWithPWD Function:
-
-This function is responsible for generating a response from the AI model using the provided password. It takes the following parameters:
-
-- `languagePromt`: Prompt to be sent to the AI model.
-- `model`: AI model to use for generating the response.
-- `ai_endpoint`: Endpoint for communication with the AI model.
-- `spwd`: Password for authentication with the AI model.
-- `upwd`: User's password for authentication with the AI model.
-
-The function constructs a request to the AI model using the provided parameters and sends it to the specified endpoint. The response is then returned.
-
-#### LogResponse Function:
-
-This function logs the full response object, including its creation time, ID, model, object, choices, and usage information.
-
-
-
-lib/localai/setupSequenceWithKey.go
-## Package: localai
-
-### Imports:
-
-```
-import (
-	"context"
-	"log"
-	"sync"
-
-	db "github.com/JackBekket/hellper/lib/database"
-	//"github.com/sashabaranov/go-openai"
-
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-)
-```
-
-### External Data, Input Sources:
-
-- Database: `db.User` struct, which contains user information, including their AI session data.
-- Telegram Bot API: `tgbotapi.BotAPI` for interacting with the Telegram bot.
-- AI Endpoint: `ai_endpoint` for communication with the AI model.
-- Password: `spwd` for authentication with the AI model.
-
-### Code Summary:
-
-#### SetupSequenceWithKey Function:
-
-This function is responsible for setting up the AI sequence for a given user. It takes the following parameters:
-
-- `bot`: Telegram bot API instance.
-- `user`: Database record containing user information.
-- `language`: Language preference for the user.
-- `ctx`: Context for the operation.
-- `spwd`: Password for authentication with the AI model.
-- `ai_endpoint`: Endpoint for communication with the AI model.
-
-The function first acquires a mutex lock to ensure thread safety. It then retrieves the user's GPT key and model from the `user.AiSession` field. It also retrieves the user's ID and network from the `user` struct.
-
-The function then uses a switch statement to handle different language preferences. For each language, it calls the `tryLanguage` function to generate a response from the AI model. The response is then sent to the user via the Telegram bot.
-
-#### tryLanguage Function:
-
-This function takes the following parameters:
-
-- `user`: Database record containing user information.
-- `language`: Language preference for the user.
-- `languageCode`: Code representing the language (0 - default, 1 - Russian, 2 - English).
-- `ctx`: Context for the operation.
-- `ai_endpoint`: Endpoint for communication with the AI model.
-- `spwd`: Password for authentication with the AI model.
-- `upwd`: User's password for authentication with the AI model.
-
-The function first constructs a language prompt based on the `languageCode`. It then calls the `GenerateCompletionWithPWD` function to generate a response from the AI model. The response is then logged and returned as a string.
-
-#### GenerateCompletionWithPWD Function:
-
-This function is responsible for generating a response from the AI model using the provided password. It takes the following parameters:
-
-- `languagePromt`: Prompt to be sent to the AI model.
-- `model`: AI model to use for generating the response.
-- `ai_endpoint`: Endpoint for communication with the AI model.
-- `spwd`: Password for authentication with the AI model.
-- `upwd`: User's password for authentication with the AI model.
-
-The function constructs a request to the AI model using the provided parameters and sends it to the specified endpoint. The response is then returned.
-
-#### LogResponse Function:
-
-This function logs the full response object, including its creation time, ID, model, object, choices, and usage information.
-
-
-
-lib/localai/startDialogSequence.go
-## Package: localai
-
-### Imports:
-
-* context
-* log
-* db "github.com/JackBekket/hellper/lib/database"
-* tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-
-### External Data, Input Sources:
-
-* `db.UsersMap`: A map containing user data from the database.
-* `ai_endpoint`: A string representing the endpoint for the AI model.
-
-### Code Summary:
-
-#### errorMessage Function:
-
-This function handles errors that occur during the process of creating a request. It logs the error, sends an error message to the user via Telegram, and removes the user from the database.
-
-#### StartDialogSequence Function:
-
-This function initiates a dialog sequence with the user. It retrieves the user's data from the database, logs the GPT model and prompt, and calls the GenerateCompletion function to generate a response from the AI model. If an error occurs during the process, it calls the errorMessage function. Otherwise, it logs the response, formats it for display, and sends it to the user via Telegram. Finally, it updates the user's dialog status in the database.
-
-#### LogResponse Function:
-
-This function logs the full response object, including its creation time, ID, model, object, choices, and usage information.
-
-
-
+### End of Output

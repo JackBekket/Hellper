@@ -54,16 +54,16 @@ The code provides a basic framework for managing user data, AI sessions, and cha
 ### External Data and Input Sources:  
   
 - AI_ENDPOINT: Environment variable containing the API endpoint for the AI service.  
+- GPT_KEY: User's AI session GPT key.  
 - EMBEDDINGS_DB_URL: Environment variable containing the URL for the embeddings database.  
-- GptKey: Field in the User struct containing the API key for the GPT service.  
   
 ### Code Summary:  
   
 #### SetContext Function:  
   
-This function sets the context for a User object by establishing a connection to the embeddings database and initializing a vector store. It first loads the environment variables, retrieves the API key and endpoint for the AI service, and the URL for the embeddings database. Then, it uses the provided information to create a vector store using the GetVectorStoreWithOptions function from the embeddings package. The vector store is stored in the VectorStore field of the User object. Finally, it sets up a defer function to ensure that the vector store is closed when the function exits.  
+This function sets the context for a user by establishing a connection to the embeddings database and initializing a vector store. It first loads the environment variables and retrieves the necessary information for connecting to the AI service and the embeddings database. Then, it uses the provided information to create a vector store using the `GetVectorStoreWithOptions` function from the `embeddings` package. The vector store is stored in the user's `VectorStore` field. Finally, it sets up a defer function to ensure that the vector store is closed when the function exits.  
   
 #### ClearContext Function:  
   
-This function clears the context for a User object by setting the VectorStore field to nil.  
+This function clears the context for a user by setting the `VectorStore` field to nil. This effectively disconnects the user from the embeddings database and closes the vector store.  
   
