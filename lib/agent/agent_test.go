@@ -9,5 +9,6 @@ import (
 
 func Test_Run (t *testing.T) {
 
-  agent.Run()
+  // Testing autonomouse semantic_search agent. it will stop when it finds the answer
+  agent.SearchRun()
 }

@@ -18,13 +18,17 @@ import (
 /** My current vision of this mechanism is a graph. So each agent can be represented as graph. Each node is usually single action in <turn_of_dialog>. Graphs is connected with themselves through edges, which represent
   relations whithin graphs. Each graph can be conditional or direct. If we need to reorder graph we can simply alter entry_point instead of rewriting code of dialog itseelf every time.
   Each graph can also be represented graphically.
+
+
+    This is autonomouse semantic_search agent package without human-in-the-loop breakpoint
 */
 
 
 
 
 
-func Run() {
+
+func SearchRun() {
 
 
   model_name := "tiger-gemma-9b-v1-i1"
@@ -219,23 +223,9 @@ func Run() {
 
 
 
-askHuman := func(ctx context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
-      // Implement your logic here to ask the human for input,
-    // such as sending a message to a messaging platform or
-    // displaying a prompt in a user interface.
-    // For example, you could use a library like "github.com/gorilla/websocket"
-    // to establish a WebSocket connection and send/receive messages.
-
-    // Placeholder for now:
-    return state, nil
-}
-
-
-
-
 //CONDITIONS funcs
 
-/*
+
   // condition function, which defines whether or not to use semanticSearch tool. we have access to semanticSearch itself in main thread through a pointer to this function. So if llm says 'yes, use this function with x signatures` -- it will match to a pointer and x function will be called.`
   shouldSearchDocuments := func(ctx context.Context, state []llms.MessageContent) string {
     lastMsg := state[len(state)-1]
@@ -251,57 +241,17 @@ askHuman := func(ctx context.Context, state []llms.MessageContent) ([]llms.Messa
     return graph.END
   }
 
-  shouldWaitForHuman := func(ctx context.Context, state []llms.MessageContent) string {
-    lastMsg := state[len(state)-1]
-    for _, part := range lastMsg.Parts {
-      toolCall, ok := part.(llms.ToolCall)
-      if ok && toolCall.FunctionCall.Name == "askHuman" {
-        log.Printf("waiting for human input")
-        return "askHuman"
-      }
-    }
-    return graph.END  // should it be the end here? should it EVER ends?
-}
-*/
-
-shouldContinue := func(ctx context.Context, state []llms.MessageContent) string {
-  lastMsg := state[len(state)-1]
-  for _, part := range lastMsg.Parts {
-    toolCall, ok := part.(llms.ToolCall)
-
-    if ok && toolCall.FunctionCall.Name == "askHuman" {
-      log.Printf("waiting for human input")
-      return "askHuman"
-    }
-    if ok && toolCall.FunctionCall.Name == "semanticSearch" {
-      log.Printf("agent should use SemanticSearch (embeddings similarity search aka DocumentsSearch)")
-      return "semanticSearch"
-    }
-  }
- 
-  return graph.END // should it be the end here? should it EVER ends?
-}
-
-
-
 
 
   workflow := graph.NewMessageGraph()
 
   workflow.AddNode("agent", agent)
+  //workflow.AddNode("search", search)
   workflow.AddNode("semanticSearch", semanticSearch)
-  // Add a new node for human interaction
-  workflow.AddNode("askHuman", askHuman)
 
   workflow.SetEntryPoint("agent")
-  
- // workflow.AddConditionalEdge("agent", shouldSearchDocuments)
- // workflow.AddConditionalEdge("agent",shouldWaitForHuman)
-  workflow.AddConditionalEdge("agent",shouldContinue)
-
+  workflow.AddConditionalEdge("agent", shouldSearchDocuments)
   workflow.AddEdge("semanticSearch", "agent")
-  workflow.AddEdge("askHuman", "agent")
-  //workflow.AddEdge("askHuman","agent")
 
   app, err := workflow.Compile()
   if err != nil {
