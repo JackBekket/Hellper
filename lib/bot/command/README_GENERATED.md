@@ -1,26 +1,26 @@
 ## Package: command
 
 ### Imports:
+
 - log
 - db "github.com/JackBekket/hellper/lib/database"
 - tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
-### External Data:
-- msgTemplates (not shown in the code, but mentioned in the code)
+### External Data, Input Sources:
 
-### Summary:
-#### AddAdminToMap function:
-This function is responsible for adding a new admin to the system. It takes two arguments: adminKey (the API key for the admin's GPT model) and updateMessage (a telegram message object containing information about the user).
+- adminKey (string)
+- updateMessage (tgbotapi.Message)
 
-1. It extracts the chatID from the updateMessage and creates a new User object with the chatID, username, dialog status, admin status, and AI session information (including the adminKey).
+### AddAdminToMap Function:
 
-2. It stores the new User object in the UsersMap (which is part of the database package).
+This function is responsible for adding an admin to the database and sending a confirmation message to the user. It takes two arguments: adminKey (string) and updateMessage (tgbotapi.Message).
 
-3. It logs a message indicating that the admin has been authorized.
-
-4. It sends a message to the admin confirming their authorization.
-
-5. It sends another message to the admin with a one-time reply keyboard containing a button for selecting the GPT-3.5 model.
+1. It extracts the chatID from the updateMessage.
+2. It creates a new User object with the chatID, username, dialog status, admin status, and AI session information. The AI session information includes the adminKey.
+3. It adds the new User object to the UsersMap in the database.
+4. It logs a message indicating that the admin has been authorized.
+5. It sends a confirmation message to the admin using the bot.
+6. It sends another message with a one-time reply keyboard containing a button for selecting the GPT-3.5 model.
 
 lib/bot/command/addNewUsertoMap.go
 ## Package: command
@@ -35,15 +35,13 @@ lib/bot/command/addNewUsertoMap.go
 
 - updateMessage: A tgbotapi.Message object containing information about the incoming Telegram message.
 
-### Summary:
+### AddNewUserToMap Function:
 
-#### AddNewUserToMap function:
+This function is responsible for adding a new user to the database and assigning them a "Dialog_status" of 0. It takes an updateMessage as input, extracts the chatID and username from the message, and creates a new User object with these values. The function then calls the database.AddUser function to store the new user in the database.
 
-This function is responsible for adding a new user to the database and assigning them a "Dialog_status" of 0. It takes an updateMessage as input, which contains information about the incoming Telegram message. The function first extracts the chatID and username from the updateMessage. Then, it creates a new User object with the extracted information and the Dialog_status set to 0. The User object is then added to the database using the AddUser function from the database package.
+After adding the user to the database, the function logs the user's ID and username. It then creates a new message using the msgTemplates["hello"] template and sends it to the user with a one-time reply keyboard containing a "Start!" button.
 
-After adding the user to the database, the function logs the user's ID and username. It then creates a new message using the "hello" template from the msgTemplates map and sends it to the user with a one-time reply keyboard containing a "Start!" button.
-
-The function also includes a commented-out section that checks if the user is already registered and updates the user's Dialog_status accordingly. However, this section is not currently being used.
+The function also includes a commented-out section that appears to be related to registration and checking if the user is already registered. This section is not currently being used.
 
 lib/bot/command/cases.go
 ## Package: command
@@ -90,101 +88,100 @@ This package contains the core logic for handling user interactions and managing
    - Functions like `HandleVoiceMessage` and `RecognizeImage` handle these tasks and provide responses to the user.
 
 5. Error Handling:
-   - The package includes error handling mechanisms to handle potential issues during the dialog flow and AI model interaction.
-   - Functions like `WrongResponse` and `ChangeDialogStatus` help manage errors and maintain the dialog flow.
+   - The package includes error handling mechanisms to handle potential issues, such as invalid API keys or failed AI model interactions.
+   - Functions like `WrongResponse` provide appropriate responses to the user in case of errors.
 
-6. Environment Variables:
-   - The package uses environment variables to configure the local AI endpoint.
-   - The `AttachKey` function handles the process of attaching the user's API key to their session.
+6. Context Management:
+   - The package uses the `context` package to manage the context of the AI session, including user data and other relevant information.
 
-7. Context Management:
-   - The package uses a context to store user data and pass it between functions.
-   - The `contextKey` type is used to define the key for storing user data in the context.
+7. Environment Variables:
+   - The package uses environment variables to configure the local AI endpoint and other settings.
 
-8. Helper Functions:
-   - The package includes helper functions like `DeleteFile` and `GetEnvsForSST` to support the main functionality.
+8. File Handling:
+   - The package handles file operations, such as deleting temporary files, to ensure proper cleanup.
 
-By summarizing these major code parts, we can understand the overall structure and functionality of the command package. It provides a comprehensive framework for managing user interactions, handling dialog flow, and integrating with AI models for various tasks.
+9. Logging:
+   - The package uses the `log` package to log important events and debug information.
+
+10. Helper Functions:
+   - The package includes helper functions for tasks like deleting files and managing dialog status.
+
+By summarizing these major code parts, we can understand the overall functionality of the `command` package and its role in managing user interactions and AI session management.
 
 lib/bot/command/checkAdmin.go
 ## Package: command
 
 ### Imports:
+
 - fmt
 - github.com/JackBekket/hellper/lib/bot/env
 - github.com/go-telegram-bot-api/telegram-bot-api/v5
 
 ### External Data, Input Sources:
+
 - adminData: A map of strings to env.AdminData, representing the admin data for each environment.
 - updateMessage: A tgbotapi.Message, representing the incoming Telegram message.
 
-### CheckAdmin Function:
-This function is responsible for checking if the user is an admin and updating the dialog status in the database accordingly. It takes two arguments: adminData and updateMessage.
+### Summary:
+
+#### CheckAdmin Function:
+
+The CheckAdmin function is responsible for updating the "dialogStatus" in the database based on whether the user is an admin or not. It takes two arguments: adminData and updateMessage.
 
 1. It first extracts the chatID from the updateMessage.
-2. Then, it iterates through the adminData map, looking for a matching chatID.
-3. If a match is found, it checks if the admin has a valid GPTKey.
-    - If the GPTKey is not empty, it adds the admin to the c.adminMap and returns.
-    - If the GPTKey is empty, it sends a message to the user informing them that the environment variable is missing and then adds the user to the c.userMap.
-4. If no match is found in the adminData map, it adds the user to the c.userMap.
+2. Then, it iterates through the adminData map, checking if the chatID matches any of the admin entries.
+3. If a match is found, it checks if the admin's GPTKey is not empty. If it is, the function calls the AddAdminToMap function, passing the GPTKey and updateMessage as arguments.
+4. If the GPTKey is empty, the function sends a message to the chatID, indicating that the environment is missing. It then calls the AddNewUserToMap function, passing the updateMessage as an argument.
+5. If no match is found in the adminData map, the function calls the AddNewUserToMap function, passing the updateMessage as an argument.
+
+The AddAdminToMap and AddNewUserToMap functions are not shown in the provided code, but they are likely responsible for updating the database with the appropriate dialogStatus based on whether the user is an admin or not.
 
 lib/bot/command/msgTemplates.go
-package command
+## Package/Component: command
 
-imports:
-- fmt
-- strings
+### Imports:
 
-external data:
-- msgTemplates: map[string]string
+```
+map[string]string
+```
 
-summary:
-The code defines a package called "command" that provides a set of message templates for various commands and functionalities. The package includes a map called "msgTemplates" that stores string values for different commands, such as "hello," "case0," "await," "case1," and "help_command." These templates can be used to generate messages for users or other components within the system.
+### External Data, Input Sources:
 
-The "help_command" template provides a list of available commands and their descriptions, including:
-- /help: Print this message.
-- /restart: Restart the session to switch between local-ai and openai chatGPT.
-- /search_doc: Search for documents.
-- /rag: Process Retrival-Augmented Generation.
-- /instruct: Use system prompt template instead of langchain (higher priority, see examples).
-- /image: Generate images.
+- `msgTemplates`: A map containing various message templates used in the package.
 
-The code also includes a comment indicating that all functions are experimental and may cause the bot to halt or catch fire.
+### Summary:
 
-
+The provided code snippet is part of a package or component named "command". It defines a map called `msgTemplates` that stores various message templates. These templates are likely used for generating responses or displaying information to the user. The code snippet also includes a comment that suggests the package or component might be related to a local AI node and provides a list of additional commands that can be used with the bot.
 
 lib/bot/command/newCommander.go
 ## Package: command
 
 ### Imports:
+- context
+- github.com/JackBekket/hellper/lib/database
+- github.com/go-telegram-bot-api/telegram-bot-api/v5
 
-- `context`
-- `github.com/JackBekket/hellper/lib/database`
-- `github.com/go-telegram-bot-api/telegram-bot-api/v5`
-
-### External Data and Input Sources:
-
+### External Data, Input Sources:
 - `bot`: A pointer to a `tgbotapi.BotAPI` object, which is used to interact with the Telegram Bot API.
-- `usersDb`: A map of user IDs to `database.User` objects, which is used to store and retrieve user data from the database.
-- `ctx`: A context object, which is used to manage the lifetime of the Commander instance and its associated resources.
+- `usersDb`: A map of user IDs to `database.User` objects, which is used to store and retrieve user data.
+- `ctx`: A context object, which is used to manage the lifetime of the Commander instance.
 
-### Summary of Major Code Parts:
-
-#### Commander Struct:
-
-The `Commander` struct represents the core component of the package, responsible for managing the interaction with the Telegram Bot API and the database. It contains the following fields:
-
-- `bot`: A pointer to the Telegram Bot API object.
+### Commander Struct:
+The `Commander` struct is responsible for managing the interaction with the Telegram Bot API and the database. It has the following fields:
+- `bot`: A pointer to a `tgbotapi.BotAPI` object.
 - `usersDb`: A map of user IDs to `database.User` objects.
 - `ctx`: A context object.
 
-#### NewCommander Function:
+### NewCommander Function:
+The `NewCommander` function is used to create a new `Commander` instance. It takes the following arguments:
+- `bot`: A pointer to a `tgbotapi.BotAPI` object.
+- `usersDb`: A map of user IDs to `database.User` objects.
+- `ctx`: A context object.
 
-The `NewCommander` function is a constructor for the `Commander` struct. It takes the Telegram Bot API object, the user database, and a context object as input and returns a new `Commander` instance.
+The function returns a pointer to a new `Commander` instance, which is initialized with the provided arguments.
 
-#### GetCommander Function:
-
-The `GetCommander` function is not provided in the code snippet, but it is mentioned in the comments. It is likely a function that returns a new `Commander` instance, similar to the `NewCommander` function.
+### GetCommander Function:
+The `GetCommander` function is not provided in the code snippet. It is assumed to be a function that returns a pointer to a `Commander` instance.
 
 lib/bot/command/ui.go
 ## Package: command
@@ -197,11 +194,11 @@ lib/bot/command/ui.go
 
 ### Code Summary:
 #### RenderModelMenuLAI:
-This function renders a menu of LLaMA-based models with an inline keyboard. It takes the chat ID as input and constructs a message with the appropriate model names as buttons. The message is then sent to the specified chat using the bot instance.
+This function renders a menu of LLaMA-based models with an inline keyboard. It takes the chat ID as input and constructs a message with the appropriate model names as buttons. The message is then sent to the specified chat using the bot.
 
 #### RenderLanguage:
-This function renders a menu for choosing a language with an inline keyboard. It takes the chat ID as input and constructs a message with language options as buttons. The message is then sent to the specified chat using the bot instance.
+This function renders a menu for choosing a language with an inline keyboard. It takes the chat ID as input and constructs a message with language options as buttons. The message is then sent to the specified chat using the bot.
+
+
 
 lib/bot/command/utils.go
-
-

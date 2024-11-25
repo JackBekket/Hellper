@@ -31,15 +31,15 @@ This function handles voice messages received from the Telegram bot. It first ex
   
 #### GetFileURL:  
   
-This function retrieves the URL of a file given its file ID and the Telegram bot API. It uses the `tgbotapi.FileConfig` struct to specify the file ID and then calls the `bot.GetFile` method to retrieve the file information. The function then constructs the file URL using the bot token and file path and returns it along with any errors encountered.  
+This function takes the file ID of a Telegram file and the bot API as input. It uses the bot API to retrieve the file information and constructs the URL to access the file from Telegram's servers. The function returns the file URL and any errors encountered during the process.  
   
 #### DownloadFile:  
   
-This function downloads a file from a given URL to a local file path. It first creates the local file and then uses the `http.Get` method to retrieve the file data from the URL. The file data is then written to the local file using the `io.Copy` function. Finally, the function returns any errors encountered during the process.  
+This function takes a URL and a local file path as input. It creates a new file at the specified local path and downloads the data from the given URL to the file. The function returns any errors encountered during the process.  
   
 #### GetEnvsForSST:  
   
-This function retrieves the AI endpoint URL and voice recognition model from environment variables. It first retrieves the AI endpoint URL from the `AI_ENDPOINT` environment variable and appends the voice recognition suffix from the `VOICE_RECOGNITION_SUFFIX` environment variable. If the suffix is not set, it defaults to `/v1/audio/transcriptions`. The function then retrieves the voice recognition model from the `VOICE_RECOGNITION_MODEL` environment variable and defaults to "whisper-1" if not set. Finally, it returns the AI endpoint URL and voice recognition model.  
+This function retrieves the necessary environment variables for speech-to-text conversion. It first retrieves the AI endpoint URL from the `AI_ENDPOINT` environment variable. If the `VOICE_RECOGNITION_SUFFIX` environment variable is not set, it defaults to `/v1/audio/transcriptions`. The function also retrieves the voice recognition model from the `VOICE_RECOGNITION_MODEL` environment variable, defaulting to "whisper-1" if not set. Finally, the function returns the constructed AI endpoint URL and the voice recognition model.  
   
   
   

@@ -1,7 +1,7 @@
 # lib/localai/localai.go  
 ## localai package  
   
-This package provides functions for interacting with various AI models, including chat completion, image generation, and transcription.  
+This package provides functions for interacting with various AI models, including chat models and image generation models. It also includes a function for transcribing audio using the Whisper model.  
   
 ### Imports  
   
@@ -23,30 +23,31 @@ The package imports the following packages:
   
 The package uses the following external data and input sources:  
   
-- API endpoints for various AI models (e.g., chat completion, image generation, transcription)  
-- Environment variables (e.g., OPENAI_API_KEY)  
+- API endpoints for chat models and image generation models (e.g., "http://localhost:8080/v1/chat/completions")  
+- Whisper model for audio transcription  
+- Environment variable "OPENAI_API_KEY" for authentication with the API  
   
 ### Code Summary  
   
-#### Chat Completion  
+1. Chat Request and Response Structures: The package defines structures for chat requests and responses, including fields for model, messages, temperature, created, object, ID, model, choices, and usage statistics.  
   
-The `GenerateCompletion` function sends a chat completion request to a specified API endpoint. It takes the prompt, model name, and API URL as input. The function first creates a JSON payload containing the prompt, model name, and temperature. Then, it sends a POST request to the API endpoint with the JSON payload. The response is parsed as a ChatResponse object, which contains the assistant's response.  
+2. Generation Response Structure: A structure for generation responses is also defined, including fields for created, ID, data, and usage.  
   
-#### Image Generation  
+3. Wrong Password Error: A custom error type, WrongPwdError, is defined to handle incorrect passwords.  
   
-The `GenerateImageStableDiffusion` function generates an image using the Stable Diffusion model. It takes the prompt, image size, API URL, and model name as input. The function creates a JSON payload containing the prompt, model name, and image size. It then sends a POST request to the API endpoint with the JSON payload. The response is parsed as a GenerationResponse object, which contains the URL of the generated image.  
+4. Main Function: The main function demonstrates how to use the package by sending a chat request to a chat model and printing the assistant's response.  
   
-#### Transcription  
+5. GenerateCompletion Function: This function takes a prompt, model name, and API URL as input and returns a chat response. It creates a chat request, converts it to JSON, sends the request to the API, and parses the response.  
   
-The `TranscribeWhisper` function transcribes an audio file using the Whisper model. It takes the API URL, model name, and path to the audio file as input. The function first opens the audio file and creates a multipart form data payload containing the model name and the audio file. It then sends a POST request to the API endpoint with the multipart form data payload. The response is parsed as a struct containing the transcribed text.  
+6. GenerateCompletionWithPWD Function: This function is similar to GenerateCompletion but also takes a secret password as input and returns an error if the password is incorrect.  
   
-#### Wrong Password Handling  
+7. GenerateImageStableDiffusion Function: This function takes a prompt, size, API URL, and model as input and returns an image URL. It creates a payload with the prompt, size, and model, sends a POST request to the API, and parses the response to extract the image URL.  
   
-The `GenerateCompletionWithPWD` function checks if the provided user password matches the stored password. If they match, it calls the `GenerateCompletion` function to generate the chat completion. Otherwise, it returns an error indicating that the password is incorrect.  
+8. TranscribeWhisper Function: This function takes a URL, model, and path to an audio file as input and returns the transcribed text. It opens the audio file, creates a multipart request body, sends the request to the API, and parses the response to extract the transcribed text.  
   
-#### Text Cleaning  
+9. cleanText Function: This function removes "[BLANK_AUDIO]" from the output of the TranscribeWhisper function.  
   
-The `cleanText` function removes the "[BLANK_AUDIO]" string from the input text if it is present and the input text is empty after removing the "[BLANK_AUDIO]" string. Otherwise, it returns the input text with the "[BLANK_AUDIO]" string removed.  
+### End of Output  
   
   
   

@@ -1,7 +1,10 @@
 # lib/langchain/handler.go  
 ## langchain  
   
+This package provides a ChainCallbackHandler struct and various methods to handle different events during the execution of a chain.  
+  
 ### Imports  
+  
 ```  
 import (  
 	"context"  
@@ -16,23 +19,32 @@ import (
 ```  
   
 ### External Data, Input Sources  
-- `context.Context`: Provides context for the code execution.  
-- `encoding/json`: Used for marshaling and unmarshaling JSON data.  
-- `log`: Provides logging functionality.  
-- `db "github.com/JackBekket/hellper/lib/database"`: Database library for interacting with the database.  
-- `llms`: Library for interacting with large language models.  
-- `schema`: Library for defining and working with schemas.  
+  
+The package uses the following external data and input sources:  
+  
+1. `db.User`: A struct representing a user, likely from a database.  
+2. `llms.ContentResponse`: A struct containing information about the generated content, including choices and generation info.  
+3. `schema.AgentAction`, `schema.AgentFinish`, `schema.Document`, etc.: Structs representing various events and data structures related to the chain execution.  
   
 ### Code Summary  
-The provided code defines a `ChainCallbackHandler` struct, which implements various callback functions for handling different events during the execution of a chain. These callbacks are used to handle actions, finishes, errors, and other events related to the chain.  
   
-The `HandleLLMGenerateContentEnd` function is responsible for handling the end of an LLM content generation process. It logs the content, stop reason, context, and generation information. It also updates the user's usage information based on the generated content and saves it to the database.  
+1. `ChainCallbackHandler` struct: This struct is responsible for handling various events during the chain execution. It has methods for handling agent actions, agent finishes, chain ends, chain errors, chain starts, LLM errors, LLM generate content starts, LLM starts, retriever ends, retriever starts, streaming functions, tool ends, tool errors, and tool starts.  
   
-The `LogResponseContentChoice` function is called within `HandleLLMGenerateContentEnd` to log the content, stop reason, context, and generation information. It also logs specific fields from the generation information, such as prompt tokens, completion tokens, and total tokens.  
+2. `HandleLLMGenerateContentEnd`: This method is called when the LLM has finished generating content. It logs the content, stop reason, context, and generation info. It also updates the user's usage information based on the generated content and saves it to the database.  
   
-The code also includes a comment indicating that the user's usage information should be updated based on the generated content and saved to the database. This suggests that the code is part of a larger system that tracks and manages user usage.  
+3. `LogResponseContentChoice`: This helper function logs the content, stop reason, context, and generation info of the chosen content. It also logs the prompt tokens, completion tokens, and total tokens from the generation info.  
   
-The code snippet demonstrates the use of callbacks to handle events during the execution of a chain, as well as the logging of relevant information for debugging and monitoring purposes. It also highlights the importance of updating user usage information and saving it to the database.  
+4. `HandleText`: This method is intended to be implemented if needed to handle text input.  
+  
+5. Other methods: The remaining methods in the `ChainCallbackHandler` struct are placeholders for handling various events during the chain execution. They are currently unimplemented but can be filled in as needed.  
+  
+6. Database interaction: The package interacts with a database to store user usage information. It uses the `db.UpdateSessionUsage` function to update the user's usage based on the generated content.  
+  
+7. Logging: The package uses the `log` package to log various events and information during the chain execution. This includes logging the content, stop reason, context, generation info, and other relevant data.  
+  
+8. Error handling: The package includes error handling mechanisms, such as panic statements and error checking, to ensure that the code can handle unexpected situations gracefully.  
+  
+9. Type assertions: The package uses type assertions to ensure that the data being accessed is of the expected type. This helps to prevent runtime errors and ensure that the code is working as intended.  
   
 # lib/langchain/langchain.go  
 ## langchain_controller  
@@ -72,7 +84,7 @@ The package uses the following external data and input sources:
   
 2. **StartNewChat()**: This function starts a new conversation by calling InitializeNewChatWithContextNoLimit() and then running the conversation using the RunChain() function.  
   
-3. **RunChain()**: This function runs a given prompt through the provided conversation, generating a response.  
+3. **RunChain()**: This function runs a given prompt through the specified conversation, generating a response.  
   
 4. **ContinueChatWithContextNoLimit()**: This function continues an existing chat session by running a given prompt through the conversation, generating a response.  
   
@@ -84,9 +96,9 @@ The package uses the following external data and input sources:
   
 8. **memory.NewConversationBuffer()**: This function creates a new conversation buffer for storing chat history.  
   
-9. **chains.NewConversation()**: This function creates a new conversation using the provided language model and memory buffer.  
+9. **chains.NewConversation()**: This function creates a new conversation using the specified language model and memory buffer.  
   
-10. **llms.GenerateFromSinglePrompt()**: This function generates a response from a single prompt using the provided language model and options.  
+10. **llms.GenerateFromSinglePrompt()**: This function generates a response from a single prompt using the specified language model and options.  
   
 11. **openai.New()**: This function creates a new OpenAI client using the provided API token, model name, and base URL.  
   
@@ -117,75 +129,83 @@ tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
   
 ### External Data, Input Sources:  
   
-- `db.User`: User data from the database.  
-- `ai_endpoint`: Endpoint for the AI model.  
-- `language`: Language preference for the user.  
-- `ctx`: Context for the request.  
+1. Database: The code uses a database to store user information, including their AI session data. The database is accessed through the `db` package.  
+2. Telegram Bot API: The code uses the Telegram Bot API to interact with a Telegram bot. The API is accessed through the `tgbotapi` package.  
   
 ### Code Summary:  
   
 #### SetupSequenceWithKey Function:  
   
-This function is responsible for setting up a sequence of interactions with the AI model based on the user's preferences and session data. It takes the following parameters:  
+This function is responsible for setting up a sequence of interactions with an AI model, based on the user's language preference and other session data. It takes the following parameters:  
   
-- `bot`: Telegram bot API instance.  
-- `user`: User data from the database.  
-- `language`: Language preference for the user.  
-- `ctx`: Context for the request.  
-- `ai_endpoint`: Endpoint for the AI model.  
+1. `bot`: A pointer to a Telegram bot instance.  
+2. `user`: A `db.User` struct containing user information, including their AI session data.  
+3. `language`: A string representing the user's preferred language.  
+4. `ctx`: A context object for managing the execution of the function.  
+5. `ai_endpoint`: A string representing the endpoint for the AI model.  
   
-The function first retrieves the user's GPT key and model from the session data. Then, it determines the appropriate language based on the user's preference and calls the `tryLanguage` function to initiate the conversation with the AI model.  
+The function first locks a mutex to ensure thread safety. Then, it retrieves the user's GPT key, model, and other session data from the `user` struct. Based on the `language` parameter, it calls the `tryLanguage` function to initiate a conversation with the AI model. The `tryLanguage` function returns a response, a chat session object, and an error. If there is an error, the function calls the `errorMessage` function to handle the error. Otherwise, it updates the user's dialog status, AI session data, and stores the updated user information in the `db.UsersMap`.  
   
 #### tryLanguage Function:  
   
 This function is responsible for initiating a conversation with the AI model based on the user's language preference. It takes the following parameters:  
   
-- `user`: User data from the database.  
-- `language`: Language preference for the user.  
-- `languageCode`: Code for the language (0 - default, 1 - Russian, 2 - English).  
-- `ctx`: Context for the request.  
-- `ai_endpoint`: Endpoint for the AI model.  
+1. `user`: A `db.User` struct containing user information, including their AI session data.  
+2. `language`: A string representing the user's preferred language.  
+3. `languageCode`: An integer representing the language code (0 - default, 1 - Russian, 2 - English).  
+4. `ctx`: A context object for managing the execution of the function.  
+5. `ai_endpoint`: A string representing the endpoint for the AI model.  
   
-The function first constructs a language prompt based on the language code and then calls the `StartNewChat` function to initiate a new conversation with the AI model. The result of the conversation is returned along with the dialog thread.  
+The function first constructs a language prompt based on the `languageCode` parameter. Then, it calls the `StartNewChat` function to initiate a new chat session with the AI model. The `StartNewChat` function returns a response, a chat session object, and an error. If there is an error, the function returns an empty string, nil, and the error. Otherwise, it returns the response, chat session object, and nil.  
   
 #### StartNewChat Function:  
   
-This function is responsible for starting a new conversation with the AI model. It takes the following parameters:  
+This function is responsible for starting a new chat session with the AI model. It takes the following parameters:  
   
-- `ctx`: Context for the request.  
-- `gptKey`: GPT key for the user.  
-- `model`: AI model to use.  
-- `ai_endpoint`: Endpoint for the AI model.  
-- `languagePromt`: Language prompt to use for the conversation.  
+1. `ctx`: A context object for managing the execution of the function.  
+2. `gptKey`: A string representing the user's GPT key.  
+3. `model`: A string representing the AI model to use.  
+4. `ai_endpoint`: A string representing the endpoint for the AI model.  
+5. `languagePromt`: A string representing the language prompt to use.  
   
-The function returns the result of the conversation and the dialog thread.  
+The function returns a response, a chat session object, and an error. If there is an error, the function returns an empty string, nil, and the error. Otherwise, it returns the response, chat session object, and nil.  
   
 #### ContinueChatWithContextNoLimit Function:  
   
-This function is responsible for continuing a conversation with the AI model. It takes the following parameters:  
+This function is responsible for continuing a chat session with the AI model. It takes the following parameters:  
   
-- `thread`: Dialog thread for the conversation.  
-- `languagePromt`: Language prompt to use for the conversation.  
+1. `thread`: A chat session object representing the current chat thread.  
+2. `languagePromt`: A string representing the language prompt to use.  
   
-The function returns the result of the conversation.  
+The function returns a response and an error. If there is an error, the function returns an empty string and the error. Otherwise, it returns the response and nil.  
   
 #### GenerateContentLAI Function:  
   
 This function is responsible for generating content using the AI model. It takes the following parameters:  
   
-- `ai_endpoint`: Endpoint for the AI model.  
-- `model`: AI model to use.  
-- `languagePromt`: Language prompt to use for the conversation.  
+1. `ai_endpoint`: A string representing the endpoint for the AI model.  
+2. `model`: A string representing the AI model to use.  
+3. `languagePromt`: A string representing the language prompt to use.  
   
-The function returns the result of the content generation.  
+The function returns a response and an error. If there is an error, the function returns an empty string and the error. Otherwise, it returns the response and nil.  
   
 #### LogResponseContentChoice Function:  
   
-This function is responsible for logging the content choice from the AI model's response. It takes the following parameter:  
+This function is responsible for logging the content of the AI model's response. It takes the following parameter:  
   
-- `resp`: Response from the AI model.  
+1. `resp`: A response object containing the AI model's response.  
   
-The function logs the content choice from the response.  
+The function logs the content of the response's first choice.  
+  
+#### errorMessage Function:  
+  
+This function is responsible for handling errors during the interaction with the AI model. It takes the following parameters:  
+  
+1. `err`: An error object representing the error that occurred.  
+2. `bot`: A pointer to a Telegram bot instance.  
+3. `user`: A `db.User` struct containing user information.  
+  
+The function sends an error message to the user through the Telegram bot.  
   
   
   
@@ -209,29 +229,28 @@ github.com/go-telegram-bot-api/telegram-bot-api/v5
   
 - Database: `db.UsersMap` (likely a map of user IDs to user objects)  
 - Telegram Bot API: `tgbotapi.BotAPI` (for sending messages and handling interactions with the Telegram bot)  
+- Media directory: `../../media/` (for retrieving random video files to send as error messages)  
   
 ### Code Summary:  
   
-#### errorMessage Function:  
+#### `errorMessage` function:  
   
 - This function is called when an error occurs during the process of creating a request.  
-- It logs the error, sends an error message to the user, and then sends a helper video to the user.  
-- The helper video is selected randomly from a list of files in the "media" directory.  
-- Finally, it removes the user from the database (temporary solution).  
+- It logs the error, sends an error message to the user, and then sends a helper video as an error message.  
+- It also removes the user from the database (temporary solution).  
   
-#### StartDialogSequence Function:  
+#### `StartDialogSequence` function:  
   
 - This function initiates a dialog sequence with an AI model.  
 - It takes the Telegram bot API, chat ID, prompt, context, and AI endpoint as input.  
-- It retrieves the user object from the database and initializes the AI session.  
+- It retrieves the user's AI session and dialog thread from the database.  
 - It calls the `ContinueChatWithContextNoLimit` function to continue the conversation with the AI model.  
 - If there is an error, it calls the `errorMessage` function.  
-- If the AI response is successful, it sends the response to the user, updates the user's dialog status, and stores the updated user object back in the database.  
+- If the AI response is successful, it sends the response to the user, updates the user's dialog status, and stores the updated dialog thread in the database.  
   
-#### LogResponse Function:  
+#### Other code:  
   
-- This function is commented out but appears to be intended for logging the full response object from the AI model.  
-- It would log various attributes of the response, such as the creation time, ID, model, object, choices, and usage information.  
+- There is a commented-out function `LogResponse` that seems to be intended for logging the full response object from the AI model.  
   
   
   
