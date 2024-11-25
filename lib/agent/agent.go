@@ -144,7 +144,6 @@ func Run() {
           ai_url := os.Getenv("AI_ENDPOINT")          //TODO: should be global?   .. there are global, there might be resetting.
           api_token := os.Getenv("ADNIN_KEY")
           db_link := os.Getenv("EMBEDDINGS_DB_URL")
-
           log.Println("Collection Name: ", args.Collection)
           log.Println("db_link: ", db_link)
 
@@ -158,8 +157,6 @@ func Run() {
 			log.Println("error getting store")
             return state, err
           }
-
-          log.Println("store:", store)
 
           maxResults := 2 // Set your desired maxResults here
           //options := args.Options // Pass in any additional options as needed
