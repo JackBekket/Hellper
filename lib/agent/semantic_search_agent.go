@@ -28,7 +28,7 @@ import (
 
 
 
-func SearchRun() {
+func SearchRun(prompt string) {
 
 
   model_name := "tiger-gemma-9b-v1-i1"
@@ -223,7 +223,7 @@ func SearchRun() {
 
 
 
-//CONDITIONS funcs
+   //CONDITIONS funcs
 
 
   // condition function, which defines whether or not to use semanticSearch tool. we have access to semanticSearch itself in main thread through a pointer to this function. So if llm says 'yes, use this function with x signatures` -- it will match to a pointer and x function will be called.`
@@ -261,7 +261,8 @@ func SearchRun() {
 
   intialState = append(
     intialState,  //TODO: check if we can somehow set collection name in initial state
-    llms.TextParts(llms.ChatMessageTypeHuman, "Collection Name: 'Hellper' Query: How does embeddings package works?"),
+    //llms.TextParts(llms.ChatMessageTypeHuman, "Collection Name: 'Hellper' Query: How does embeddings package works?"),
+    llms.TextParts(llms.ChatMessageTypeHuman, prompt),
   )
 
   response, err := app.Invoke(context.Background(), intialState)

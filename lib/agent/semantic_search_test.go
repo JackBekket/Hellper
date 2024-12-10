@@ -11,7 +11,7 @@ import (
 func Test_Search (t *testing.T) {
 
   // Testing autonomouse semantic_search agent. it will stop when it finds the answer
-  agent.SearchRun()
+  agent.SearchRun("Collection Name: 'Hellper' Query: How does embeddings package works?")
 }
 
 
