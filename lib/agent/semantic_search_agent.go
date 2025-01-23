@@ -21,7 +21,7 @@ import (
   Each graph can also be represented graphically.
 
 
-    This is autonomouse semantic_search agent package without human-in-the-loop breakpoint
+    This is OneShot agent example
 */
 
 
@@ -32,7 +32,7 @@ import (
 func OneShotRun(prompt string) string{
 
 
-  model_name := "tiger-gemma-9b-v1-i1"
+  model_name := "tiger-gemma-9b-v1-i1"    // should be settable?
   _ = godotenv.Load()
           ai_url := os.Getenv("AI_ENDPOINT")          //TODO: should be global?
           api_token := os.Getenv("ADNIN_KEY")
@@ -55,11 +55,6 @@ func OneShotRun(prompt string) string{
     llms.TextParts(llms.ChatMessageTypeSystem, "You are an agent that has access to a semanticSearch tool. Please use this tool to get user information they are looking for. If tool already have been used then use output of toolcall to answer user question. "),
   }
 
-  completion_test, err := model.GenerateContent(context.Background(),intialState)
-  if err != nil {
-	log.Println("error with simple generate content",err)
-  }
-  log.Println("completion test: ", completion_test)
 
 
 // toolS definition interfaces
@@ -281,7 +276,6 @@ func OneShotRun(prompt string) string{
 
   intialState = append(
     intialState,  //TODO: check if we can somehow set collection name in initial state
-    //llms.TextParts(llms.ChatMessageTypeHuman, "Collection Name: 'Hellper' Query: How does embeddings package works?"),
     llms.TextParts(llms.ChatMessageTypeHuman, prompt),
   )
 
