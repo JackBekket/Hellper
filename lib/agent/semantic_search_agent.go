@@ -22,6 +22,7 @@ import (
 
 
     This is OneShot agent example
+    It does not have memory by itself, but memory (history of previouse messages) can be passed as optional parameter
 */
 
 
@@ -29,8 +30,7 @@ import (
 
 
 
-func OneShotRun(prompt string) string{
-
+func OneShotRun(prompt string, history_state ...llms.MessageContent) string{
 
   model_name := "tiger-gemma-9b-v1-i1"    // should be settable?
   _ = godotenv.Load()
@@ -51,10 +51,40 @@ func OneShotRun(prompt string) string{
 
   //completion_test := model.GenerateContent()
 
+  
+  // Operation with message STATE stack
+
+  agentState := []llms.MessageContent{
+    llms.TextParts(llms.ChatMessageTypeSystem, "You are an agent that has access to a semanticSearch tool. Please use this tool to get user information they are looking for."),
+  }
   intialState := []llms.MessageContent{
-    llms.TextParts(llms.ChatMessageTypeSystem, "You are an agent that has access to a semanticSearch tool. Please use this tool to get user information they are looking for. If tool already have been used then use output of toolcall to answer user question. "),
+    llms.TextParts(llms.ChatMessageTypeSystem, "Below a current conversation between user and helpful AI assistant. Your task will be in the next system message"),
   }
 
+  if len(history_state) > 0 {                   // if there are previouse message state then we first load it into message state
+    // Access the first element of the slice
+    history := history_state
+    // ... use the history variable as needed
+    for _, message := range history {
+      intialState = append(intialState, message)  // load history as initial state
+    }
+    intialState = append(
+      intialState,   
+      agentState...,        // append agent system prompt
+    )
+    intialState = append(
+      intialState,  
+      llms.TextParts(llms.ChatMessageTypeHuman, prompt),  //append user input (!)
+    )
+  } else {
+    intialState = agentState    //history is empty -- load agentState as initial_state and append user prompt
+    intialState = append(
+      intialState,  
+      llms.TextParts(llms.ChatMessageTypeHuman, prompt),
+    )
+    
+    
+  }
 
 
 // toolS definition interfaces
@@ -234,7 +264,7 @@ func OneShotRun(prompt string) string{
 
 
 
-   //CONDITIONS funcs
+ //CONDITIONS funcs
 
   // condition function, which defines whether or not to use semanticSearch tool. we have access to semanticSearch itself in main thread through a pointer to this function. So if llm says 'yes, use this function with x signatures` -- it will match to a pointer and x function will be called.`
   shouldSearchDocuments := func(ctx context.Context, state []llms.MessageContent) string {
@@ -257,7 +287,7 @@ func OneShotRun(prompt string) string{
 
 
 
-  // MAIN WORKFLOW
+// MAIN WORKFLOW
   workflow := graph.NewMessageGraph()
 
   workflow.AddNode("agent", agent)
@@ -273,11 +303,6 @@ func OneShotRun(prompt string) string{
     log.Printf("error: %v", err)
     return fmt.Sprintf("error :%v", err)
   }
-
-  intialState = append(
-    intialState,  //TODO: check if we can somehow set collection name in initial state
-    llms.TextParts(llms.ChatMessageTypeHuman, prompt),
-  )
 
   response, err := app.Invoke(context.Background(), intialState)
   if err != nil {
