@@ -58,15 +58,6 @@ func errorMessage(err error, bot *tgbotapi.BotAPI, user db.User) {
 		log.Println("Could not send video message:", err)
 	  }
 
-
-
-
-
-
-
-
-
-
 	userDb := db.UsersMap
 	delete(userDb, user.ID)
 
@@ -116,6 +107,8 @@ func StartDialogSequence(bot *tgbotapi.BotAPI, chatID int64, promt string, ctx c
 			log.Println(err)
 		}
 		
+		// TODO: Find a way to convert llms.ChatMessage into llms.MessageContent and find a way to call agent from here
+
 		//log.Println(history)
 		total_turns := len(history)
 		log.Println("total number of turns: ", total_turns)
