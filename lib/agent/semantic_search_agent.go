@@ -28,7 +28,7 @@ import (
 
 
 
-func SearchRun(prompt string) {
+func OneShotRun(prompt string) {
 
 
   model_name := "tiger-gemma-9b-v1-i1"
@@ -178,7 +178,7 @@ func SearchRun(prompt string) {
 
         log.Println("store:", store)
 
-        maxResults := 2 // Set your desired maxResults here
+        maxResults := 1 // Set your desired maxResults here
         //options := args.Options // Pass in any additional options as needed
 
         // Call your SemanticSearch function here

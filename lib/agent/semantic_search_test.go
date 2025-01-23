@@ -9,9 +9,9 @@ import (
 
 
 func Test_Search (t *testing.T) {
-
+  //t.Deadline(5 * time.Second)
   // Testing autonomouse semantic_search agent. it will stop when it finds the answer
-  agent.SearchRun("Collection Name: 'Hellper' Query: How does embeddings package works?")
+  agent.OneShotRun("Collection Name: 'Hellper' Query: How does embeddings package works?")
 }
 
 
