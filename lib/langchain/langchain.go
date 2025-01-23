@@ -101,6 +101,9 @@ func RunChain(ctx context.Context, session *db.ChatSession, prompt string) (stri
 	return result, session, nil
 }
 
+
+
+// TODO: HERE WE NEED TO REFACTOR TO WORK WITH NEW AGENTS SCHEMATICS. AFTER THAT WE CAN START DECREASE CODEBASE
 // Continue Dialog with memory included, so user can chat with remembering context of previouse messages
 func ContinueChatWithContextNoLimit(ctx context.Context, session *db.ChatSession, prompt string) (string, *db.ChatSession, error) {
 	//ctx := context.Background()

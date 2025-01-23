@@ -66,6 +66,8 @@ func (c *Commander) SearchDocuments(chatID int64, promt string, maxResults int) 
 
 }
 
+
+// TODO: OBSOLETE
 // Retrival-Augmented Generation
 func (c *Commander) RAG(chatID int64, promt string, maxResults int) {
 	user := db.UsersMap[chatID]
