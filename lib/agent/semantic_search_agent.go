@@ -51,7 +51,7 @@ func OneShotRun(prompt string) {
   //completion_test := model.GenerateContent()
 
   intialState := []llms.MessageContent{
-    llms.TextParts(llms.ChatMessageTypeSystem, "You are an agent that has access to a semanticSearch. Please provide the user with the information they are looking for by using the semanticSearch tool provided."),
+    llms.TextParts(llms.ChatMessageTypeSystem, "You are an agent that has access to a semanticSearch tool. Please use this tool to get user information they are looking for. If tool already have been used then use output of toolcall to answer user question. "),
   }
 
   completion_test, err := model.GenerateContent(context.Background(),intialState)
@@ -101,7 +101,7 @@ func OneShotRun(prompt string) {
     },
   }
 
-  //TODO: REWORK
+
 
 
 // AGENT NODE
@@ -110,7 +110,21 @@ func OneShotRun(prompt string) {
     then it will append toolCall to message state.
     Note, that agent can call few toolCalls and all of them can be append here. toolCalls may be done parallel (I guess) */
   agent := func(ctx context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
-    response, err := model.GenerateContent(ctx, state, llms.WithTools(tools))
+   
+
+    lastMsg := state[len(state)-1]
+        if lastMsg.Role == "tool" {   // If we catch response from tool then we use this response
+          response, err := model.GenerateContent(ctx, state)
+          if err != nil {
+            return state, err
+          }
+          msg := llms.TextParts(llms.ChatMessageTypeAI, response.Choices[0].Content)
+          state = append(state, msg)
+          return state,nil
+
+
+  }    else {   // If it is first interaction then we call tools
+    response, err := model.GenerateContent(ctx, state, llms.WithTools(tools))   // AI call tool function.. in this step it just put call in messages stack
     if err != nil {
       return state, err
     }
@@ -118,21 +132,22 @@ func OneShotRun(prompt string) {
 
     if len(response.Choices[0].ToolCalls) > 0 {
       for _, toolCall := range response.Choices[0].ToolCalls {
-        if toolCall.FunctionCall.Name == "semanticSearch" {
+        if toolCall.FunctionCall.Name == "semanticSearch" {       // AI catch that there is a function call in messages, so *now* it actually calls the function.
 
-          msg.Parts = append(msg.Parts, toolCall)
+          msg.Parts = append(msg.Parts, toolCall) // Add result to messages stack
 
         }
       }
     }
-    state = append(state, msg)
+    state = append(state, msg)  
     return state, nil
   }
+}
 
 
 // TOOL FUNCTIONS
 
-  // Custom semantic search function
+  // Custom semantic search function for working with vector-store information
   semanticSearch := func(ctx context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
     lastMsg := state[len(state)-1]
 
@@ -225,24 +240,28 @@ func OneShotRun(prompt string) {
 
    //CONDITIONS funcs
 
-
   // condition function, which defines whether or not to use semanticSearch tool. we have access to semanticSearch itself in main thread through a pointer to this function. So if llm says 'yes, use this function with x signatures` -- it will match to a pointer and x function will be called.`
   shouldSearchDocuments := func(ctx context.Context, state []llms.MessageContent) string {
+  
+    // this function (I suppose) can be reworked to work with a *set* of a functions, not just one func.
+
     lastMsg := state[len(state)-1]
     for _, part := range lastMsg.Parts {
       toolCall, ok := part.(llms.ToolCall)
 
-      if ok && toolCall.FunctionCall.Name == "semanticSearch" {
+      if ok && toolCall.FunctionCall.Name == "semanticSearch"  {
         log.Printf("agent should use SemanticSearch (embeddings similarity search aka DocumentsSearch)")
         return "semanticSearch"
       }
     }
 
-    return graph.END
+    return graph.END  // never reach this point, should be removed?
   }
 
 
 
+
+  // MAIN WORKFLOW
   workflow := graph.NewMessageGraph()
 
   workflow.AddNode("agent", agent)
