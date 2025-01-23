@@ -3,6 +3,7 @@ package agent
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 
@@ -28,7 +29,7 @@ import (
 
 
 
-func OneShotRun(prompt string) {
+func OneShotRun(prompt string) string{
 
 
   model_name := "tiger-gemma-9b-v1-i1"
@@ -275,7 +276,7 @@ func OneShotRun(prompt string) {
   app, err := workflow.Compile()
   if err != nil {
     log.Printf("error: %v", err)
-    return
+    return fmt.Sprintf("error :%v", err)
   }
 
   intialState = append(
@@ -287,9 +288,12 @@ func OneShotRun(prompt string) {
   response, err := app.Invoke(context.Background(), intialState)
   if err != nil {
     log.Printf("error: %v", err)
-    return
+    return fmt.Sprintf("error :%v", err)
   }
 
   lastMsg := response[len(response)-1]
   log.Printf("last msg: %v", lastMsg.Parts[0]) 
+  result := lastMsg.Parts[0]
+  result_str := fmt.Sprintf("%v", result)
+  return result_str
 }
