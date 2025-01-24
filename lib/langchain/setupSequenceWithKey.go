@@ -35,7 +35,7 @@ func SetupSequenceWithKey(
 
 	switch language {
 	case "English":
-		response,probe, err := tryLanguage(user, "", 1, ctx,ai_endpoint)
+		response,probe, err := tryLanguage(user, "", 1,ai_endpoint)
 		if err != nil {
 			errorMessage(err, bot, user)
 		} else {
@@ -50,7 +50,7 @@ func SetupSequenceWithKey(
 			db.UsersMap[chatID] = user
 		}
 	case "Russian":
-		response,probe, err := tryLanguage(user, "", 2, ctx,ai_endpoint)
+		response,probe, err := tryLanguage(user, "", 2,ai_endpoint)
 		if err != nil {
 			errorMessage(err, bot, user)
 		} else {
@@ -64,7 +64,7 @@ func SetupSequenceWithKey(
 			db.UsersMap[chatID] = user
 		}
 	default:
-		response,probe, err := tryLanguage(user, language, 0, ctx,ai_endpoint)
+		response,probe, err := tryLanguage(user, language, 0, ai_endpoint)
 		if err != nil {
 			errorMessage(err, bot, user)
 		} else {
@@ -83,7 +83,7 @@ func SetupSequenceWithKey(
 }
 
 // LanguageCode: 0 - default, 1 - Russian, 2 - English
-func tryLanguage(user db.User, language string, languageCode int, ctx context.Context, ai_endpoint string) (string,*db.ChatSession, error) {
+func tryLanguage(user db.User, language string, languageCode int, ai_endpoint string) (string,*db.ChatSessionGraph, error) {
 	var languagePromt string
 	//var languageResponse string
 	model := user.AiSession.GptModel
@@ -105,36 +105,12 @@ func tryLanguage(user db.User, language string, languageCode int, ctx context.Co
 	//model := user.AiSession.GptModel
 	//chatID := user.ID
 
-	// Initializing empty dialog thread
-	result,thread, err := StartNewChat(ctx,gptKey,model,ai_endpoint,languagePromt)
+	
+	//result,thread, err := StartNewChat(ctx,gptKey,model,ai_endpoint,languagePromt)
+	result,thread, err := RunNewAgent(gptKey,model,ai_endpoint,languagePromt)
 		if err != nil {
 			log.Println(err)
 			return "",nil,err
 		}
-
-	//user.AiSession.DialogThread = *thread
-	//db.UsersMap[chatID] = user // we need to store empty buffer *before* starting dialog
-
-	return result,thread, nil
-	
-	
-	/*
-	resp, err := ContinueChatWithContextNoLimit(thread,languagePromt)
-	if err != nil {
-		return "", err
-	} else {
-		return resp, nil
-	}
-	*/
-
-	/*
-	resp, err := GenerateContentLAI(ai_endpoint,model,languagePromt)
-	if err != nil {
-		return "", err
-	} else {
-		LogResponseContentChoice(resp)
-		answer := resp.Choices[0].Content
-		return answer, nil
-	}
-	*/
+	return thread,result, nil
 }

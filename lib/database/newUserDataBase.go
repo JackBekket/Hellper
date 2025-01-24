@@ -32,7 +32,7 @@ type AiSession struct {
 	GptKey       string
 	GptModel     string
 	AI_Type      int8
-	DialogThread ChatSession		//TODO: Rework
+	DialogThread ChatSessionGraph		//TODO: Rework
 	Base_url     string
 	Usage        map[string]int
 }

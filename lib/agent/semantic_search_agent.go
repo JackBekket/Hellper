@@ -78,10 +78,10 @@ func OneShotRun(prompt string, model openai.LLM,history_state ...llms.MessageCon
   // Operation with message STATE stack
 
   agentState := []llms.MessageContent{
-    llms.TextParts(llms.ChatMessageTypeSystem, "You are an agent that has access to a semanticSearch tool. Please use this tool to get user information they are looking for."),
+    llms.TextParts(llms.ChatMessageTypeSystem, "You are helpful agent that has access to a semanticSearch tool. Use this tool if user ask to retrive some information from database/collection to provide user with information he/she looking for."),
   }
   intialState := []llms.MessageContent{
-    llms.TextParts(llms.ChatMessageTypeSystem, "Below a current conversation between user and helpful AI assistant. Your task will be in the next system message"),
+    llms.TextParts(llms.ChatMessageTypeSystem, "Below a current conversation between user and helpful AI assistant. You (assistant) should help user in any task he/she ask you to do."),
   }
 
   if len(history_state) > 0 {                   // if there are previouse message state then we first load it into message state
