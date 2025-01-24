@@ -21,13 +21,13 @@ tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
 ### Code Summary:
 
-The `dialog` package is responsible for handling user interactions with a Telegram bot. It manages the dialog flow, processes commands, and integrates with an AI model for tasks like image generation.
+The `dialog` package is responsible for handling user interactions with a Telegram bot. It manages dialog status, handles commands, integrates with an AI model, and interacts with a database.
 
 #### Function: HandleUpdates
 
 This function processes incoming updates from the Telegram bot API. It iterates through the updates and handles each one based on its type.
 
-1. It first checks if the update is a callback query, and if so, it handles the callback logic for inline buttons and other interactive elements.
+1. It first checks if the update is a callback query. If it is, it handles the callback logic for inline buttons and other interactive elements.
 
 2. If the update is not a callback query, it checks if the message is from a group chat. If it is, it skips the message if it doesn't contain the bot's username or if it's a voice or photo message.
 
@@ -45,7 +45,7 @@ The code handles various commands, such as `/image`, `/restart`, `/help`, `/sear
 
 #### Dialog Status:
 
-The user's dialog status is an integer that indicates the current stage of the conversation. The code uses this status to determine which actions to perform and what responses to send to the user.
+The code maintains a dialog status for each user, which determines the current state of the conversation. The dialog status is updated based on the user's actions and the bot's responses.
 
 #### AI Integration:
 
@@ -53,21 +53,21 @@ The code integrates with an AI model, which is used for image generation and oth
 
 #### Database Interaction:
 
-The code interacts with a database to store and retrieve user data, such as their dialog status and other relevant information. The database is accessed through the `database` package.
+The code interacts with a database to store user data, such as their dialog status and other relevant information. The database is accessed through the `database` package.
 
 #### Error Handling:
 
-The code includes basic error handling, such as checking if the user exists in the database and handling cases where the AI model returns an error.
-
-#### Logging:
-
-The code uses the `log` package to log various events, such as user interactions, command execution, and errors.
+The code includes basic error handling, such as checking if the user exists in the database and handling cases where the AI model is not available.
 
 #### Security:
 
 The code includes some security measures, such as checking if the user is an administrator and prompting for an API key before accessing certain features.
 
+#### Logging:
+
+The code uses the `log` package to log various events, such as user interactions, command execution, and error messages.
+
 #### Summary:
 
-The `dialog` package provides a framework for handling user interactions with a Telegram bot. It includes logic for managing dialog status, handling commands, integrating with an AI model, and interacting with a database. The code is well-structured and includes basic error handling, logging, and security measures.
+The `dialog` package provides a framework for handling user interactions with a Telegram bot. It includes logic for managing dialog status, handling commands, integrating with an AI model, and interacting with a database. The code is well-structured and includes basic error handling, security measures, and logging.
 
