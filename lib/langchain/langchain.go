@@ -1,8 +1,5 @@
 package langchain
 
-//package langchain_controller
-//package main
-
 import (
 	"context"
 	"fmt"
@@ -17,14 +14,6 @@ import (
 	//"github.com/tmc/langchaingo/llms/options"
 	"github.com/tmc/langchaingo/llms/openai"
 )
-
-//var tgbot *tgbotapi.BotAPI
-
-/** DEV NOTE
-	 OAI -- openAI, LAI -- localAI
-	 if your IDE says it won't compile just try to build from terminal first
-	 if it says there no methods "Run" or "Predict" in LLM class -- it is weird bug, just compile it from terminal
-**/
 
 /*
 	you can get conversation logs by docker logs -f local-ai

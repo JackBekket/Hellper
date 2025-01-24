@@ -92,7 +92,8 @@ func (c *Commander) RAG(chatID int64, promt string, maxResults int) {
 	// TODO: Refactor to better readability, remove unused code
 	// TODO: Superagents
 	//result, err := embeddings.Rag(base_url,api_token,promt,maxResults,store)
-	result := agent.OneShotRun(promt)
+	llm := agent.CreateGenericLLM()
+	result := agent.OneShotRun(promt, llm)
 	/*
 	if err != nil {
 		msg := tgbotapi.NewMessage(user.ID, "error occured when calling RAG: " + err.Error())

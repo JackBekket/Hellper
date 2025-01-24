@@ -49,14 +49,17 @@ import (
 
 
 
-func OneShotRun(prompt string, history_state ...llms.MessageContent) string{
+func OneShotRun(prompt string, model openai.LLM,history_state ...llms.MessageContent) string{
 
+  /*
   model_name := "tiger-gemma-9b-v1-i1"    // should be settable?
   _ = godotenv.Load()
           ai_url := os.Getenv("AI_ENDPOINT")          //TODO: should be global?
           api_token := os.Getenv("ADNIN_KEY")
           //db_link := os.Getenv("EMBEDDINGS_DB_URL")
+  */
 
+  /*
   model, err := openai.New(
     openai.WithToken(api_token),
     //openai.WithBaseURL("http://localhost:8080"),
@@ -67,6 +70,7 @@ func OneShotRun(prompt string, history_state ...llms.MessageContent) string{
   if err != nil {
     log.Fatal(err)
   }
+  */
 
   //completion_test := model.GenerateContent()
 
