@@ -16,37 +16,31 @@
 ### External Data, Input Sources:
 
 1. Environment variables:
-    - `AI_BASEURL`: Base URL for the AI service (e.g., "http://localhost:8080/v1/").
-    - `OPENAI_API_KEY`: API key for the OpenAI service.
-    - `PG_HOST`: Hostname or IP address of the PostgreSQL database.
-    - `PG_USER`: Username for the PostgreSQL database.
-    - `PG_PASSWORD`: Password for the PostgreSQL database.
-    - `PG_DB`: Database name for the PostgreSQL database.
-2. Command-line arguments:
-    - `ai_url`: URL for the AI service.
-    - `api_token`: API token for the AI service.
-    - `db_link`: Connection string for the PostgreSQL database.
+    - `PG_HOST`
+    - `PG_USER`
+    - `PG_PASSWORD`
+    - `PG_DB`
+    - `API_KEY`
+
+2. Function arguments:
+    - `ai_url`: AI URL (localhost, OpenAI, or Docker)
+    - `api_token`: AI token
+    - `db_link`: Database link
+    - `name`: Collection name for vector store
 
 ### Code Summary:
 
 #### LoadEnv() function:
 
-- This function is not implemented in the provided code.
+This function is not implemented in the provided code.
 
 #### GetVectorStore() function:
 
-- This function creates a vector store using the PostgreSQL database and the OpenAI API.
-- It first retrieves the necessary environment variables or command-line arguments for the AI service, API token, and database connection.
-- Then, it creates a connection pool for the PostgreSQL database using the provided connection string.
-- Next, it creates an embeddings client using the OpenAI API, specifying the base URL, API version, embedding model, and API token.
-- An embedder is created using the embeddings client.
-- Finally, a vector store is created using the PostgreSQL database connection, embedder, and collection name.
+This function creates a vector store from a database using the provided AI URL, API token, and database link. It first parses the database link and creates a connection pool. Then, it creates an embeddings client using the OpenAI API and an embedder using the embeddings client. Finally, it creates a vector store using the pgvector library, which uses the connection pool and embedder.
 
 #### GetVectorStoreWithOptions() function:
 
-- This function is similar to GetVectorStore() but allows specifying a collection name for the vector store.
-- It takes the same input parameters as GetVectorStore() and adds an additional parameter for the collection name.
-- The rest of the logic is the same as GetVectorStore(), except for the collection name being passed to the vector store creation.
+This function is similar to GetVectorStore() but allows specifying a collection name for the vector store. It takes the same arguments as GetVectorStore() plus an additional argument, `name`, which specifies the collection name. The rest of the logic is the same as GetVectorStore().
 
 
 
