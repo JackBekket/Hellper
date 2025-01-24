@@ -23,6 +23,25 @@ import (
 
     This is OneShot agent example
     It does not have memory by itself, but memory (history of previouse messages) can be passed as optional parameter
+
+    So let's say at high level this code package is a graph (or supergraph), so the main logic of this package is a workflow graph.
+    This graph ensures that messages stack (dialog) is processed as intended.
+    Graph have multiple nodes, which starts with entry_points, and those nodes are connected via edges.
+    There may be direct edges or a conditional edges
+
+    Graph must end in sometime to be able to compile (doesn't really work you have to make shure there is no loophole)
+
+    Nodes are basically could be tool nodes, agents and conditions
+
+    Agent is basically main thinking or decision-making algorythm, it is responsible to call tools, process user input, process tool responses, etc.
+
+    Conditonal node is basically algorythm that check if Agent is calling some tools and if it is -- call this tools. Note, that agent is *calling* the tool, but conditional node *handle this tool call*
+
+    If your task is to create a documentation for this package -- start with describing workflow, what are the nodes in general, how does they connect with each other in general, how workflow works in general.
+    Then explain/describe how agent node works, what tools does it have. Then describe how each tool works.
+    Then make a general summary for this package
+
+
 */
 
 
