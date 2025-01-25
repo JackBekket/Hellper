@@ -94,7 +94,7 @@ func StartDialogSequence(bot *tgbotapi.BotAPI, chatID int64, promt string, ctx c
 		promt,
 	)
 	api_key := user.AiSession.GptKey
-	base_url := user.AiSession.Base_url
+	base_url := ai_endpoint
 
 	thread := user.AiSession.DialogThread
 
