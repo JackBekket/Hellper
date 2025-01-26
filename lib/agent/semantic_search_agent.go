@@ -70,7 +70,7 @@ func OneShotRun(prompt string, model openai.LLM,history_state ...llms.MessageCon
     }
     intialState = append(
       intialState,   
-      agentState...,        // append agent system prompt
+      agentState...,        // append agent system prompt     //something wrong here
     )
     intialState = append(
       intialState,  
@@ -139,11 +139,12 @@ func OneShotRun(prompt string, model openai.LLM,history_state ...llms.MessageCon
    
 
     consideration_query := []llms.MessageContent{
-      llms.TextParts(llms.ChatMessageTypeSystem, "You are simple agent which task is to determine if a user prompt require calling semanticSearch tool for processing user request. semanticSearch should be called only if user requested information from database collection. You should return 'true' if next agent should indeed use semanticSearch tool call for processing user query, and you should return 'false' otherwise. You should return ONLY 'true' or 'false'"),
+      llms.TextParts(llms.ChatMessageTypeSystem, "Your task is to determine whether or not to call semanticSearch function based on human input. You should ONLY return 'true' or 'false'."),
     }
 
     lastMsg := state[len(state)-1]
         if lastMsg.Role == "tool" {   // If we catch response from tool then we use this response
+          state = append(state, lastMsg)
           response, err := model.GenerateContent(ctx, state)
           if err != nil {
             return state, err
@@ -155,9 +156,9 @@ func OneShotRun(prompt string, model openai.LLM,history_state ...llms.MessageCon
 
   }   else {   // If it is not tool response 
 
-    if lastMsg.Role == "human" {    //                                            first interaction (?)
-
-      consideration_stack := append(consideration_query, lastMsg)
+    if lastMsg.Role == "human" {    //                                            any user request
+      //state
+      consideration_stack := append(consideration_query, state...)
       check, err := model.GenerateContent(ctx, consideration_stack)               // one punch which determine wheter or not call tools. this is hardcode and probably should be separate part of the graph.
       if err != nil {
         return state, err
