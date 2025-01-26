@@ -16,12 +16,14 @@ import (
 func Test_Search (t *testing.T) {
   //t.Deadline(5 * time.Second)
   // Testing OnePunch semantic_search agent. it will stop when it finds the answer
+  log.Println("testing one-shot search")
   model := createGenericLLM()
-  result1 := agent.OneShotRun("Collection Name: 'Hellper' Query: How does embeddings package works?",model)
+  result1 := agent.OneShotRun("Call semanticSearch tool. Collection Name: 'Hellper' Query: How does embeddings package works?",model)
   log.Println("OneShotAskRun",result1)
 }
 
 func TestMemory(t *testing.T) {
+  log.Println("testing with memory")
   initialstate := []llms.MessageContent{
       llms.TextParts(llms.ChatMessageTypeSystem, "Below a current conversation between user and helpful AI assistant. Your task will be in the next system message"),
       llms.TextParts(llms.ChatMessageTypeHuman, "Hello my name is Yemet! I'm excited to see what we can do together."),

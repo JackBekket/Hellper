@@ -51,29 +51,6 @@ import (
 
 func OneShotRun(prompt string, model openai.LLM,history_state ...llms.MessageContent) string{
 
-  /*
-  model_name := "tiger-gemma-9b-v1-i1"    // should be settable?
-  _ = godotenv.Load()
-          ai_url := os.Getenv("AI_ENDPOINT")          //TODO: should be global?
-          api_token := os.Getenv("ADNIN_KEY")
-          //db_link := os.Getenv("EMBEDDINGS_DB_URL")
-  */
-
-  /*
-  model, err := openai.New(
-    openai.WithToken(api_token),
-    //openai.WithBaseURL("http://localhost:8080"),
-    openai.WithBaseURL(ai_url),
-    openai.WithModel(model_name),
-    openai.WithAPIVersion("v1"),
-  )
-  if err != nil {
-    log.Fatal(err)
-  }
-  */
-
-  //completion_test := model.GenerateContent()
-
   
   // Operation with message STATE stack
 
@@ -161,6 +138,10 @@ func OneShotRun(prompt string, model openai.LLM,history_state ...llms.MessageCon
   agent := func(ctx context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
    
 
+    consideration_query := []llms.MessageContent{
+      llms.TextParts(llms.ChatMessageTypeSystem, "You are simple agent which task is to determine if a user prompt require calling semanticSearch tool for processing user request. semanticSearch should be called only if user requested information from database collection. You should return 'true' if next agent should indeed use semanticSearch tool call for processing user query, and you should return 'false' otherwise. You should return ONLY 'true' or 'false'"),
+    }
+
     lastMsg := state[len(state)-1]
         if lastMsg.Role == "tool" {   // If we catch response from tool then we use this response
           response, err := model.GenerateContent(ctx, state)
@@ -172,7 +153,51 @@ func OneShotRun(prompt string, model openai.LLM,history_state ...llms.MessageCon
           return state,nil
 
 
-  }    else {   // If it is first interaction then we call tools
+  }   else {   // If it is not tool response 
+
+    if lastMsg.Role == "human" {    //                                            first interaction (?)
+
+      consideration_stack := append(consideration_query, lastMsg)
+      check, err := model.GenerateContent(ctx, consideration_stack)               // one punch which determine wheter or not call tools. this is hardcode and probably should be separate part of the graph.
+      if err != nil {
+        return state, err
+      }
+      check_txt := fmt.Sprintf(check.Choices[0].Content) 
+      log.Println("check result: ", check_txt)
+
+      if check_txt == "true" {                                                      // tool call required by one-shot agent
+        response, err := model.GenerateContent(ctx, state, llms.WithTools(tools))   // AI call tool function.. in this step it just put call in messages stack
+        if err != nil {
+          return state, err
+        }
+    msg := llms.TextParts(llms.ChatMessageTypeAI, response.Choices[0].Content)
+
+    if len(response.Choices[0].ToolCalls) > 0 {
+      for _, toolCall := range response.Choices[0].ToolCalls {
+        if toolCall.FunctionCall.Name == "semanticSearch" {       // AI catch that there is a function call in messages, so *now* it actually calls the function.
+
+          msg.Parts = append(msg.Parts, toolCall) // Add result to messages stack
+
+        }
+      }
+      state = append(state, msg)  
+      return state, nil
+    }
+     } else {                                                     // proceed without tools
+      response, err := model.GenerateContent(ctx, state)
+      if err != nil {
+        return state, err
+      }
+      msg := llms.TextParts(llms.ChatMessageTypeAI, response.Choices[0].Content)
+      state = append(state, msg)
+      return state,nil
+     }
+        // end if_human
+    }
+
+
+    // if we get to this point, then our input is not tool result and not a human... I have no idea how it can reach this point
+
     response, err := model.GenerateContent(ctx, state, llms.WithTools(tools))   // AI call tool function.. in this step it just put call in messages stack
     if err != nil {
       return state, err
