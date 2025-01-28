@@ -1,6 +1,8 @@
 package agent_test
 
 import (
+	"flag"
+	"fmt"
 	"log"
 	"os"
 	"testing"
@@ -36,6 +38,31 @@ func TestMemory(t *testing.T) {
 
   // Assert or compare the result with the expected output
 }
+
+func TestLongConversation(t *testing.T) {
+	log.Println("testing with long conversation")
+	flag.Set("test.timeout", "3m")
+    fmt.Println("timeout: " + flag.Lookup("test.timeout").Value.String())
+
+	initialstate := []llms.MessageContent{
+		llms.TextParts(llms.ChatMessageTypeSystem, "Below a current conversation between user and helpful AI assistant. Your task will be in the next system message"),
+		llms.TextParts(llms.ChatMessageTypeHuman, "Hello my name is Yemet! I'm excited to see what we can do together."),
+		llms.TextParts(llms.ChatMessageTypeAI, "Hey there! Let me know how I can help you out."),
+		llms.TextParts(llms.ChatMessageTypeAI, "I'm here to assist you with any task you may have. Just give me a command and I'll do my best to help."),
+	}
+	model := createGenericLLM()
+	result := agent.OneShotRun("Collection Name: 'Hellper' Query: How does main package works? Call semanticSearch tool. Also do you remember what is my name?",model ,initialstate...)
+	log.Println("Result 1st turn:", result)
+	msg := agent.CreateMessageContentAi(result)
+	initialstate = append(initialstate, msg...)
+	//user_input2 := agent.CreateMessageContentHuman("How does local-ai package works? Collection Name: Hellper. Use semantic search.")
+	user_input2 := "How does local-ai package works? Collection Name: Hellper. Use semantic search."
+	res2 := agent.OneShotRun(user_input2,model ,initialstate...)
+	log.Println("Result 2nd turn:", res2)
+  
+	// Assert or compare the result with the expected output
+  }
+
 
 
 

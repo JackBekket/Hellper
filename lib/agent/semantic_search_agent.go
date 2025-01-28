@@ -49,6 +49,7 @@ var Tools []llms.Tool
 
 
 
+// This is the main function for this package
 func OneShotRun(prompt string, model openai.LLM,history_state ...llms.MessageContent) string{
 
   
@@ -176,7 +177,7 @@ func agent(ctx context.Context, state []llms.MessageContent) ([]llms.MessageCont
   tools := Tools
   
   consideration_query := []llms.MessageContent{
-    llms.TextParts(llms.ChatMessageTypeSystem, "Your task is to determine whether or not to call semanticSearch function based on human input. You should ONLY return 'true' or 'false'."),
+    llms.TextParts(llms.ChatMessageTypeSystem, "You are descision making agent, which can reply ONLY 'true' or 'false'.Your task is to determine whether or not to call semanticSearch function based on human input. You should ONLY return 'true' or 'false'."),
   }
 
   lastMsg := state[len(state)-1]
@@ -315,7 +316,7 @@ func semanticSearch(ctx context.Context, state []llms.MessageContent)  ([]llms.M
       store, err := embeddings.GetVectorStoreWithOptions(ai_url,api_token,db_link,args.Collection) // TODO: changed argument 'Name' to 'CollectionName' or something like that
       if err != nil {
         // Handle errors in retrieving the vector store
-  log.Println("error getting store")
+        log.Println("error getting store")
         return state, err
       }
 
