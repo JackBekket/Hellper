@@ -78,7 +78,7 @@ func OneShotRun(prompt string, model openai.LLM,history_state ...llms.MessageCon
       llms.TextParts(llms.ChatMessageTypeHuman, prompt),  //append user input (!)
     )
   } else {
-    intialState = agentState    //history is empty -- load agentState as initial_state and append user prompt
+    //intialState = agentState    //history is empty -- load agentState as initial_state and append user prompt
     intialState = append(
       intialState,  
       llms.TextParts(llms.ChatMessageTypeHuman, prompt),
@@ -169,7 +169,9 @@ func OneShotRun(prompt string, model openai.LLM,history_state ...llms.MessageCon
     Note, that agent can call few toolCalls and all of them can be append here. toolCalls may be done parallel (I guess) */
 func agent(ctx context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
   
-  
+  agentState := []llms.MessageContent{
+    llms.TextParts(llms.ChatMessageTypeSystem, "You are helpful agent that has access to a semanticSearch tool. Use this tool if user ask to retrive some information from database/collection to provide user with information he/she looking for."),
+  }
   model := Model  // global... should be .env or getting from user context I guess.
   tools := Tools
   
@@ -193,7 +195,8 @@ func agent(ctx context.Context, state []llms.MessageContent) ([]llms.MessageCont
 
   if lastMsg.Role == "human" {    //                                            any user request
     //state
-    consideration_stack := append(consideration_query, state...)
+    consideration_stack := append(consideration_query, lastMsg)
+    //consideration_stack := append(consideration_query, state...)  // this is appending current state, but we actually need only last message here.
     check, err := model.GenerateContent(ctx, consideration_stack)               // one punch which determine wheter or not call tools. this is hardcode and probably should be separate part of the graph.
     if err != nil {
       return state, err
@@ -202,6 +205,8 @@ func agent(ctx context.Context, state []llms.MessageContent) ([]llms.MessageCont
     log.Println("check result: ", check_txt)
 
     if check_txt == "true" {                                                      // tool call required by one-shot agent
+      state = append(state,agentState...)
+      state = append(state, lastMsg)
       response, err := model.GenerateContent(ctx, state, llms.WithTools(tools))   // AI call tool function.. in this step it just put call in messages stack
       if err != nil {
         return state, err
@@ -267,6 +272,9 @@ func shouldSearchDocuments(ctx context.Context, state []llms.MessageContent)  st
     
         return graph.END  // never reach this point, should be removed?
 }
+
+
+
 
 func semanticSearch(ctx context.Context, state []llms.MessageContent)  ([]llms.MessageContent, error){
   lastMsg := state[len(state)-1]

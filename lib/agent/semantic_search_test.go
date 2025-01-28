@@ -31,7 +31,7 @@ func TestMemory(t *testing.T) {
       llms.TextParts(llms.ChatMessageTypeAI, "I'm here to assist you with any task you may have. Just give me a command and I'll do my best to help."),
   }
   model := createGenericLLM()
-  result := agent.OneShotRun("Collection Name: 'Hellper' Query: How does embeddings package works? Also do you remember what is my name?",model ,initialstate...)
+  result := agent.OneShotRun("Collection Name: 'Hellper' Query: How does main package works? Call semanticSearch tool. Also do you remember what is my name?",model ,initialstate...)
   log.Println("Result:", result)
 
   // Assert or compare the result with the expected output
