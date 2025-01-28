@@ -28,8 +28,8 @@ func RunThread(prompt string, model openai.LLM, history ...llms.MessageContent) 
 	lastResponse := CreateMessageContentAi(call)
 	if len(history) > 0 { 
 		user_msg := CreateMessageContentHuman(prompt)
-		state := append(history,user_msg...)
-		state = append(history, lastResponse...)
+		state := append(history,user_msg[0])
+		state = append(state, lastResponse...)
 		return state,call
 	} else {
 		user_msg := CreateMessageContentHuman(prompt)

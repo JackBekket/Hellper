@@ -62,7 +62,7 @@ func ContinueAgent(api_token string, model_name string, base_url string, user_pr
 			return nil, "error",err
 		}
 		dialog_state, output_text := agent.RunThread(user_prompt,*llm,state.ConversationBuffer...)
-
+		
 		return &db.ChatSessionGraph{
 			ConversationBuffer: dialog_state,
 		}, output_text ,nil
