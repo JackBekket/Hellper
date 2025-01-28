@@ -235,22 +235,6 @@ func agent(ctx context.Context, state []llms.MessageContent) ([]llms.MessageCont
     return state,nil
    }
   } // end if human
-  response, err := model.GenerateContent(ctx, state, llms.WithTools(tools))   // AI call tool function.. in this step it just put call in messages stack
-    if err != nil {
-      return state, err
-    }
-    msg := llms.TextParts(llms.ChatMessageTypeAI, response.Choices[0].Content)
-
-    if len(response.Choices[0].ToolCalls) > 0 {
-      for _, toolCall := range response.Choices[0].ToolCalls {
-        if toolCall.FunctionCall.Name == "semanticSearch" {       // AI catch that there is a function call in messages, so *now* it actually calls the function.
-
-          msg.Parts = append(msg.Parts, toolCall) // Add result to messages stack
-
-        }
-      }
-    }
-    state = append(state, msg)  
     return state, nil
   } // end if not tool response
   } 
