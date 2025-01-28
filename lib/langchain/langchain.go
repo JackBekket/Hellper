@@ -1,25 +1,19 @@
 package langchain
 
+// OBSOLETE! USE LANGGRAPH.GO
+
 import (
 	"context"
 	"fmt"
 	"log"
 
-	db "github.com/JackBekket/hellper/lib/database"
-
-	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/memory"
 
 	//"github.com/tmc/langchaingo/llms/options"
 	"github.com/tmc/langchaingo/llms/openai"
 )
 
 /*
-	you can get conversation logs by docker logs -f local-ai
-	(if you run local-ai in DEBUG mode)
-*/
-
 // Initialize New Dialog thread with User with no limitation for token usage (may fail, use with limit)
 func InitializeNewChatWithContextNoLimit(api_token string, model_name string, base_url string, user_initial_promt string) (*db.ChatSession, error) {
 	//ctx := context.Background()
@@ -103,8 +97,7 @@ func ContinueChatWithContextNoLimit(ctx context.Context, session *db.ChatSession
 	return result, session, nil
 }
 
-
-
+*/
 
 /*
 		HIGH LEVEL INSTRUCT (SUDO)

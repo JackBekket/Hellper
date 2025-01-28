@@ -11,7 +11,6 @@ import (
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai"
 
-	//"github.com/tmc/langgraphgo/graph"
 	"github.com/JackBekket/hellper/lib/embeddings"
 	"github.com/JackBekket/langgraphgo/graph"
 )
@@ -70,7 +69,7 @@ func OneShotRun(prompt string, model openai.LLM,history_state ...llms.MessageCon
     }
     intialState = append(
       intialState,   
-      agentState...,        // append agent system prompt     //something wrong here
+      agentState...,        // append agent system prompt    
     )
     intialState = append(
       intialState,  
@@ -133,8 +132,8 @@ func OneShotRun(prompt string, model openai.LLM,history_state ...llms.MessageCon
   // MAIN WORKFLOW
   workflow := graph.NewMessageGraph()
 
-  workflow.AddNode("agent", agent)
-  workflow.AddNode("semanticSearch", semanticSearch)
+  workflow.AddNode("agent", agent)  // see agent function
+  workflow.AddNode("semanticSearch", semanticSearch)  // see semantic search function
 
   workflow.SetEntryPoint("agent") // we start with agent
   workflow.AddConditionalEdge("agent", shouldSearchDocuments)   // if agent decide and called semamnticSearch, then this function will handle call, and make an actual tool call
@@ -181,7 +180,7 @@ func agent(ctx context.Context, state []llms.MessageContent) ([]llms.MessageCont
   }
 
   lastMsg := state[len(state)-1]
-      if lastMsg.Role == "tool" {   // If we catch response from tool then we use this response
+      if lastMsg.Role == "tool" {   // If we catch response from tool then it's second iteration and we simply need to give answer to user using this result
         state = append(state, lastMsg)
         response, err := model.GenerateContent(ctx, state)
         if err != nil {
@@ -285,7 +284,7 @@ func semanticSearch(ctx context.Context, state []llms.MessageContent)  ([]llms.M
     if ok && toolCall.FunctionCall.Name == "semanticSearch" {
 
       // TODO: Extract query and store parameters from the arguments
-      // ... (logic to extract necessary values for SemanticSearch call)
+      // (logic to extract necessary values for SemanticSearch call)
       var args struct {
         Query string `json:"query"`
         //Store string `json:"store"`
@@ -302,7 +301,7 @@ func semanticSearch(ctx context.Context, state []llms.MessageContent)  ([]llms.M
 
       //get env
       _ = godotenv.Load()
-      ai_url := os.Getenv("AI_ENDPOINT")          //TODO: should be global?   .. there are global, there might be resetting.
+      ai_url := os.Getenv("AI_ENDPOINT")          // there are global, there might be resetting.
       api_token := os.Getenv("ADNIN_KEY")
       db_link := os.Getenv("EMBEDDINGS_DB_URL")
 
@@ -320,16 +319,16 @@ func semanticSearch(ctx context.Context, state []llms.MessageContent)  ([]llms.M
         return state, err
       }
 
-      log.Println("store:", store)
+      log.Println("store:", store)  // actually return empty store in case of error (!)
 
       maxResults := 1 // Set your desired maxResults here
       //options := args.Options // Pass in any additional options as needed
 
-      // Call your SemanticSearch function here
+      // Call *real* SemanticSearch function 
       searchResults, err := embeddings.SemanticSearch(
         searchQuery, 
         maxResults,
-        store, // Pass in your vector store
+        store,
        // options, // Pass in any additional options you need
       )
 
