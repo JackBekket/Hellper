@@ -42,16 +42,40 @@ lib/agent/superagent.go
 ## Package: agent
 
 ### Imports:
-- "github.com/tmc/langchaingo/llms"
+
+```
+log
+os
+github.com/joho/godotenv
+github.com/tmc/langchaingo/llms
+github.com/tmc/langchaingo/llms/openai
+```
 
 ### External Data, Input Sources:
-- llms.MessageContent: This type is used to represent a message in the context of a conversation. It is likely used to store previous messages in the conversation history.
 
-### OnePunch Function:
-This function takes a prompt string as input and calls the OneShotRun function with the prompt. It then prints the result of the OneShotRun function call to the console.
+- Environment variables: AI_ENDPOINT, ADNIN_KEY, EMBEDDINGS_DB_URL (not used in the provided code)
 
-### RunThread Function:
-This function takes a prompt string and a variable number of llms.MessageContent arguments representing the conversation history. It calls the OneShotRun function with the prompt and the history, and then prints the result of the OneShotRun function call to the console.
+### Code Summary:
+
+#### One-Shot Agent:
+
+The `OnePunch` function is a prototype for a one-shot agent that doesn't use any history context. It creates a generic LLM using the `CreateGenericLLM` function and then calls the `OneShotRun` function with the provided prompt and the LLM. The result is printed to the console.
+
+#### Thread Agent:
+
+The `RunThread` function is a prototype for a thread agent that can use history context. It takes a prompt, a pre-existing LLM, and an optional list of history messages as input. It appends the new user prompt to the history and then calls the `OneShotRun` function with the prompt, the LLM, and the updated history. The result is printed to the console, and the updated history and the result are returned.
+
+#### Message Content Creation:
+
+The `CreateMessageContentAi` and `CreateMessageContentHuman` functions are used to create message content for the AI and human, respectively. They take a string as input and return a slice of `llms.MessageContent` objects.
+
+#### Generic LLM Creation:
+
+The `CreateGenericLLM` function creates a generic LLM using the OpenAI API. It takes the model name, API token, and base URL as input. It then creates a new OpenAI client using the provided parameters and returns the LLM.
+
+#### One-Shot Run:
+
+The `OneShotRun` function is not shown in the provided code, but it is assumed to be a function that takes a prompt, an LLM, and an optional list of history messages as input and returns the result of running the agent with the given parameters.
 
 
 

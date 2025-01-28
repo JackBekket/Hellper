@@ -1,98 +1,204 @@
-# command
+## Package: command
 
-## Summary for addAdminTomap.go
+### Imports:
 
-This code package defines a function called AddAdminToMap that handles the authorization of new administrators for a Telegram bot. It takes an adminKey and an updateMessage as input. The function first extracts the chatID and username from the updateMessage. Then, it creates a new user entry in the UsersMap, which is a map of users and their corresponding information. The new user entry includes the chatID, username, dialog status, admin status, and an AiSession object containing the adminKey.
+- log
+- db "github.com/JackBekket/hellper/lib/database"
+- tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
-The function then logs the authorized username and sends a confirmation message to the user. Finally, it sends another message with a one-time reply keyboard containing a button for selecting the desired GPT model (in this case, GPT-3.5).
+### External Data, Input Sources:
+
+- adminKey (string)
+- updateMessage (tgbotapi.Message)
+
+### AddAdminToMap Function:
+
+This function is responsible for adding an admin to the database and sending a confirmation message to the user. It takes two arguments: adminKey (string) and updateMessage (tgbotapi.Message).
+
+1. It extracts the chatID from the updateMessage.
+2. It creates a new User object with the chatID, username, dialog status, admin status, and AI session information. The AI session information includes the adminKey.
+3. It adds the new User object to the UsersMap in the database.
+4. It logs a message indicating that the admin has been authorized.
+5. It sends a confirmation message to the admin using the bot.
+6. It sends another message with a one-time reply keyboard containing a button for selecting the GPT-3.5 model.
+
+lib/bot/command/addNewUsertoMap.go
+## Package: command
+
+### Imports:
+
+- log
+- github.com/JackBekket/hellper/lib/database
+- github.com/go-telegram-bot-api/telegram-bot-api/v5
+
+### External Data, Input Sources:
+
+- updateMessage: A tgbotapi.Message object containing information about the incoming Telegram message.
+
+### AddNewUserToMap Function:
+
+This function is responsible for adding a new user to the database and assigning them a "Dialog_status" of 0. It takes an updateMessage as input, extracts the chatID and username from the message, and creates a new User object with these values. The function then calls the database.AddUser function to store the new user in the database.
+
+After adding the user to the database, the function logs the user's ID and username. It then creates a new message using the msgTemplates["hello"] template and sends it to the user with a one-time reply keyboard containing a "Start!" button.
+
+The function also includes a commented-out section that appears to be related to registration and checking if the user is already registered. This section is not currently being used.
+
+lib/bot/command/cases.go
+## Package: command
+
+This package contains the core logic for handling user interactions and managing the AI session. It includes functions for handling user input, managing the dialog flow, and interacting with the AI model.
+
+### Imports:
+
+- context
+- fmt
+- log
+- strings
+- github.com/JackBekket/hellper/lib/database
+- github.com/JackBekket/hellper/lib/langchain
+- github.com/JackBekket/hellper/lib/localai
+- github.com/JackBekket/hellper/lib/localai/audioRecognition
+- github.com/JackBekket/hellper/lib/localai/imageRecognition
+- github.com/go-telegram-bot-api/telegram-bot-api/v5
+- github.com/joho/godotenv
+
+### External Data and Input Sources:
+
+- Database: The package uses a database (likely a key-value store) to store user data, including their AI session information and dialog status.
+- Telegram Bot API: The package interacts with the Telegram Bot API to receive user messages and send responses.
+- Local AI: The package utilizes local AI models for tasks like speech recognition and image recognition.
+
+### Major Code Parts:
+
+1. Dialog Flow Management:
+   - The package manages the dialog flow by tracking the user's dialog status and providing appropriate responses based on the current status.
+   - Functions like `InputYourAPIKey`, `ChooseModel`, `HandleModelChoose`, and `ConnectingToAiWithLanguage` handle different stages of the dialog flow.
+
+2. AI Model Interaction:
+   - The package allows users to choose an AI model from a list of available options.
+   - The `attachModel` function attaches the selected model to the user's session.
+   - The `DialogSequence` function handles the main loop for interacting with the AI model, processing user input and sending responses.
+
+3. User Data Management:
+   - The package provides functions to access and manage user data, such as `GetUsersDb` and `GetUser`.
+   - User data is stored in the database and includes information about the user's AI session and dialog status.
+
+4. Local AI Integration:
+   - The package integrates with local AI models for tasks like speech recognition and image recognition.
+   - Functions like `HandleVoiceMessage` and `RecognizeImage` handle these tasks and provide responses to the user.
+
+5. Error Handling:
+   - The package includes error handling mechanisms to handle potential issues, such as invalid API keys or failed AI model interactions.
+   - Functions like `WrongResponse` provide appropriate responses to the user in case of errors.
+
+6. Context Management:
+   - The package uses the `context` package to manage the context of the AI session, including user data and other relevant information.
+
+7. Environment Variables:
+   - The package uses environment variables to configure the local AI endpoint and other settings.
+
+8. File Handling:
+   - The package handles file operations, such as deleting temporary files, to ensure proper cleanup.
+
+9. Logging:
+   - The package uses the `log` package to log important events and debug information.
+
+10. Helper Functions:
+   - The package includes helper functions for tasks like deleting files and managing dialog status.
+
+By summarizing these major code parts, we can understand the overall functionality of the `command` package and its role in managing user interactions and AI session management.
+
+lib/bot/command/checkAdmin.go
+## Package: command
+
+### Imports:
+
+- fmt
+- github.com/JackBekket/hellper/lib/bot/env
+- github.com/go-telegram-bot-api/telegram-bot-api/v5
+
+### External Data, Input Sources:
+
+- adminData: A map of strings to env.AdminData, representing the admin data for each environment.
+- updateMessage: A tgbotapi.Message, representing the incoming Telegram message.
+
+### Summary:
+
+#### CheckAdmin Function:
+
+The CheckAdmin function is responsible for updating the "dialogStatus" in the database based on whether the user is an admin or not. It takes two arguments: adminData and updateMessage.
+
+1. It first extracts the chatID from the updateMessage.
+2. Then, it iterates through the adminData map, checking if the chatID matches any of the admin entries.
+3. If a match is found, it checks if the admin's GPTKey is not empty. If it is, the function calls the AddAdminToMap function, passing the GPTKey and updateMessage as arguments.
+4. If the GPTKey is empty, the function sends a message to the chatID, indicating that the environment is missing. It then calls the AddNewUserToMap function, passing the updateMessage as an argument.
+5. If no match is found in the adminData map, the function calls the AddNewUserToMap function, passing the updateMessage as an argument.
+
+The AddAdminToMap and AddNewUserToMap functions are not shown in the provided code, but they are likely responsible for updating the database with the appropriate dialogStatus based on whether the user is an admin or not.
+
+lib/bot/command/msgTemplates.go
+## Package/Component: command
+
+### Imports:
+
+```
+map[string]string
+```
+
+### External Data, Input Sources:
+
+- `msgTemplates`: A map containing various message templates used in the package.
+
+### Summary:
+
+The provided code snippet is part of a package or component named "command". It defines a map called `msgTemplates` that stores various message templates. These templates are likely used for generating responses or displaying information to the user. The code snippet also includes a comment that suggests the package or component might be related to a local AI node and provides a list of additional commands that can be used with the bot.
+
+lib/bot/command/newCommander.go
+## Package: command
+
+### Imports:
+- context
+- github.com/JackBekket/hellper/lib/database
+- github.com/go-telegram-bot-api/telegram-bot-api/v5
+
+### External Data, Input Sources:
+- `bot`: A pointer to a `tgbotapi.BotAPI` object, which is used to interact with the Telegram Bot API.
+- `usersDb`: A map of user IDs to `database.User` objects, which is used to store and retrieve user data.
+- `ctx`: A context object, which is used to manage the lifetime of the Commander instance.
+
+### Commander Struct:
+The `Commander` struct is responsible for managing the interaction with the Telegram Bot API and the database. It has the following fields:
+- `bot`: A pointer to a `tgbotapi.BotAPI` object.
+- `usersDb`: A map of user IDs to `database.User` objects.
+- `ctx`: A context object.
+
+### NewCommander Function:
+The `NewCommander` function is used to create a new `Commander` instance. It takes the following arguments:
+- `bot`: A pointer to a `tgbotapi.BotAPI` object.
+- `usersDb`: A map of user IDs to `database.User` objects.
+- `ctx`: A context object.
+
+The function returns a pointer to a new `Commander` instance, which is initialized with the provided arguments.
+
+### GetCommander Function:
+The `GetCommander` function is not provided in the code snippet. It is assumed to be a function that returns a pointer to a `Commander` instance.
+
+lib/bot/command/ui.go
+## Package: command
+
+### Imports:
+- tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+
+### External Data, Input Sources:
+- msgTemplates: A map containing message templates for different scenarios.
+
+### Code Summary:
+#### RenderModelMenuLAI:
+This function renders a menu of LLaMA-based models with an inline keyboard. It takes the chat ID as input and constructs a message with the appropriate model names as buttons. The message is then sent to the specified chat using the bot.
+
+#### RenderLanguage:
+This function renders a menu for choosing a language with an inline keyboard. It takes the chat ID as input and constructs a message with language options as buttons. The message is then sent to the specified chat using the bot.
 
 
 
-## Summary for addNewUsertoMap.go
-
-This code package defines a function called `AddNewUserToMap` that adds a new user to the database and assigns them a "Dialog_status" of 0. The function takes an update message as input, extracts the user's ID and username, and creates a new user object with these values. The user object is then added to the database using the `database.AddUser` function.
-
-The function also logs the new user's ID and username to the console. Additionally, it sends a welcome message to the new user, including a "Start!" button in the reply markup.
-
-The code package also includes imports for the `log` package and the `database` package, as well as the `tgbotapi` package for interacting with the Telegram Bot API.
-
-
-
-## Summary for cases.go
-
-This code package provides a command-line interface for interacting with an AI model. It includes functions for handling user input, managing dialog flow, and connecting to various AI services.
-
-The package starts by defining a `Commander` struct that manages the interaction with the user. It includes methods for handling different user inputs, such as choosing a network, selecting a model, and providing an API key. The package also includes functions for connecting to different AI services, such as OpenAI, LocalAI, and VastAI.
-
-The `InputYourAPIKey` method prompts the user to enter their API key, which is then stored in the user's profile. The `ChooseNetwork` method allows the user to select the AI service they want to use, and the `HandleNetworkChoose` method handles the user's choice by setting the appropriate network and model selection parameters.
-
-The `ChooseModel` method prompts the user to select a model from the available options, and the `HandleModelChoose` method handles the user's choice by setting the model name and API endpoint. The `AttachKey` method is used to store the user's API key in their profile.
-
-The package also includes functions for generating images using Stable Diffusion, uploading images to Telegram, and handling dialog flow. The `DialogSequence` method is responsible for managing the conversation between the user and the AI model, while the `GenerateNewImageLAI_SD` method generates an image using Stable Diffusion and uploads it to Telegram.
-
-Overall, this code package provides a comprehensive set of tools for interacting with AI models, including user input handling, dialog flow management, and integration with various AI services.
-
-## Summary for checkAdmin.go
-
-This code package defines a function called `CheckAdmin` that manages user permissions and loads keys from the environment into the database. It takes an `adminData` map containing admin information and an `updateMessage` as input.
-
-The function first checks if the user is an admin by comparing the user's ID with the IDs in the `adminData` map. If the user is an admin, it checks if the corresponding GPT key is present in the environment. If the key is found, it adds the admin to a map and returns. If the key is missing, it sends a message to the user and directs the function to the case for non-admin users.
-
-If the user is not an admin, the function adds the user to a map and returns. This ensures that only admins with valid GPT keys can access certain features or resources.
-
-In summary, this code package provides a mechanism for managing user permissions and loading keys from the environment into the database. It ensures that only admins with valid GPT keys can access certain features or resources.
-
-
-
-## Summary for msgTemplates.go
-
-This code package defines a set of message templates for a bot that interacts with either an OpenAI API or a local AI node. The templates cover various aspects of the bot's functionality, including greetings, authorization prompts, model selection, network selection, and help commands. The package also includes templates for experimental features such as document searching, Retrival-Augmented Generation, and image generation.
-
-The message templates are stored in a map called `msgTemplates`, where each key represents a specific message and its corresponding value is the message content. The package provides a comprehensive set of templates to guide the bot's interactions with users and manage its various functionalities.
-
-
-
-## Summary for newCommander.go
-
-This code package defines a Commander struct that manages interactions with a Telegram bot and a database of users. The Commander struct has three fields: a pointer to a Telegram bot API object, a map of user IDs to database.User objects, and a context object.
-
-The package provides a constructor function, NewCommander, which takes a Telegram bot API object, a map of user IDs to database.User objects, and a context object as input and returns a new Commander instance.
-
-The package also includes a function, GetCommander, which is not fully implemented in the provided code.
-
-
-
-## Summary for ui.go
-
-This code package provides a set of functions for rendering menus and handling user interactions within a Telegram bot. It utilizes the `tgbotapi` library to interact with the Telegram API.
-
-The package includes functions for rendering model menus for different types of AI models, such as GPT-3.5, GPT-4, and various language models. These functions create and send messages to the user, along with a one-time reply keyboard containing buttons for selecting the desired model.
-
-Additionally, the package includes a function for rendering a language menu, which allows the user to choose a language for the bot to understand and respond in. This function sends a message to the user with a one-time reply keyboard containing buttons for selecting the desired language.
-
-In summary, this code package provides a framework for creating a Telegram bot that can handle user interactions related to selecting AI models and languages. It uses the `tgbotapi` library to interact with the Telegram API and provides functions for rendering menus and handling user input.
-
-
-
-## Summary for utils.go
-
-This code package provides a set of functions for a Telegram bot that can perform various tasks, such as providing help messages, searching for documents, and retrieving usage statistics. The package also includes a function for sending media files, such as videos, to users.
-
-The package starts by defining a Commander struct, which contains methods for handling different commands. The HelpCommandMessage method is responsible for sending a help message to the user when they request it. The SearchDocuments method allows users to search for documents based on a given prompt and returns the results along with their scores. The RAG method implements a Retrieval-Augmented Generation approach, which combines the results of a semantic search with a language model to generate a more comprehensive response.
-
-The GetUsage method retrieves and displays the usage statistics for a particular user, including the number of prompt tokens, completion tokens, and total tokens used. The SendMediaHelper method is responsible for sending a random video file from a specified media directory to the user.
-
-Overall, this code package provides a comprehensive set of functions for a Telegram bot that can assist users with various tasks, including document search, usage tracking, and media sharing.
-
-
-
-## Package Summary
-
-This code package provides a comprehensive set of tools for managing user permissions, loading keys from the environment, and interacting with AI models. It includes functions for handling user input, managing dialog flow, and connecting to various AI services. The package also provides message templates for a bot that interacts with either an OpenAI API or a local AI node, covering various aspects of the bot's functionality, such as greetings, authorization prompts, model selection, network selection, and help commands.
-
-The package defines a Commander struct that manages interactions with a Telegram bot and a database of users. It includes functions for rendering menus and handling user interactions, such as selecting AI models and languages. Additionally, the package provides a set of functions for a Telegram bot that can perform various tasks, such as providing help messages, searching for documents, and retrieving usage statistics.
-
-In summary, this code package provides a robust framework for creating a Telegram bot that can handle user interactions related to selecting AI models, languages, and performing various tasks, including document search, usage tracking, and media sharing. It utilizes the `tgbotapi` library to interact with the Telegram API and provides a comprehensive set of tools for managing user permissions, loading keys from the environment, and interacting with AI models.
-
-
-
+lib/bot/command/utils.go
