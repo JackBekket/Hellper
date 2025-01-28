@@ -4,20 +4,23 @@ package langchain
 
 import (
 	"context"
-	"io/ioutil"
 	"log"
 	"math/rand"
 	"os"
 	"path/filepath"
 
+	"io/fs"
+
 	db "github.com/JackBekket/hellper/lib/database"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+
+	//TODO: investigate why meme videos with helper are not sent by this func!
+	// Notifies the user that an error occurred while creating the request.
+	// "An error has occured. In order to proceed we need to recreate client and initialize new session"
+	// Removes a user from the database (тemporary solution).
+	"sort"
 )
 
-//TODO: investigate why meme videos with helper are not sent by this func!
-// Notifies the user that an error occurred while creating the request.
-// "An error has occured. In order to proceed we need to recreate client and initialize new session"
-// Removes a user from the database (тemporary solution).
 func errorMessage(err error, bot *tgbotapi.BotAPI, user db.User) {
 	log.Println("error :", err)
 	msg := tgbotapi.NewMessage(user.ID, err.Error())
@@ -25,48 +28,56 @@ func errorMessage(err error, bot *tgbotapi.BotAPI, user db.User) {
 	msg = tgbotapi.NewMessage(user.ID, "an error has occured. In order to proceed we need to recreate client and initialize new session")
 	bot.Send(msg)
 
-		// Send helper video error
-		// Get a list of all files in the media directory
-		files, err := ioutil.ReadDir("../../media/")
+	// Send helper video error
+	// Get a list of all files in the media directory
+	files, err := func() ([]fs.FileInfo, error) {
+		f, err := os.Open("../../media/")
 		if err != nil {
-		  log.Println("Could not read media directory:", err)
-		  return
+			return nil, err
 		}
-	
-		  // Select a random file
-		  //rand.Seed(time.Now().UnixNano())
-		  randomFile := files[rand.Intn(len(files))]
-	
-	  // Open the video file
-	  videoFile, err := os.Open(filepath.Join("../../media/", randomFile.Name()))
-	  if err != nil {
+		list, err := f.Readdir(-1)
+		f.Close()
+		if err != nil {
+			return nil, err
+		}
+		sort.Slice(list, func(i, j int) bool {
+			return list[i].Name() < list[j].Name()
+		})
+		return list, nil
+	}()
+	if err != nil {
+		log.Println("Could not read media directory:", err)
+		return
+	}
+
+	// Select a random file
+	//rand.Seed(time.Now().UnixNano())
+	randomFile := files[rand.Intn(len(files))]
+
+	// Open the video file
+	videoFile, err := os.Open(filepath.Join("../../media/", randomFile.Name()))
+	if err != nil {
 		log.Println("Could not open video file:", err)
 		return
-	  }
-	  defer videoFile.Close()
-	
-	  // Create a new video message
-	  videoMsg := tgbotapi.NewVideo(user.ID, tgbotapi.FileReader{
-		Name: randomFile.Name(),
+	}
+	defer videoFile.Close()
+
+	// Create a new video message
+	videoMsg := tgbotapi.NewVideo(user.ID, tgbotapi.FileReader{
+		Name:   randomFile.Name(),
 		Reader: videoFile,
 		//Size: -1, // Let the tgbotapi package determine the size
-	  })
-	
-	  // Send the video message
-	  _, err = bot.Send(videoMsg)
-	  if err != nil {
+	})
+
+	// Send the video message
+	_, err = bot.Send(videoMsg)
+	if err != nil {
 		log.Println("Could not send video message:", err)
-	  }
+	}
 
 	userDb := db.UsersMap
 	delete(userDb, user.ID)
 
-
-
-
-	// updateDb := userDatabase[ID]
-	// updateDb.Dialog_status = 0
-	// userDatabase[ID] = updateDb
 }
 
 
@@ -82,12 +93,14 @@ func StartDialogSequence(bot *tgbotapi.BotAPI, chatID int64, promt string, ctx c
 		gptModel,
 		promt,
 	)
+	api_key := user.AiSession.GptKey
+	base_url := ai_endpoint
 
 	thread := user.AiSession.DialogThread
 
-	resp,post_session, err := ContinueChatWithContextNoLimit(ctx,&thread,promt)
+	post_session, resp, err := ContinueAgent(api_key, gptModel, base_url, promt, &thread)
 	if err != nil {
-		errorMessage(err,bot,user)
+		errorMessage(err, bot, user)
 	} else {
 
 		log.Println("AI response: ", resp)
@@ -100,24 +113,15 @@ func StartDialogSequence(bot *tgbotapi.BotAPI, chatID int64, promt string, ctx c
 		user.AiSession.Usage = usage
 		//db.UsersMap[chatID] = user
 
-		
-		//log.Println("check if it's stored in messages, printing messages:")
-		history, err := thread.ConversationBuffer.ChatHistory.Messages(ctx)
-		if err != nil {
-			log.Println(err)
-		}
-		
-		// TODO: Find a way to convert llms.ChatMessage into llms.MessageContent and find a way to call agent from here
-
 		//log.Println(history)
-		total_turns := len(history)
+		total_turns := len(thread.ConversationBuffer)
 		log.Println("total number of turns: ", total_turns)
 		// Iterate over each message and print
 		/*
-		log.Println("Printing messages:")
-		for _, msg := range history {
-			log.Println(msg.GetContent())
-		}
+			log.Println("Printing messages:")
+			for _, msg := range history {
+				log.Println(msg.GetContent())
+			}
 		*/
 
 		user.AiSession.DialogThread = *post_session
@@ -139,6 +143,3 @@ func LogResponse(resp *llms.ContentResponse) {
 	log.Println("resp_usage total tokens: ",resp.Usage.TotalTokens)
 }
 */
-
-
-

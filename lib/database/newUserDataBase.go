@@ -4,8 +4,7 @@ package database
 // user should be fully functional user class and all operation with user should be placed here (in separate user.go package)
 
 import (
-	"github.com/tmc/langchaingo/chains"
-	"github.com/tmc/langchaingo/memory"
+	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/vectorstores"
 )
 
@@ -31,14 +30,25 @@ type AiSession struct {
 	GptKey       string
 	GptModel     string
 	AI_Type      int8
-	DialogThread ChatSession
+	DialogThread ChatSessionGraph		
 	Base_url     string
 	Usage        map[string]int
 }
 
+/*
 type ChatSession struct {
 	ConversationBuffer memory.ConversationBuffer
 	DialogThread       chains.LLMChain
+}
+*/
+
+
+
+// langgraph doesn't work with same types as langchain, so we have to improvise here.
+type ChatSessionGraph struct {
+	ConversationBuffer []llms.MessageContent
+	//DialogThread string
+
 }
 
 var UsersMap = make(map[int64]User)
@@ -70,10 +80,19 @@ func GetSessionUsage(id int64) map[string]int {
 	return usage
 }
 
+/*
 func NewChatSession(buffer  memory.ConversationBuffer, thread chains.LLMChain) *ChatSession {
 	return &ChatSession{
 		ConversationBuffer: buffer,
 		DialogThread: thread,
 	}
 }
+*/
+
+func NewChatSessionGraph(buffer  []llms.MessageContent) *ChatSessionGraph {
+	return &ChatSessionGraph{
+		ConversationBuffer: buffer,
+	}
+}
+
 

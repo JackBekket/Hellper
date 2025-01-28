@@ -1,62 +1,186 @@
-# langchain
+## langchain
 
-## Summary for handler.go
+This package provides a ChainCallbackHandler struct and various methods to handle different events during the execution of a chain.
 
-This code package provides a set of functions and methods for handling various aspects of a language model (LLM) chain, including agent actions, chain completion, and LLM errors. It also includes a ChainCallbackHandler struct that implements callbacks for different events in the chain, such as the start and end of a chain, as well as the generation of content by the LLM.
+### Imports
 
-The package utilizes a database to store user information and usage statistics. It also includes a function to log the content of an LLM response, including the choice made by the model, the reason for stopping, and the generation information. This information is used to update the user's usage statistics and store them in the database.
+```
+import (
+	"context"
+	"encoding/json"
+	"log"
 
-In addition to the ChainCallbackHandler, the package provides methods for handling various events related to the LLM, such as the start and end of a tool, as well as the generation of content by the LLM. These methods allow for customization and control over the behavior of the LLM chain.
+	db "github.com/JackBekket/hellper/lib/database"
+	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/schema"
+	//""
+)
+```
 
-Overall, this code package provides a comprehensive set of tools for managing and interacting with an LLM chain, including handling callbacks, logging responses, and updating user usage statistics.
+### External Data, Input Sources
+
+The package uses the following external data and input sources:
+
+1. `db.User`: A struct representing a user, likely from a database.
+2. `llms.ContentResponse`: A struct containing information about the generated content, including choices and generation info.
+3. `schema.AgentAction`, `schema.AgentFinish`, `schema.Document`, etc.: Structs representing various events and data structures related to the chain execution.
+
+### Code Summary
+
+1. `ChainCallbackHandler` struct: This struct is responsible for handling various events during the chain execution. It has methods for handling agent actions, agent finishes, chain ends, chain errors, chain starts, LLM errors, LLM generate content starts, LLM starts, retriever ends, retriever starts, streaming functions, tool ends, tool errors, and tool starts.
+
+2. `HandleLLMGenerateContentEnd`: This method is called when the LLM has finished generating content. It logs the content, stop reason, context, and generation info. It also updates the user's usage information based on the generated content and saves it to the database.
+
+3. `LogResponseContentChoice`: This helper function logs the content, stop reason, context, and generation info of the chosen content. It also logs the prompt tokens, completion tokens, and total tokens from the generation info.
+
+4. `HandleText`: This method is intended to be implemented if needed to handle text input.
+
+5. Other methods: The remaining methods in the `ChainCallbackHandler` struct are placeholders for handling various events during the chain execution. They are currently unimplemented but can be filled in as needed.
+
+6. Database interaction: The package interacts with a database to store user usage information. It uses the `db.UpdateSessionUsage` function to update the user's usage based on the generated content.
+
+7. Logging: The package uses the `log` package to log various events and information during the chain execution. This includes logging the content, stop reason, context, generation info, and other relevant data.
+
+8. Error handling: The package includes error handling mechanisms, such as panic statements and error checking, to ensure that the code can handle unexpected situations gracefully.
+
+9. Type assertions: The package uses type assertions to ensure that the data being accessed is of the expected type. This helps to prevent runtime errors and ensure that the code is working as intended.
+
+lib/langchain/langchain.go
+## Package: langchain
+
+### Imports:
+- context
+- fmt
+- log
+- github.com/tmc/langchaingo/llms
+- github.com/tmc/langchaingo/llms/openai
+
+### External Data, Input Sources:
+- base_url (string)
+- promt (string)
+- model_name (string)
+- api_token (string)
+- network (string)
+- options (llms.CallOption)
+
+### Summary:
+#### GenerateContentInstruction Function:
+This function is designed to generate content from a single prompt without using memory or context. It takes several parameters, including the base URL, prompt, model name, API token, and network. The function first checks the network type and initializes the appropriate language model. Then, it calls the `GenerateFromSinglePrompt` function from the `llms` package to generate the content. Finally, it returns the generated content and any potential errors.
+
+lib/langchain/langgraph.go
+## Package: langchain
+
+### Imports:
+- github.com/JackBekket/hellper/lib/agent
+- github.com/JackBekket/hellper/lib/database
+- github.com/tmc/langchaingo/llms/openai
+
+### External Data, Input Sources:
+- api_token (string)
+- model_name (string)
+- base_url (string)
+- user_promt (string)
+- state (db.ChatSessionGraph)
+
+### RunNewAgent Function:
+This function initializes a new agent with the provided API token, model name, and base URL. It creates a new OpenAI LLM instance using the provided parameters and runs a thread using the agent.RunThread function. The function returns a new ChatSessionGraph object containing the conversation buffer and the output text.
+
+### ContinueAgent Function:
+This function continues an existing agent with the provided API token, model name, base URL, user prompt, and state. It creates a new OpenAI LLM instance using the provided parameters and runs a thread using the agent.RunThread function with the provided state. The function returns a new ChatSessionGraph object containing the conversation buffer and the output text.
 
 
 
-## Summary for langchain.go
+lib/langchain/setupSequenceWithKey.go
+## Package: langchain
 
-This code package provides a set of functions for interacting with language models, specifically OpenAI's API and a local AI model. It includes functions for initializing new conversations, continuing existing conversations, and generating content from single prompts.
+### Imports:
 
-The package utilizes the LangChain library to manage conversations and memory, allowing for context-aware interactions. It also provides a function to generate content from a single prompt, which can be used for tasks such as text generation or code completion.
+- context
+- log
+- sync
+- db "github.com/JackBekket/hellper/lib/database"
+- tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
-The code package supports both OpenAI's API and a local AI model, allowing users to choose their preferred method of interaction. It also includes error handling and logging to ensure smooth operation.
+### External Data, Input Sources:
 
-In summary, this code package offers a comprehensive set of tools for interacting with language models, enabling users to create and manage conversations, generate content, and leverage the power of AI for various tasks.
+- Database: db.User, db.ChatSessionGraph, db.GetSessionUsage
+- Telegram Bot API: tgbotapi.BotAPI, tgbotapi.NewMessage, bot.Send
+- AI Endpoint: ai_endpoint
+
+### Code Summary:
+
+#### SetupSequenceWithKey Function:
+
+This function is responsible for setting up a sequence of interactions with an AI model based on user preferences and session data. It takes a Telegram bot instance, a user object, a language, a context, and an AI endpoint as input.
+
+1. It first acquires a lock to ensure thread safety.
+2. It retrieves the user's ID, GPT key, and model from the user object.
+3. Based on the provided language, it calls the tryLanguage function to initiate a conversation with the AI model.
+4. If successful, it updates the user's dialog status, AI session data, and usage information.
+5. Finally, it stores the updated user object in the db.UsersMap.
+
+#### tryLanguage Function:
+
+This function is responsible for initiating a conversation with the AI model based on the provided language and language code. It takes a user object, a language string, a language code, and an AI endpoint as input.
+
+1. It constructs a language prompt based on the language code.
+2. It retrieves the user's GPT key, model, and chat ID from the user object.
+3. It calls the RunNewAgent function to start a new agent and initiate the conversation with the AI model.
+4. If successful, it returns the conversation thread and the AI model's response.
+
+#### RunNewAgent Function:
+
+This function is responsible for starting a new agent and initiating a conversation with the AI model. It takes the GPT key, model, AI endpoint, and language prompt as input.
+
+1. It uses the provided GPT key, model, and AI endpoint to connect to the AI model.
+2. It sends the language prompt to the AI model and waits for a response.
+3. It returns the conversation thread and the AI model's response.
 
 
 
-## Summary for setupSequenceWithKey.go
+lib/langchain/startDialogSequence.go
+## Package: langchain
 
-This code package provides a framework for managing user interactions with an AI model, specifically focusing on language-based tasks. It utilizes a database to store user information, including their AI session details and dialog status. The package also includes functions for setting up a sequence of interactions with the AI, handling language selection, and managing the dialog thread.
+### Imports:
 
-The package uses a mutex to ensure thread safety when accessing shared resources. It also defines a context key for storing user information within the context. The `SetupSequenceWithKey` function initializes a new interaction sequence, taking into account the user's language preference, AI session details, and the AI endpoint.
+```
+context
+log
+math/rand
+os
+path/filepath
+io/fs
+github.com/JackBekket/hellper/lib/database
+github.com/go-telegram-bot-api/telegram-bot-api/v5
+```
 
-The `tryLanguage` function handles language selection and initiates a conversation with the AI model. It takes the user's language preference, language code, context, and AI endpoint as input. Based on the language code, it constructs a language prompt and initiates a new chat session with the AI model. The function returns the AI's response, the dialog thread, and any errors encountered during the process.
+### External Data, Input Sources:
 
-In summary, this code package provides a comprehensive solution for managing user interactions with an AI model, including language selection, dialog management, and error handling. It leverages a database to store user information and ensures thread safety through the use of a mutex. The package also includes functions for setting up a sequence of interactions with the AI and handling language selection.
+- Database: `db.UsersMap`
+- Telegram Bot API: `tgbotapi.BotAPI`
+- Media directory: `../../media/`
 
+### Code Summary:
 
+#### errorMessage Function:
 
-## Summary for startDialogSequence.go
+This function handles errors that occur during the process of creating a request. It logs the error, sends an error message to the user, and then sends a helper video to the user. The helper video is selected randomly from the media directory.
 
-This code package provides a function called StartDialogSequence that initiates a conversation with an AI model. It takes a Telegram bot, chat ID, prompt, context, and AI endpoint as input. The function retrieves the user's AI session data from the database, including the GPT model and dialog thread. It then uses the provided prompt to continue the conversation with the AI model, obtaining a response and updating the dialog thread. The response is sent to the user via Telegram, and the user's dialog status and usage are updated in the database.
+#### StartDialogSequence Function:
 
-In addition to the StartDialogSequence function, there's an error handling function called errorMessage that handles errors during the process. It logs the error, sends an error message to the user, and removes the user from the database. The package also includes a helper function to send a random video from a media directory to the user in case of an error.
+This function initiates a dialog sequence with an AI model. It takes the following parameters:
 
-The code package is designed to handle user interactions with an AI model, manage dialog threads, and update user data in a database. It utilizes a mutex to ensure thread safety when accessing shared resources. The package also includes error handling and recovery mechanisms to ensure smooth operation.
+- `bot`: A Telegram bot API instance.
+- `chatID`: The ID of the chat to send the message to.
+- `promt`: The prompt to send to the AI model.
+- `ctx`: A context object.
+- `ai_endpoint`: The endpoint for the AI model.
 
+The function first retrieves the user's AI session data from the database. Then, it uses the provided parameters to continue the agent's dialog thread. If an error occurs, the `errorMessage` function is called. Otherwise, the AI response is sent to the user, and the user's dialog status and usage are updated in the database.
 
+#### LogResponse Function:
 
-## Package Summary
-
-This code package provides a comprehensive set of tools for managing and interacting with an LLM chain, including handling callbacks, logging responses, and updating user usage statistics. It also includes functions for initializing new conversations, continuing existing conversations, and generating content from single prompts. The package supports both OpenAI's API and a local AI model, allowing users to choose their preferred method of interaction.
-
-The package utilizes a database to store user information, including their AI session details and dialog status. It also includes functions for setting up a sequence of interactions with the AI, handling language selection, and managing the dialog thread. The package uses a mutex to ensure thread safety when accessing shared resources.
-
-In addition to the ChainCallbackHandler, the package provides methods for handling various events related to the LLM, such as the start and end of a tool, as well as the generation of content by the LLM. These methods allow for customization and control over the behavior of the LLM chain.
-
-The code package also includes a function called StartDialogSequence that initiates a conversation with an AI model. It takes a Telegram bot, chat ID, prompt, context, and AI endpoint as input. The function retrieves the user's AI session data from the database, including the GPT model and dialog thread. It then uses the provided prompt to continue the conversation with the AI model, obtaining a response and updating the dialog thread. The response is sent to the user via Telegram, and the user's dialog status and usage are updated in the database.
-
-In summary, this code package provides a comprehensive solution for managing user interactions with an AI model, including language selection, dialog management, and error handling. It leverages a database to store user information and ensures thread safety through the use of a mutex. The package also includes functions for setting up a sequence of interactions with the AI and handling language selection.
+This function is commented out but appears to be intended for logging the full response object from an AI model. It would log various attributes of the response, such as the model, object, choices, and usage information.
 
 
 

@@ -11,7 +11,6 @@ import (
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai"
 
-	//"github.com/tmc/langgraphgo/graph"
 	"github.com/JackBekket/hellper/lib/embeddings"
 	"github.com/JackBekket/langgraphgo/graph"
 )
@@ -44,294 +43,295 @@ import (
 
 */
 
+// global var
+var Model openai.LLM
+var Tools []llms.Tool
 
+// This is the main function for this package
+func OneShotRun(prompt string, model openai.LLM, history_state ...llms.MessageContent) string {
 
+	// Operation with message STATE stack
+	agentState := []llms.MessageContent{
+		llms.TextParts(llms.ChatMessageTypeSystem, "You are helpful agent that has access to a semanticSearch tool. Use this tool if user ask to retrive some information from database/collection to provide user with information he/she looking for."),
+	}
+	intialState := []llms.MessageContent{
+		llms.TextParts(llms.ChatMessageTypeSystem, "Below a current conversation between user and helpful AI assistant. You (assistant) should help user in any task he/she ask you to do."),
+	}
 
+	if len(history_state) > 0 { // if there are previouse message state then we first load it into message state
+		// Access the first element of the slice
+		history := history_state
+		// ... use the history variable as needed
+		for _, message := range history {
+			intialState = append(intialState, message) // load history as initial state
+		}
+		intialState = append(
+			intialState,
+			agentState..., // append agent system prompt
+		)
+		intialState = append(
+			intialState,
+			llms.TextParts(llms.ChatMessageTypeHuman, prompt), //append user input (!)
+		)
+	} else {
+		//intialState = agentState    //history is empty -- load agentState as initial_state and append user prompt
+		intialState = append(
+			intialState,
+			llms.TextParts(llms.ChatMessageTypeHuman, prompt),
+		)
 
+	}
 
-func OneShotRun(prompt string, history_state ...llms.MessageContent) string{
+	// toolS definition interfaces
+	tools := []llms.Tool{
+		{
+			Type: "function",
+			Function: &llms.FunctionDefinition{
+				Name:        "search",
+				Description: "Preforms Duck Duck Go web search",
+				Parameters: map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"query": map[string]any{
+							"type":        "string",
+							"description": "The search query",
+						},
+					},
+				},
+			},
+		},
+		{
+			Type: "function",
+			Function: &llms.FunctionDefinition{
+				Name:        "semanticSearch",
+				Description: "Performs semantic search using a vector store",
+				Parameters: map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"query": map[string]any{
+							"type":        "string",
+							"description": "The search query",
+						},
+						"collection": map[string]any{ //TODO: there should NOT exist arguments which called NAME cause it cause COLLISION with actual function name.    .....more like confusion then collision so there are no error
+							"type":        "string",
+							"description": "name of collection store in which we perform the search",
+						},
+					},
+				},
+			},
+		},
+	}
 
-  model_name := "tiger-gemma-9b-v1-i1"    // should be settable?
-  _ = godotenv.Load()
-          ai_url := os.Getenv("AI_ENDPOINT")          //TODO: should be global?
-          api_token := os.Getenv("ADNIN_KEY")
-          //db_link := os.Getenv("EMBEDDINGS_DB_URL")
+	Tools = tools
+	Model = model
 
-  model, err := openai.New(
-    openai.WithToken(api_token),
-    //openai.WithBaseURL("http://localhost:8080"),
-    openai.WithBaseURL(ai_url),
-    openai.WithModel(model_name),
-    openai.WithAPIVersion("v1"),
-  )
-  if err != nil {
-    log.Fatal(err)
-  }
+	// MAIN WORKFLOW
+	workflow := graph.NewMessageGraph()
 
-  //completion_test := model.GenerateContent()
+	workflow.AddNode("agent", agent)                   // see agent function
+	workflow.AddNode("semanticSearch", semanticSearch) // see semantic search function
 
-  
-  // Operation with message STATE stack
+	workflow.SetEntryPoint("agent")                             // we start with agent
+	workflow.AddConditionalEdge("agent", shouldSearchDocuments) // if agent decide and called semamnticSearch, then this function will handle call, and make an actual tool call
+	workflow.AddEdge("semanticSearch", "agent")                 // return result of the search back to agent
 
-  agentState := []llms.MessageContent{
-    llms.TextParts(llms.ChatMessageTypeSystem, "You are an agent that has access to a semanticSearch tool. Please use this tool to get user information they are looking for."),
-  }
-  intialState := []llms.MessageContent{
-    llms.TextParts(llms.ChatMessageTypeSystem, "Below a current conversation between user and helpful AI assistant. Your task will be in the next system message"),
-  }
+	app, err := workflow.Compile()
+	if err != nil {
+		log.Printf("error: %v", err)
+		return fmt.Sprintf("error :%v", err)
+	}
 
-  if len(history_state) > 0 {                   // if there are previouse message state then we first load it into message state
-    // Access the first element of the slice
-    history := history_state
-    // ... use the history variable as needed
-    for _, message := range history {
-      intialState = append(intialState, message)  // load history as initial state
-    }
-    intialState = append(
-      intialState,   
-      agentState...,        // append agent system prompt
-    )
-    intialState = append(
-      intialState,  
-      llms.TextParts(llms.ChatMessageTypeHuman, prompt),  //append user input (!)
-    )
-  } else {
-    intialState = agentState    //history is empty -- load agentState as initial_state and append user prompt
-    intialState = append(
-      intialState,  
-      llms.TextParts(llms.ChatMessageTypeHuman, prompt),
-    )
-    
-    
-  }
+	response, err := app.Invoke(context.Background(), intialState)
+	if err != nil {
+		log.Printf("error: %v", err)
+		return fmt.Sprintf("error :%v", err)
+	}
 
-
-// toolS definition interfaces
-  tools := []llms.Tool{
-    {
-      Type: "function",
-      Function: &llms.FunctionDefinition{
-        Name:        "search",
-        Description: "Preforms Duck Duck Go web search",
-        Parameters: map[string]any{
-          "type": "object",
-          "properties": map[string]any{
-            "query": map[string]any{
-              "type":        "string",
-              "description": "The search query",
-            },
-          },
-        },
-      },
-    },
-    {
-      Type: "function",
-      Function: &llms.FunctionDefinition{
-        Name:        "semanticSearch",
-        Description: "Performs semantic search using a vector store",
-        Parameters: map[string]any{
-          "type": "object",
-          "properties": map[string]any{
-            "query": map[string]any{
-              "type":        "string",
-              "description": "The search query",
-            },
-            "collection": map[string]any{                     //TODO: there should NOT exist arguments which called NAME cause it cause COLLISION with actual function name.    .....more like confusion then collision so there are no error
-              "type":        "string",
-              "description": "name of collection store in which we perform the search",
-            },
-          }, 
-        },
-      },
-    },
-  }
-
-
-
+	lastMsg := response[len(response)-1]
+	log.Printf("last msg: %v", lastMsg.Parts[0])
+	result := lastMsg.Parts[0]
+	result_str := fmt.Sprintf("%v", result)
+	return result_str
+}
 
 // AGENT NODE
-/** We are telling agent, that it should response withTools, giving it function signatures defined earlier. 
-    if agent get response from conditional edge like 'yes, use x function with this signatures and this json object as input parameters -- it will match with predefined pointer to semanticSearch function and it will make a toolCall
-    then it will append toolCall to message state.
-    Note, that agent can call few toolCalls and all of them can be append here. toolCalls may be done parallel (I guess) */
-  agent := func(ctx context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
-   
+/** We are telling agent, that it should response withTools, giving it function signatures defined earlier.
+  if agent get response from conditional edge like 'yes, use x function with this signatures and this json object as input parameters -- it will match with predefined pointer to semanticSearch function and it will make a toolCall
+  then it will append toolCall to message state.
+  Agent will recive current stake, make consideration whether or not to use tool and make a call for it
+  `shouldSearchDocuments` func will handle this tool call -- it will call semanticSearch function
+  Then result of the search tool will go back to agent as a toolResonse in the messages state
+*/
+func agent(ctx context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
 
-    lastMsg := state[len(state)-1]
-        if lastMsg.Role == "tool" {   // If we catch response from tool then we use this response
-          response, err := model.GenerateContent(ctx, state)
-          if err != nil {
-            return state, err
-          }
-          msg := llms.TextParts(llms.ChatMessageTypeAI, response.Choices[0].Content)
-          state = append(state, msg)
-          return state,nil
+	agentState := []llms.MessageContent{
+		llms.TextParts(llms.ChatMessageTypeSystem, "You are helpful agent that has access to a semanticSearch tool. Use this tool if user ask to retrive some information from database/collection to provide user with information he/she looking for."),
+	}
+	model := Model // global... should be .env or getting from user context I guess.
+	tools := Tools
 
+	consideration_query := []llms.MessageContent{
+		llms.TextParts(llms.ChatMessageTypeSystem, "You are decision making agent, which can reply ONLY 'true' or 'false'.Your task is to determine whether or not to call semanticSearch function based on human input. If you see a basic question, return false. If user specified that he desires to use that function, return true. You should ONLY return 'true' or 'false'."),
+	}
 
-  }    else {   // If it is first interaction then we call tools
-    response, err := model.GenerateContent(ctx, state, llms.WithTools(tools))   // AI call tool function.. in this step it just put call in messages stack
-    if err != nil {
-      return state, err
-    }
-    msg := llms.TextParts(llms.ChatMessageTypeAI, response.Choices[0].Content)
+	lastMsg := state[len(state)-1]
+	if lastMsg.Role == "tool" { // If we catch response from tool then it's second iteration and we simply need to give answer to user using this result
+		state = append(state, lastMsg)
+		response, err := model.GenerateContent(ctx, state)
+		if err != nil {
+			return state, err
+		}
+		msg := llms.TextParts(llms.ChatMessageTypeAI, response.Choices[0].Content)
+		state = append(state, msg)
+		return state, nil
 
-    if len(response.Choices[0].ToolCalls) > 0 {
-      for _, toolCall := range response.Choices[0].ToolCalls {
-        if toolCall.FunctionCall.Name == "semanticSearch" {       // AI catch that there is a function call in messages, so *now* it actually calls the function.
+	} else { // If it is not tool response
 
-          msg.Parts = append(msg.Parts, toolCall) // Add result to messages stack
+		if lastMsg.Role == "human" { //                                            any user request
+			//state
+			consideration_stack := append(consideration_query, lastMsg)
+			//consideration_stack := append(consideration_query, state...)  // this is appending current state, but we actually need only last message here.
+			check, err := model.GenerateContent(ctx, consideration_stack) // one punch which determine wheter or not call tools. this is hardcode and probably should be separate part of the graph.
+			if err != nil {
+				return state, err
+			}
+			check_txt := fmt.Sprintf(check.Choices[0].Content)
+			log.Println("check result: ", check_txt)
 
-        }
-      }
-    }
-    state = append(state, msg)  
-    return state, nil
-  }
+			if check_txt == "true" { // tool call required by one-shot agent
+				state = append(state, agentState...)
+				state = append(state, lastMsg)
+				response, err := model.GenerateContent(ctx, state, llms.WithTools(tools)) // AI call tool function.. in this step it just put call in messages stack
+				if err != nil {
+					return state, err
+				}
+				msg := llms.TextParts(llms.ChatMessageTypeAI, response.Choices[0].Content)
+
+				if len(response.Choices[0].ToolCalls) > 0 {
+					for _, toolCall := range response.Choices[0].ToolCalls {
+						if toolCall.FunctionCall.Name == "semanticSearch" { // AI catch that there is a function call in messages, so *now* it actually calls the function.
+
+							msg.Parts = append(msg.Parts, toolCall) // Add result to messages stack
+
+						}
+					}
+					state = append(state, msg)
+					return state, nil
+				}
+			} else { // proceed without tools
+				response, err := model.GenerateContent(ctx, state)
+				if err != nil {
+					return state, err
+				}
+				msg := llms.TextParts(llms.ChatMessageTypeAI, response.Choices[0].Content)
+				state = append(state, msg)
+				return state, nil
+			}
+		} // end if human
+		return state, nil
+	} // end if not tool response
 }
 
+// this function is only HANDLES tool calls, so this is a handler, not a deciding mechanism. agent decide whether or not to call tool in agent func and this func is handling tool call here.
+func shouldSearchDocuments(ctx context.Context, state []llms.MessageContent) string {
+	// this function (I suppose) can be reworked to work with a *set* of a functions, not just one func.
 
-// TOOL FUNCTIONS
+	lastMsg := state[len(state)-1]
+	for _, part := range lastMsg.Parts {
+		toolCall, ok := part.(llms.ToolCall)
 
-  // Custom semantic search function for working with vector-store information
-  semanticSearch := func(ctx context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
-    lastMsg := state[len(state)-1]
+		if ok && toolCall.FunctionCall.Name == "semanticSearch" {
+			log.Printf("agent should use SemanticSearch (embeddings similarity search aka DocumentsSearch)")
+			return "semanticSearch"
+		}
+	}
 
-    for _, part := range lastMsg.Parts {
-      toolCall, ok := part.(llms.ToolCall)
-      if ok && toolCall.FunctionCall.Name == "semanticSearch" {
-
-        // TODO: Extract query and store parameters from the arguments
-        // ... (logic to extract necessary values for SemanticSearch call)
-        var args struct {
-          Query string `json:"query"`
-          //Store string `json:"store"`
-          //Options []map[string]any `json:"options"`
-          Collection string `json:"collection"`   //TODO: ALWAYS CHECK THIS JSON REFERENCE WHEN ALTERING VARS
-        }
-        if err := json.Unmarshal([]byte(toolCall.FunctionCall.Arguments), &args); err != nil {
-          // Handle any errors in deserializing the arguments
-    log.Println("error unmurshal json")
-          return state, err
-        }
-        // Extract query from the args structure
-        searchQuery := args.Query
-
-        //get env
-        _ = godotenv.Load()
-        ai_url := os.Getenv("AI_ENDPOINT")          //TODO: should be global?   .. there are global, there might be resetting.
-        api_token := os.Getenv("ADNIN_KEY")
-        db_link := os.Getenv("EMBEDDINGS_DB_URL")
-
-        log.Println("Collection Name: ", args.Collection)
-        log.Println("db_link: ", db_link)
-
-
-        // Retrieve your vector store based on the store value in the args
-        // You'll likely need to have a method for getting the vector store based
-        // on the store string ("store" value in the args)
-        store, err := embeddings.GetVectorStoreWithOptions(ai_url,api_token,db_link,args.Collection) // TODO: changed argument 'Name' to 'CollectionName' or something like that
-        if err != nil {
-          // Handle errors in retrieving the vector store
-    log.Println("error getting store")
-          return state, err
-        }
-
-        log.Println("store:", store)
-
-        maxResults := 1 // Set your desired maxResults here
-        //options := args.Options // Pass in any additional options as needed
-
-        // Call your SemanticSearch function here
-        searchResults, err := embeddings.SemanticSearch(
-          searchQuery, 
-          maxResults,
-          store, // Pass in your vector store
-         // options, // Pass in any additional options you need
-        )
-
-        if err != nil {
-            log.Printf("semantic search error: %v", err)
-            return state, err
-        }
-
-        
-        // Format and return search results
-        // ... (process and format search results from SemanticSearch)
-        //toolResponse := []string{} // Initialize an empty slice to store extracted text
-        toolResponse := ""
-        for _, result := range searchResults {
-          //toolResponse = append(toolResponse, result.PageContent) 
-          toolResponse += result.PageContent + "\n"
-          
-        }
-
-        msg := llms.MessageContent{
-          Role: llms.ChatMessageTypeTool,
-          Parts: []llms.ContentPart{
-            llms.ToolCallResponse{
-              ToolCallID: toolCall.ID,
-              Name:       toolCall.FunctionCall.Name,
-              Content:    toolResponse,
-            },
-          },
-        }
-        state = append(state, msg)
-      }
-    }
-    return state, nil
+	return graph.END // never reach this point, should be removed?
 }
 
+// This function is performing similarity search in our db vectorstore.
+func semanticSearch(ctx context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
+	lastMsg := state[len(state)-1]
 
+	for _, part := range lastMsg.Parts {
+		toolCall, ok := part.(llms.ToolCall)
+		if ok && toolCall.FunctionCall.Name == "semanticSearch" {
 
- //CONDITIONS funcs
+			// TODO: Extract query and store parameters from the arguments
+			// (logic to extract necessary values for SemanticSearch call)
+			var args struct {
+				Query string `json:"query"`
+				//Store string `json:"store"`
+				//Options []map[string]any `json:"options"`
+				Collection string `json:"collection"` //TODO: ALWAYS CHECK THIS JSON REFERENCE WHEN ALTERING VARS
+			}
+			if err := json.Unmarshal([]byte(toolCall.FunctionCall.Arguments), &args); err != nil {
+				// Handle any errors in deserializing the arguments
+				log.Println("error unmurshal json")
+				return state, err
+			}
+			// Extract query from the args structure
+			searchQuery := args.Query
 
-  // condition function, which defines whether or not to use semanticSearch tool. we have access to semanticSearch itself in main thread through a pointer to this function. So if llm says 'yes, use this function with x signatures` -- it will match to a pointer and x function will be called.`
-  shouldSearchDocuments := func(ctx context.Context, state []llms.MessageContent) string {
-  
-    // this function (I suppose) can be reworked to work with a *set* of a functions, not just one func.
+			//get env
+			_ = godotenv.Load()
+			ai_url := os.Getenv("AI_ENDPOINT") // there are global, there might be resetting.
+			api_token := os.Getenv("OPENAI_API_KEY")
+			db_link := os.Getenv("EMBEDDINGS_DB_URL")
 
-    lastMsg := state[len(state)-1]
-    for _, part := range lastMsg.Parts {
-      toolCall, ok := part.(llms.ToolCall)
+			log.Println("Collection Name: ", args.Collection)
+			log.Println("db_link: ", db_link)
 
-      if ok && toolCall.FunctionCall.Name == "semanticSearch"  {
-        log.Printf("agent should use SemanticSearch (embeddings similarity search aka DocumentsSearch)")
-        return "semanticSearch"
-      }
-    }
+			// Retrieve your vector store based on the store value in the args
+			// You'll likely need to have a method for getting the vector store based
+			// on the store string ("store" value in the args)
+			store, err := embeddings.GetVectorStoreWithOptions(ai_url, api_token, db_link, args.Collection) // TODO: changed argument 'Name' to 'CollectionName' or something like that
+			if err != nil {
+				// Handle errors in retrieving the vector store
+				log.Println("error getting store")
+				return state, err
+			}
 
-    return graph.END  // never reach this point, should be removed?
-  }
+			log.Println("store:", store) // actually return empty store in case of error (!)
 
+			maxResults := 1 // Set your desired maxResults here
+			//options := args.Options // Pass in any additional options as needed
 
+			// Call *real* SemanticSearch function
+			searchResults, err := embeddings.SemanticSearch(
+				searchQuery,
+				maxResults,
+				store,
+				// options, // Pass in any additional options you need
+			)
 
+			if err != nil {
+				log.Printf("semantic search error: %v", err)
+				return state, err
+			}
 
-// MAIN WORKFLOW
-  workflow := graph.NewMessageGraph()
+			// Format and return search results
+			// ... (process and format search results from SemanticSearch)
+			//toolResponse := []string{} // Initialize an empty slice to store extracted text
+			toolResponse := ""
+			for _, result := range searchResults {
+				//toolResponse = append(toolResponse, result.PageContent)
+				toolResponse += result.PageContent + "\n"
 
-  workflow.AddNode("agent", agent)
-  //workflow.AddNode("search", search)
-  workflow.AddNode("semanticSearch", semanticSearch)
+			}
 
-  workflow.SetEntryPoint("agent")
-  workflow.AddConditionalEdge("agent", shouldSearchDocuments)
-  workflow.AddEdge("semanticSearch", "agent")
-
-  app, err := workflow.Compile()
-  if err != nil {
-    log.Printf("error: %v", err)
-    return fmt.Sprintf("error :%v", err)
-  }
-
-  response, err := app.Invoke(context.Background(), intialState)
-  if err != nil {
-    log.Printf("error: %v", err)
-    return fmt.Sprintf("error :%v", err)
-  }
-
-  lastMsg := response[len(response)-1]
-  log.Printf("last msg: %v", lastMsg.Parts[0]) 
-  result := lastMsg.Parts[0]
-  result_str := fmt.Sprintf("%v", result)
-  return result_str
+			msg := llms.MessageContent{
+				Role: llms.ChatMessageTypeTool,
+				Parts: []llms.ContentPart{
+					llms.ToolCallResponse{
+						ToolCallID: toolCall.ID,
+						Name:       toolCall.FunctionCall.Name,
+						Content:    toolResponse,
+					},
+				},
+			}
+			state = append(state, msg)
+		}
+	}
+	return state, nil
 }
