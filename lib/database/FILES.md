@@ -2,43 +2,39 @@
 ## Package: database  
   
 ### Imports:  
-  
-- github.com/tmc/langchaingo/chains  
-- github.com/tmc/langchaingo/memory  
+- github.com/tmc/langchaingo/llms  
 - github.com/tmc/langchaingo/vectorstores  
   
 ### External Data, Input Sources:  
+- UsersMap: A map that stores user data, where the key is the Telegram user ID and the value is a User struct.  
+- UsageMap: A map that stores session usage data, where the key is the session ID and the value is a SessionUsage struct.  
   
-- UsersMap: A map that stores user data, where the key is the user's ID and the value is a User struct.  
-- UsageMap: A map that stores session usage data, where the key is the user's ID and the value is a SessionUsage struct.  
-  
-### Code Summary:  
+### Major Code Parts:  
   
 #### User Struct:  
-  
-The User struct represents a user in the database. It contains the user's ID, username, dialog status, admin status, AI session, network, topics, and a vector store.  
+- Represents a user in the database.  
+- Contains fields for user ID, username, dialog status, admin status, AI session, network, topics, and a vector store.  
   
 #### SessionUsage Struct:  
-  
-The SessionUsage struct represents the usage of an AI session. It contains the session ID and a map of usage data.  
+- Represents a session's usage data.  
+- Contains fields for session ID and a map of usage statistics.  
   
 #### AiSession Struct:  
+- Represents an AI session.  
+- Contains fields for GPT key, GPT model, AI type, dialog thread, base URL, and usage statistics.  
   
-The AiSession struct represents an AI session. It contains the GPT key, GPT model, AI type, chat session, base URL, and usage data.  
-  
-#### ChatSession Struct:  
-  
-The ChatSession struct represents a chat session. It contains a conversation buffer and a dialog thread.  
+#### ChatSessionGraph Struct:  
+- Represents a chat session graph.  
+- Contains a field for the conversation buffer, which stores the messages in the chat session.  
   
 #### Functions:  
-  
 - AddUser: Adds a new user to the UsersMap.  
-- UpdateUserUsage: Updates the usage data for a user's AI session.  
-- UpdateSessionUsage: Updates the usage data for a session.  
-- GetSessionUsage: Retrieves the usage data for a session.  
-- NewChatSession: Creates a new chat session with a conversation buffer and dialog thread.  
+- UpdateUserUsage: Updates the usage statistics for a user's AI session.  
+- UpdateSessionUsage: Updates the usage statistics for a session.  
+- GetSessionUsage: Retrieves the usage statistics for a session.  
+- NewChatSessionGraph: Creates a new ChatSessionGraph with a given conversation buffer.  
   
-The code provides a basic framework for managing user data, AI sessions, and chat sessions. It includes functions for adding users, updating usage data, and creating new chat sessions.  
+The code provides a basic framework for managing user data, AI sessions, and chat session graphs. It includes data structures and functions for adding users, updating usage statistics, and creating chat session graphs.  
   
 # lib/database/user.go  
 ## Package: database  

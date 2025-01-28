@@ -1,4 +1,4 @@
-## Package: localai
+# localai package
 
 This package provides functions for interacting with various AI models, including chat models and image generation models. It also includes a function for transcribing audio using the Whisper model.
 
