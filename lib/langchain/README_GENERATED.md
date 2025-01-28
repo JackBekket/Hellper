@@ -46,45 +46,26 @@ The package uses the following external data and input sources:
 9. Type assertions: The package uses type assertions to ensure that the data being accessed is of the expected type. This helps to prevent runtime errors and ensure that the code is working as intended.
 
 lib/langchain/langchain.go
-## langchain
+## Package: langchain
 
-### Imports
-```
-import (
-	"context"
-	"fmt"
-	"log"
+### Imports:
+- context
+- fmt
+- log
+- github.com/tmc/langchaingo/llms
+- github.com/tmc/langchaingo/llms/openai
 
-	"github.com/tmc/langchaingo/llms"
+### External Data, Input Sources:
+- base_url (string)
+- promt (string)
+- model_name (string)
+- api_token (string)
+- network (string)
+- options (llms.CallOption)
 
-	//"github.com/tmc/langchaingo/llms/options"
-	"github.com/tmc/langchaingo/llms/openai"
-)
-```
-
-### External Data, Input Sources
-- API token for OpenAI API
-- Model name for OpenAI API
-- Base URL for OpenAI API (optional)
-- User initial prompt
-
-### Major Code Parts
-#### InitializeNewChatWithContextNoLimit
-This function initializes a new chat session with the specified API token, model name, base URL, and user initial prompt. It creates a new conversation using the OpenAI LLM and a memory buffer to store the conversation history.
-
-#### StartNewChat
-This function starts a new conversation by calling InitializeNewChatWithContextNoLimit and then running the user's initial prompt through the conversation chain. It returns the result of the conversation and the updated chat session.
-
-#### RunChain
-This function runs a prompt through the provided chat session and returns the result and the updated chat session.
-
-#### ContinueChatWithContextNoLimit
-This function continues a conversation by running a new prompt through the provided chat session and returning the result and the updated chat session.
-
-#### GenerateContentInstruction
-This function generates content from a single prompt without using memory or context. It takes the base URL, prompt, model name, API token, network, and options as input and returns the generated content and any errors encountered.
-
-
+### Summary:
+#### GenerateContentInstruction Function:
+This function is designed to generate content from a single prompt without using memory or context. It takes several parameters, including the base URL, prompt, model name, API token, and network. The function first checks the network type and initializes the appropriate language model. Then, it calls the `GenerateFromSinglePrompt` function from the `llms` package to generate the content. Finally, it returns the generated content and any potential errors.
 
 lib/langchain/langgraph.go
 ## Package: langchain
@@ -105,7 +86,7 @@ lib/langchain/langgraph.go
 This function initializes a new agent with the provided API token, model name, and base URL. It creates a new OpenAI LLM instance using the provided parameters and runs a thread using the agent.RunThread function. The function returns a new ChatSessionGraph object containing the conversation buffer and the output text.
 
 ### ContinueAgent Function:
-This function continues an existing agent with the provided API token, model name, base URL, and user prompt. It creates a new OpenAI LLM instance using the provided parameters and runs a thread using the agent.RunThread function, passing the existing conversation buffer as input. The function returns a new ChatSessionGraph object containing the updated conversation buffer and the output text.
+This function continues an existing agent with the provided API token, model name, base URL, user prompt, and state. It creates a new OpenAI LLM instance using the provided parameters and runs a thread using the agent.RunThread function with the provided state. The function returns a new ChatSessionGraph object containing the conversation buffer and the output text.
 
 
 
