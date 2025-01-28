@@ -25,20 +25,31 @@ func RunThread(prompt string, model openai.LLM, history ...llms.MessageContent) 
 	//model := createGenericLLM()
 	call := OneShotRun(prompt, model, history...)
 	log.Println(call)
-	lastResponse := createMessageContent(call)
+	lastResponse := createMessageContentAi(call)
 	if len(history) > 0 { 
-		state := append(history, lastResponse...)
+		user_msg := createMessageContentHuman(prompt)
+		state := append(history,user_msg...)
+		state = append(history, lastResponse...)
 		return state,call
 	} else {
-		state := lastResponse
+		user_msg := createMessageContentHuman(prompt)
+		state := user_msg
+		state = append(state, lastResponse...)
 		return state,call
 	}
 }
 
 
-func createMessageContent (content string) []llms.MessageContent{
+func createMessageContentAi (content string) []llms.MessageContent{
 	intialState := []llms.MessageContent{
 		llms.TextParts(llms.ChatMessageTypeAI, content),
+	  }
+	return intialState
+}
+
+func createMessageContentHuman (content string) []llms.MessageContent{
+	intialState := []llms.MessageContent{
+		llms.TextParts(llms.ChatMessageTypeHuman, content),
 	  }
 	return intialState
 }

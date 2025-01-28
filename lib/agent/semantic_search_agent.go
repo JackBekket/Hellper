@@ -46,7 +46,6 @@ import (
 
 // global var
 var Model openai.LLM
-
 var Tools []llms.Tool
 
 
@@ -135,12 +134,11 @@ func OneShotRun(prompt string, model openai.LLM,history_state ...llms.MessageCon
   workflow := graph.NewMessageGraph()
 
   workflow.AddNode("agent", agent)
-  //workflow.AddNode("search", search)
   workflow.AddNode("semanticSearch", semanticSearch)
 
-  workflow.SetEntryPoint("agent")
-  workflow.AddConditionalEdge("agent", shouldSearchDocuments)
-  workflow.AddEdge("semanticSearch", "agent")
+  workflow.SetEntryPoint("agent") // we start with agent
+  workflow.AddConditionalEdge("agent", shouldSearchDocuments)   // if agent decide and called semamnticSearch, then this function will handle call, and make an actual tool call
+  workflow.AddEdge("semanticSearch", "agent")   // return result of the search back to agent
 
   app, err := workflow.Compile()
   if err != nil {
@@ -166,7 +164,10 @@ func OneShotRun(prompt string, model openai.LLM,history_state ...llms.MessageCon
 /** We are telling agent, that it should response withTools, giving it function signatures defined earlier. 
     if agent get response from conditional edge like 'yes, use x function with this signatures and this json object as input parameters -- it will match with predefined pointer to semanticSearch function and it will make a toolCall
     then it will append toolCall to message state.
-    Note, that agent can call few toolCalls and all of them can be append here. toolCalls may be done parallel (I guess) */
+    Agent will recive current stake, make consideration whether or not to use tool and make a call for it
+    `shouldSearchDocuments` func will handle this tool call -- it will call semanticSearch function
+    Then result of the search tool will go back to agent as a toolResonse in the messages state
+    */
 func agent(ctx context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
   
   agentState := []llms.MessageContent{
@@ -191,7 +192,7 @@ func agent(ctx context.Context, state []llms.MessageContent) ([]llms.MessageCont
         return state,nil
 
 
-}   else {   // If it is not tool response 
+}  else {   // If it is not tool response 
 
   if lastMsg.Role == "human" {    //                                            any user request
     //state
@@ -256,7 +257,7 @@ func agent(ctx context.Context, state []llms.MessageContent) ([]llms.MessageCont
 
 
 
-
+// this function is only HANDLES tool calls, so this is a handler, not a deciding mechanism. agent decide whether or not to call tool in agent func and this func is handling tool call here.
 func shouldSearchDocuments(ctx context.Context, state []llms.MessageContent)  string{
         // this function (I suppose) can be reworked to work with a *set* of a functions, not just one func.
 
@@ -275,7 +276,7 @@ func shouldSearchDocuments(ctx context.Context, state []llms.MessageContent)  st
 
 
 
-
+// This function is performing similarity search in our db vectorstore.
 func semanticSearch(ctx context.Context, state []llms.MessageContent)  ([]llms.MessageContent, error){
   lastMsg := state[len(state)-1]
 
