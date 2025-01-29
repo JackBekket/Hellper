@@ -1,41 +1,31 @@
-# Package: env
+**env**
+================
 
-### Imports:
+**Summary:**
+The `env` package is responsible for loading environment settings from a `.env` file and providing functions to access and manipulate these settings.
 
-* errors
-* log
-* strconv
-* github.com/joho/godotenv
+**Configuration:**
 
-### External Data, Input Sources:
+* `.env` file (used to load environment settings)
 
-* .env file: Contains environment variables that are loaded and used by the package.
+**Usage:**
 
-### Code Summary:
+The package can be used to load environment settings and provide access to these settings through various functions.
 
-#### Load() function:
+**Launch Options:**
 
-This function loads environment variables from the .env file using the godotenv library. It returns an error if there is an issue loading the environment variables.
+* The package can be launched by running the `Load` function, which reads the `.env` file and populates the `env` map.
+* Alternatively, the `LoadAdminData` function can be used to load admin data from the `env` map.
+* The `LoadTGToken`, `LoadLocalPD`, `LoadLocalAI_Endpoint`, and `GetAdminToken` functions can be used to retrieve specific environment variables.
 
-#### LoadAdminData() function:
+**Edge Cases:**
 
-This function parses the loaded environment variables and creates a map of AdminData structs. Each AdminData struct contains an ID and a GPTKey. The function handles parsing the ID values from the environment variables and populates the AdminData structs accordingly.
+* If the `.env` file is missing or corrupted, the `Load` function will return an error.
+* If an environment variable is not set, the corresponding function will return an error.
 
-#### LoadTGToken() function:
+**Notes:**
 
-This function retrieves the Telegram token from the environment variables and returns it as a string. It returns an error if the Telegram token is not found in the .env file.
+* The package does not have any TODO comments, indicating that there are no outstanding tasks or issues.
+* The code structure appears to be well-organized, with clear separation of concerns between functions.
 
-#### LoadLocalPD() function:
-
-This function retrieves the Localhost password from the environment variables and returns it as a string.
-
-#### LoadLocalAI_Endpoint() function:
-
-This function retrieves the Local AI endpoint from the environment variables and returns it as a string.
-
-#### GetAdminToken() function:
-
-This function retrieves the Admin key from the environment variables and returns it as a string.
-
-
-
+**

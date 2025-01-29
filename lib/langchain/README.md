@@ -1,186 +1,39 @@
-## langchain
+Here is a markdown summary of the provided package code:
 
-This package provides a ChainCallbackHandler struct and various methods to handle different events during the execution of a chain.
+**langchain**
+================
 
-### Imports
+**Summary:**
+The `langchain` package provides a set of callback handlers and functions for interacting with a language model. It appears to be a framework for building a conversational AI system.
 
-```
-import (
-	"context"
-	"encoding/json"
-	"log"
+**Files and Paths:**
 
-	db "github.com/JackBekket/hellper/lib/database"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/schema"
-	//""
-)
-```
+* `handler.go`: defines callback handlers for various events in a language chain
+* `langchain.go`: defines the main logic for interacting with the language model
+* `langgraph.go`: defines functions for setting up a sequence with a key
+* `startDialogSequence.go`: defines functions for starting a dialog sequence with a user
+* `setupSequenceWithKey.go`: defines functions for setting up a sequence with a key
 
-### External Data, Input Sources
+**Environment Variables, Flags, and Cmdline Arguments:**
 
-The package uses the following external data and input sources:
+* None
 
-1. `db.User`: A struct representing a user, likely from a database.
-2. `llms.ContentResponse`: A struct containing information about the generated content, including choices and generation info.
-3. `schema.AgentAction`, `schema.AgentFinish`, `schema.Document`, etc.: Structs representing various events and data structures related to the chain execution.
+**Edge Cases:**
 
-### Code Summary
+* The `langchain` package can be launched by running the `main` function in `langchain.go`. However, the `RunNewAgent` function is not defined in `setupSequenceWithKey.go`, so its implementation is unknown.
+* The `errorMessage` function in `startDialogSequence.go` attempts to send a random video file from the `media` directory as an error message. However, the `media` directory is not provided, so this functionality is not functional.
 
-1. `ChainCallbackHandler` struct: This struct is responsible for handling various events during the chain execution. It has methods for handling agent actions, agent finishes, chain ends, chain errors, chain starts, LLM errors, LLM generate content starts, LLM starts, retriever ends, retriever starts, streaming functions, tool ends, tool errors, and tool starts.
+**Relations between Code Entities:**
 
-2. `HandleLLMGenerateContentEnd`: This method is called when the LLM has finished generating content. It logs the content, stop reason, context, and generation info. It also updates the user's usage information based on the generated content and saves it to the database.
+* The `handler.go` package defines callback handlers for various events in a language chain, which are used to interact with the database, LLMs, and other components.
+* The `langchain.go` package defines the main logic for interacting with the language model.
+* The `langgraph.go` package defines functions for setting up a sequence with a key.
+* The `startDialogSequence.go` package defines functions for starting a dialog sequence with a user.
+* The `setupSequenceWithKey.go` package defines functions for setting up a sequence with a key.
 
-3. `LogResponseContentChoice`: This helper function logs the content, stop reason, context, and generation info of the chosen content. It also logs the prompt tokens, completion tokens, and total tokens from the generation info.
+**Unclear Places and Dead Code:**
 
-4. `HandleText`: This method is intended to be implemented if needed to handle text input.
+* The `RunNewAgent` function is not defined in `setupSequenceWithKey.go`, so its implementation is unknown.
+* The `LogResponse` function in `startDialogSequence.go` is currently commented out and does not appear to be used in the provided code.
 
-5. Other methods: The remaining methods in the `ChainCallbackHandler` struct are placeholders for handling various events during the chain execution. They are currently unimplemented but can be filled in as needed.
-
-6. Database interaction: The package interacts with a database to store user usage information. It uses the `db.UpdateSessionUsage` function to update the user's usage based on the generated content.
-
-7. Logging: The package uses the `log` package to log various events and information during the chain execution. This includes logging the content, stop reason, context, generation info, and other relevant data.
-
-8. Error handling: The package includes error handling mechanisms, such as panic statements and error checking, to ensure that the code can handle unexpected situations gracefully.
-
-9. Type assertions: The package uses type assertions to ensure that the data being accessed is of the expected type. This helps to prevent runtime errors and ensure that the code is working as intended.
-
-lib/langchain/langchain.go
-## Package: langchain
-
-### Imports:
-- context
-- fmt
-- log
-- github.com/tmc/langchaingo/llms
-- github.com/tmc/langchaingo/llms/openai
-
-### External Data, Input Sources:
-- base_url (string)
-- promt (string)
-- model_name (string)
-- api_token (string)
-- network (string)
-- options (llms.CallOption)
-
-### Summary:
-#### GenerateContentInstruction Function:
-This function is designed to generate content from a single prompt without using memory or context. It takes several parameters, including the base URL, prompt, model name, API token, and network. The function first checks the network type and initializes the appropriate language model. Then, it calls the `GenerateFromSinglePrompt` function from the `llms` package to generate the content. Finally, it returns the generated content and any potential errors.
-
-lib/langchain/langgraph.go
-## Package: langchain
-
-### Imports:
-- github.com/JackBekket/hellper/lib/agent
-- github.com/JackBekket/hellper/lib/database
-- github.com/tmc/langchaingo/llms/openai
-
-### External Data, Input Sources:
-- api_token (string)
-- model_name (string)
-- base_url (string)
-- user_promt (string)
-- state (db.ChatSessionGraph)
-
-### RunNewAgent Function:
-This function initializes a new agent with the provided API token, model name, and base URL. It creates a new OpenAI LLM instance using the provided parameters and runs a thread using the agent.RunThread function. The function returns a new ChatSessionGraph object containing the conversation buffer and the output text.
-
-### ContinueAgent Function:
-This function continues an existing agent with the provided API token, model name, base URL, user prompt, and state. It creates a new OpenAI LLM instance using the provided parameters and runs a thread using the agent.RunThread function with the provided state. The function returns a new ChatSessionGraph object containing the conversation buffer and the output text.
-
-
-
-lib/langchain/setupSequenceWithKey.go
-## Package: langchain
-
-### Imports:
-
-- context
-- log
-- sync
-- db "github.com/JackBekket/hellper/lib/database"
-- tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-
-### External Data, Input Sources:
-
-- Database: db.User, db.ChatSessionGraph, db.GetSessionUsage
-- Telegram Bot API: tgbotapi.BotAPI, tgbotapi.NewMessage, bot.Send
-- AI Endpoint: ai_endpoint
-
-### Code Summary:
-
-#### SetupSequenceWithKey Function:
-
-This function is responsible for setting up a sequence of interactions with an AI model based on user preferences and session data. It takes a Telegram bot instance, a user object, a language, a context, and an AI endpoint as input.
-
-1. It first acquires a lock to ensure thread safety.
-2. It retrieves the user's ID, GPT key, and model from the user object.
-3. Based on the provided language, it calls the tryLanguage function to initiate a conversation with the AI model.
-4. If successful, it updates the user's dialog status, AI session data, and usage information.
-5. Finally, it stores the updated user object in the db.UsersMap.
-
-#### tryLanguage Function:
-
-This function is responsible for initiating a conversation with the AI model based on the provided language and language code. It takes a user object, a language string, a language code, and an AI endpoint as input.
-
-1. It constructs a language prompt based on the language code.
-2. It retrieves the user's GPT key, model, and chat ID from the user object.
-3. It calls the RunNewAgent function to start a new agent and initiate the conversation with the AI model.
-4. If successful, it returns the conversation thread and the AI model's response.
-
-#### RunNewAgent Function:
-
-This function is responsible for starting a new agent and initiating a conversation with the AI model. It takes the GPT key, model, AI endpoint, and language prompt as input.
-
-1. It uses the provided GPT key, model, and AI endpoint to connect to the AI model.
-2. It sends the language prompt to the AI model and waits for a response.
-3. It returns the conversation thread and the AI model's response.
-
-
-
-lib/langchain/startDialogSequence.go
-## Package: langchain
-
-### Imports:
-
-```
-context
-log
-math/rand
-os
-path/filepath
-io/fs
-github.com/JackBekket/hellper/lib/database
-github.com/go-telegram-bot-api/telegram-bot-api/v5
-```
-
-### External Data, Input Sources:
-
-- Database: `db.UsersMap`
-- Telegram Bot API: `tgbotapi.BotAPI`
-- Media directory: `../../media/`
-
-### Code Summary:
-
-#### errorMessage Function:
-
-This function handles errors that occur during the process of creating a request. It logs the error, sends an error message to the user, and then sends a helper video to the user. The helper video is selected randomly from the media directory.
-
-#### StartDialogSequence Function:
-
-This function initiates a dialog sequence with an AI model. It takes the following parameters:
-
-- `bot`: A Telegram bot API instance.
-- `chatID`: The ID of the chat to send the message to.
-- `promt`: The prompt to send to the AI model.
-- `ctx`: A context object.
-- `ai_endpoint`: The endpoint for the AI model.
-
-The function first retrieves the user's AI session data from the database. Then, it uses the provided parameters to continue the agent's dialog thread. If an error occurs, the `errorMessage` function is called. Otherwise, the AI response is sent to the user, and the user's dialog status and usage are updated in the database.
-
-#### LogResponse Function:
-
-This function is commented out but appears to be intended for logging the full response object from an AI model. It would log various attributes of the response, such as the model, object, choices, and usage information.
-
-
-
+**

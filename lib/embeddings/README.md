@@ -1,118 +1,54 @@
-## Package: embeddings
+Here is a markdown summary of the provided package code:
 
-### Imports:
+**embeddings**
+================
 
-```
-"context"
-"fmt"
-"log"
-"github.com/tmc/langchaingo/embeddings"
-"github.com/tmc/langchaingo/llms/openai"
-"github.com/tmc/langchaingo/vectorstores"
-"github.com/tmc/langchaingo/vectorstores/pgvector"
-"github.com/jackc/pgx/v5/pgxpool"
-```
+### Overview
 
-### External Data, Input Sources:
+The `embeddings` package provides functionality for loading and interacting with vector stores, utilizing OpenAI's API and a PostgreSQL database.
 
-1. Environment variables:
-    - `PG_HOST`
-    - `PG_USER`
-    - `PG_PASSWORD`
-    - `PG_DB`
-    - `API_KEY`
+### Configuration
 
-2. Function arguments:
-    - `ai_url`: AI URL (localhost, OpenAI, or Docker)
-    - `api_token`: AI token
-    - `db_link`: Database link
-    - `name`: Collection name for vector store
+* Environment Variables:
+	+ `ai_url` (string)
+	+ `api_token` (string)
+	+ `db_link` (string)
+* Flags/CommandLine Arguments:
+	* None
+* Files and their Paths:
+	* None
 
-### Code Summary:
+### Launching the Application
 
-#### LoadEnv() function:
+The package can be launched in the following ways:
 
-This function is not implemented in the provided code.
+1. Run the `Rag` function with the required inputs (AI URL, API token, question, number of results, and a vector store).
+2. Run the `SemanticSearch` function with the required inputs (search query, maximum number of results, and a vector store).
 
-#### GetVectorStore() function:
-
-This function creates a vector store from a database using the provided AI URL, API token, and database link. It first parses the database link and creates a connection pool. Then, it creates an embeddings client using the OpenAI API and an embedder using the embeddings client. Finally, it creates a vector store using the pgvector library, which uses the connection pool and embedder.
-
-#### GetVectorStoreWithOptions() function:
-
-This function is similar to GetVectorStore() but allows specifying a collection name for the vector store. It takes the same arguments as GetVectorStore() plus an additional argument, `name`, which specifies the collection name. The rest of the logic is the same as GetVectorStore().
-
-
-
-lib/embeddings/load.go
-## Package: embeddings
-
-### Imports:
+### Package Structure
 
 ```
-"context"
-"fmt"
-"net/http"
-"log"
-"github.com/tmc/langchaingo/documentloaders"
-"github.com/tmc/langchaingo/schema"
-"github.com/tmc/langchaingo/textsplitter"
-"github.com/tmc/langchaingo/vectorstores"
-"github.com/tmc/langchaingo/vectorstores/pgvector"
+lib/
+embeddings/
+common.go
+load.go
+query.go
 ```
 
-### External Data, Input Sources:
+### Code Summary
 
-1. `source` string: This is used to fetch documents from a given URL.
+The package consists of three main files: `common.go`, `load.go`, and `query.go`.
 
-### Code Summary:
+* `common.go` is currently empty and does not perform any actions.
+* `load.go` contains functions for loading documents into a vector store and retrieving text documents from a URL.
+* `query.go` contains functions for running a retrieval QA from a language model using a question and vector store, and for performing a similarity search on a vector store.
 
-#### LoadDocsToStore Function:
+### Relations between Code Entities
 
-This function takes a slice of `schema.Document` and a `vectorstores.VectorStore` as input. It first prints the number of documents to be loaded and then adds the documents to the vector store using the `AddDocuments` method. If there is an error during the process, it logs the error and panics. After the documents are loaded, it closes the vector store using the `Close` method.
+The code appears to be well-organized, with clear separation of concerns between the three main files. However, the `common.go` file is currently empty and does not seem to be utilized by the rest of the package.
 
-#### getDocs Function:
+### Edge Cases
 
-This function takes a `source` string as input and returns a slice of `schema.Document` and an error. It first fetches the content from the given URL using `http.Get`. Then, it loads and splits the content into documents using the `documentloaders.NewHTML` and `textsplitter.NewRecursiveCharacter` functions. Finally, it returns the slice of documents and any error encountered during the process.
+* None found
 
-
-
-lib/embeddings/query.go
-## Package: embeddings
-
-### Imports:
-
-```
-"context"
-"fmt"
-"log"
-"github.com/tmc/langchaingo/chains"
-"github.com/tmc/langchaingo/llms/openai"
-"github.com/tmc/langchaingo/schema"
-"github.com/tmc/langchaingo/vectorstores"
-"github.com/tmc/langchaingo/vectorstores/pgvector"
-```
-
-### External Data, Input Sources:
-
-1. `ai_url`: URL of the AI service (e.g., OpenAI API).
-2. `api_token`: API token for authentication with the AI service.
-3. `question`: The question to be answered or the query for semantic search.
-4. `numOfResults`: The number of results to return for the retrieval-based QA.
-5. `store`: A vector store to store and retrieve embeddings.
-6. `option`: Additional options for the vector store.
-7. `searchQuery`: The query for semantic search.
-8. `maxResults`: The maximum number of results to return for semantic search.
-
-### Code Summary:
-
-#### Rag Function:
-
-This function performs retrieval-augmented generation (RAG) using an LLM and a vector store. It first creates an embeddings client using the provided AI URL and API token. Then, it runs a retrieval-based QA chain using the embeddings client and the vector store. The chain takes the question as input and returns the answer. Finally, it prints the final answer and closes the vector store.
-
-#### SemanticSearch Function:
-
-This function performs semantic search using a vector store. It takes a search query, maximum number of results, and a vector store as input. It then performs a similarity search on the vector store using the provided query and returns the top `maxResults` results. The function also prints the similarity search results, including the page content and score for each result. Finally, it closes the vector store.
-
-
-
+**

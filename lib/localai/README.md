@@ -1,49 +1,48 @@
-# localai package
+# localai
 
-This package provides functions for interacting with various AI models, including chat models and image generation models. It also includes a function for transcribing audio using the Whisper model.
+The `localai` package provides a set of functions for generating chat completions, images, and transcribing audio files using various AI models.
 
-### Imports
+**Configuration:**
 
-The package imports the following packages:
+* `OPENAI_API_KEY`: an environment variable required for generating images and transcribing audio files
 
-- bytes
-- encoding/json
-- fmt
-- io
-- io/ioutil
-- log
-- mime/multipart
-- net/http
-- os
-- path/filepath
-- strings
+**Usage:**
 
-### External Data, Input Sources
+The package can be launched from the command line by running the `main` function with the following flags:
+```
+go run localai.go -prompt <prompt> -modelName <modelName> -url <url>
+```
+Alternatively, the package can be launched by importing the `localai` package and calling the `main` function programmatically.
 
-The package uses the following external data and input sources:
+**Project Structure:**
+```
+localai/
+main.go
+audioRecognition/
+stt.go
+imageRecognition/
+imageRecognition.go
+lib/
+localai/
+localai.go
+```
+**Summary:**
 
-- API endpoints for chat models and image generation models (e.g., "http://localhost:8080/v1/chat/completions")
-- Whisper model for audio transcription
-- Environment variable "OPENAI_API_KEY" for authentication with the API
+The `localai` package provides three main functions: `GenerateCompletion`, `GenerateImageStableDiffusion`, and `TranscribeWhisper`. The `main` function demonstrates the usage of these functions by generating a chat completion.
 
-### Code Summary
+The `GenerateCompletion` function sends a POST request to a specified URL with a JSON body containing a `ChatRequest` struct, and returns the first choice's message content.
 
-1. Chat Request and Response Structures: The package defines structures for chat requests and responses, including fields for model, messages, temperature, created, object, ID, model, choices, and usage statistics.
+The `GenerateImageStableDiffusion` function generates an image using the Stable Diffusion model by sending a POST request to a specified URL with a multipart form containing a file field with a specified path.
 
-2. Generation Response Structure: A structure for generation responses is also defined, including fields for created, ID, data, and usage.
+The `TranscribeWhisper` function transcribes an audio file using the Whisper model by sending a POST request to a specified URL with a multipart form containing a file field with a specified path.
 
-3. Wrong Password Error: A custom error type, WrongPwdError, is defined to handle incorrect passwords.
+**Edge Cases:**
 
-4. Main Function: The main function demonstrates how to use the package by sending a chat request to a chat model and printing the assistant's response.
+* The package does not handle errors or edge cases, such as invalid input or network errors.
+* The `main` function does not handle command-line arguments or flags.
 
-5. GenerateCompletion Function: This function takes a prompt, model name, and API URL as input and returns a chat response. It creates a chat request, converts it to JSON, sends the request to the API, and parses the response.
+**Notes:**
 
-6. GenerateCompletionWithPWD Function: This function is similar to GenerateCompletion but also takes a secret password as input and returns an error if the password is incorrect.
+* The code does not contain any TODO comments, indicating that the functionality is complete and does not require further development.
+* The code does not contain any unclear or dead code.
 
-7. GenerateImageStableDiffusion Function: This function takes a prompt, size, API URL, and model as input and returns an image URL. It creates a payload with the prompt, size, and model, sends a POST request to the API, and parses the response to extract the image URL.
-
-8. TranscribeWhisper Function: This function takes a URL, model, and path to an audio file as input and returns the transcribed text. It opens the audio file, creates a multipart request body, sends the request to the API, and parses the response to extract the transcribed text.
-
-9. cleanText Function: This function removes "[BLANK_AUDIO]" from the output of the TranscribeWhisper function.
-
-### End of Output
