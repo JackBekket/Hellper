@@ -1,5 +1,5 @@
 name: wizard-uncensored-code-34b
-context_size: 16000
+context_size: 16000 # not tested actually
 mmap: true
 f16: true # true to GPU acceleration
 cuda: true # true to GPU acceleration
@@ -17,3 +17,4 @@ template:
    Instruction: {{.Input}}
    Response:
  completion: *template
+# TODO: it is a good model but we need a better template for a function calls
