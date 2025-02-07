@@ -19,24 +19,6 @@ type contextKey string
 
 const UserKey contextKey = "user"
 
-// Message:	case0 - "Input your openAI API key. It can be created at https://platform.openai.com/accousernamet/api-keys".
-//
-//	DialogStatus 2 -> 3
-func (c *Commander) InputYourAPIKey(updateMessage *tgbotapi.Message) {
-	updateMessage.Text = strings.ReplaceAll(updateMessage.Text, " ", "")
-	chatID := updateMessage.Chat.ID
-	user := db.UsersMap[chatID]
-
-	msg := tgbotapi.NewMessage(
-		user.ID,
-		msgTemplates["case0"],
-	)
-	c.bot.Send(msg)
-
-	user.DialogStatus = 3
-	db.UsersMap[chatID] = user
-}
-
 // update Dialog_Status 3 -> 4
 func (c *Commander) ChooseModel(updateMessage *tgbotapi.Message) {
 	updateMessage.Text = strings.TrimSpace(updateMessage.Text)

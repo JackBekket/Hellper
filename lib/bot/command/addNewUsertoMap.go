@@ -13,7 +13,7 @@ func (c *Commander) AddNewUserToMap(updateMessage *tgbotapi.Message) {
 	user := database.User{
 		ID:           chatID,
 		Username:     updateMessage.From.UserName,
-		DialogStatus: 0,
+		DialogStatus: 3,
 		Admin:        false,
 	}
 
@@ -27,10 +27,6 @@ func (c *Commander) AddNewUserToMap(updateMessage *tgbotapi.Message) {
 	)
 
 	msg := tgbotapi.NewMessage(user.ID, msgTemplates["hello"])
-	msg.ReplyMarkup = tgbotapi.NewOneTimeReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("Start!")),
-	)
 	c.bot.Send(msg)
 
 	// check for registration
