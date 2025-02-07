@@ -11,7 +11,6 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/JackBekket/hellper/lib/agent"
 	db "github.com/JackBekket/hellper/lib/database"
 	"github.com/JackBekket/hellper/lib/embeddings"
 	"github.com/JackBekket/hellper/lib/localai"
@@ -63,41 +62,6 @@ func (c *Commander) SearchDocuments(chatID int64, promt string, maxResults int) 
 		c.bot.Send(msg)
 	}
 
-}
-
-// TODO: OBSOLETE
-// Retrival-Augmented Generation
-func (c *Commander) RAG(chatID int64, promt string, maxResults int) {
-	user := db.UsersMap[chatID]
-	_ = godotenv.Load()
-
-	//conn_pg_link := os.Getenv("PG_LINK")
-	//base_url := os.Getenv("AI_BASEURL")
-	//db_conn := conn_pg_link
-	//api_token := user.AiSession.GptKey
-	//store := user.VectorStore
-	//store,err := embeddings.GetVectorStore(base_url,api_token,db_conn)
-	/*
-		if err != nil {
-			//return nil, err
-			msg := tgbotapi.NewMessage(user.ID, "error occured when getting store: " + err.Error())
-			c.bot.Send(msg)
-		}
-	*/
-
-	// TODO: Refactor to better readability, remove unused code
-	// TODO: Superagents
-	//result, err := embeddings.Rag(base_url,api_token,promt,maxResults,store)
-	llm := agent.CreateGenericLLM()
-	result := agent.OneShotRun(promt, llm)
-	/*
-		if err != nil {
-			msg := tgbotapi.NewMessage(user.ID, "error occured when calling RAG: " + err.Error())
-			c.bot.Send(msg)
-		}
-	*/
-	msg := tgbotapi.NewMessage(user.ID, result)
-	c.bot.Send(msg)
 }
 
 // Get usage for user

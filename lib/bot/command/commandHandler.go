@@ -38,9 +38,6 @@ func HandleCommands(message *tgbotapi.Message, comm *Commander) {
 	case "search_doc":
 		promt := message.CommandArguments()
 		comm.SearchDocuments(chatID, promt, 3)
-	case "rag":
-		promt := message.CommandArguments()
-		comm.RAG(chatID, promt, 1)
 	case "instruct":
 		// this is calling local-ai within base template (and without langhain injections)
 		promt := message.CommandArguments()
