@@ -13,63 +13,60 @@ import (
 // This function fire One-Shot agent without history context
 func OnePunch(prompt string) {
 
- llm := CreateGenericLLM()
- call := OneShotRun(prompt,*&llm)
- log.Println(call)
+	llm := CreateGenericLLM()
+	call := OneShotRun(prompt, *&llm)
+	log.Println(call)
 }
 
-
 // this function recive previouse history message state and append new user prompt, than run agent
-func RunThread(prompt string, model openai.LLM, history ...llms.MessageContent) ([]llms.MessageContent, string){
-	
+func RunThread(prompt string, model openai.LLM, history ...llms.MessageContent) ([]llms.MessageContent, string) {
+
 	//model := createGenericLLM()
 	call := OneShotRun(prompt, model, history...)
 	log.Println(call)
 	lastResponse := CreateMessageContentAi(call)
-	if len(history) > 0 { 
+	if len(history) > 0 {
 		user_msg := CreateMessageContentHuman(prompt)
-		state := append(history,user_msg[0])
+		state := append(history, user_msg[0])
 		state = append(state, lastResponse...)
-		return state,call
+		return state, call
 	} else {
 		user_msg := CreateMessageContentHuman(prompt)
 		state := user_msg
 		state = append(state, lastResponse...)
-		return state,call
+		return state, call
 	}
 }
 
-
-func CreateMessageContentAi (content string) []llms.MessageContent{
+func CreateMessageContentAi(content string) []llms.MessageContent {
 	intialState := []llms.MessageContent{
 		llms.TextParts(llms.ChatMessageTypeAI, content),
-	  }
+	}
 	return intialState
 }
 
-func CreateMessageContentHuman (content string) []llms.MessageContent{
+func CreateMessageContentHuman(content string) []llms.MessageContent {
 	intialState := []llms.MessageContent{
 		llms.TextParts(llms.ChatMessageTypeHuman, content),
-	  }
+	}
 	return intialState
 }
 
-
-func CreateGenericLLM() openai.LLM{
-	model_name := "tiger-gemma-9b-v1-i1"    // should be settable?
+func CreateGenericLLM() openai.LLM {
+	model_name := "tiger-gemma-9b-v1-i1" // should be settable?
 	_ = godotenv.Load()
-			ai_url := os.Getenv("AI_ENDPOINT")          //TODO: should be global?
-			api_token := os.Getenv("ADNIN_KEY")
-			//db_link := os.Getenv("EMBEDDINGS_DB_URL")
+	ai_url := os.Getenv("AI_ENDPOINT") //TODO: should be global?
+	api_token := os.Getenv("AI_ENDPOINT")
+	//db_link := os.Getenv("EMBEDDINGS_DB_URL")
 	model, err := openai.New(
-	  openai.WithToken(api_token),
-	  //openai.WithBaseURL("http://localhost:8080"),
-	  openai.WithBaseURL(ai_url),
-	  openai.WithModel(model_name),
-	  openai.WithAPIVersion("v1"),
+		openai.WithToken(api_token),
+		//openai.WithBaseURL("http://localhost:8080"),
+		openai.WithBaseURL(ai_url),
+		openai.WithModel(model_name),
+		openai.WithAPIVersion("v1"),
 	)
 	if err != nil {
-	  log.Fatal(err)
+		log.Fatal(err)
 	}
 	return *model
 }

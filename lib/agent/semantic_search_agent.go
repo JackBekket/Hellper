@@ -277,7 +277,7 @@ func semanticSearch(ctx context.Context, state []llms.MessageContent) ([]llms.Me
 			_ = godotenv.Load()
 			ai_url := os.Getenv("AI_ENDPOINT") // there are global, there might be resetting.
 			api_token := os.Getenv("OPENAI_API_KEY")
-			db_link := os.Getenv("EMBEDDINGS_DB_URL")
+			db_link := os.Getenv("PG_LINK")
 
 			log.Println("Collection Name: ", args.Collection)
 			log.Println("db_link: ", db_link)
