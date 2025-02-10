@@ -19,25 +19,6 @@ type contextKey string
 
 const UserKey contextKey = "user"
 
-// Message:	case0 - "Input your openAI API key. It can be created at https://platform.openai.com/accousernamet/api-keys".
-//
-//	DialogStatus 2 -> 3
-func (c *Commander) InputYourAPIKey(updateMessage *tgbotapi.Message) {
-	updateMessage.Text = strings.ReplaceAll(updateMessage.Text, " ", "")
-	chatID := updateMessage.Chat.ID
-	user := db.UsersMap[chatID]
-
-	msg := tgbotapi.NewMessage(
-		user.ID,
-		msgTemplates["case0"],
-	)
-	c.bot.Send(msg)
-
-	user.DialogStatus = 3
-	db.UsersMap[chatID] = user
-}
-
-
 // update Dialog_Status 3 -> 4
 func (c *Commander) ChooseModel(updateMessage *tgbotapi.Message) {
 	updateMessage.Text = strings.TrimSpace(updateMessage.Text)
@@ -49,9 +30,9 @@ func (c *Commander) ChooseModel(updateMessage *tgbotapi.Message) {
 	// Since this part is oftenly get an usernamecaught exeption, we debug what user input as key. It's bad, I know, but usernametil we got key validation we need this part.
 	log.Println("Key promt: ", gptKey)
 	user.AiSession.GptKey = gptKey // store key in memory
-		c.RenderModelMenuLAI(chatID)
-		user.DialogStatus = 4
-		db.UsersMap[chatID] = user
+	c.RenderModelMenuLAI(chatID)
+	user.DialogStatus = 4
+	db.UsersMap[chatID] = user
 }
 
 // DialogStatus 4 -> 5
@@ -60,45 +41,45 @@ func (c *Commander) HandleModelChoose(updateMessage *tgbotapi.CallbackQuery) {
 	messageID := updateMessage.Message.MessageID
 	model_name := updateMessage.Data
 	user := db.UsersMap[chatID]
-		switch model_name {
-		case "wizard-uncensored-13b":
-			c.attachModel(model_name, chatID)
-			user.AiSession.GptModel = model_name
-			c.RenderLanguage(chatID)
+	switch model_name {
+	case "wizard-uncensored-13b":
+		c.attachModel(model_name, chatID)
+		user.AiSession.GptModel = model_name
+		c.RenderLanguage(chatID)
 
-			user.DialogStatus = 5
-			db.UsersMap[chatID] = user
-		case "wizard-uncensored-30b":
-			c.attachModel(model_name, chatID)
-			user.AiSession.GptModel = model_name
-			c.RenderLanguage(chatID)
+		user.DialogStatus = 5
+		db.UsersMap[chatID] = user
+	case "wizard-uncensored-30b":
+		c.attachModel(model_name, chatID)
+		user.AiSession.GptModel = model_name
+		c.RenderLanguage(chatID)
 
-			user.DialogStatus = 5
-			db.UsersMap[chatID] = user
-		case "deepseek-coder-6b-instruct":
-			c.attachModel(model_name, chatID)
-			user.AiSession.GptModel = model_name
-			c.RenderLanguage(chatID)
+		user.DialogStatus = 5
+		db.UsersMap[chatID] = user
+	case "deepseek-coder-6b-instruct":
+		c.attachModel(model_name, chatID)
+		user.AiSession.GptModel = model_name
+		c.RenderLanguage(chatID)
 
-			user.DialogStatus = 5
-			db.UsersMap[chatID] = user
-		case "tiger-gemma-9b-v1-i1":
-			c.attachModel(model_name, chatID)
-			user.AiSession.GptModel = model_name
-			c.RenderLanguage(chatID)
+		user.DialogStatus = 5
+		db.UsersMap[chatID] = user
+	case "tiger-gemma-9b-v1-i1":
+		c.attachModel(model_name, chatID)
+		user.AiSession.GptModel = model_name
+		c.RenderLanguage(chatID)
 
-			user.DialogStatus = 5
-			db.UsersMap[chatID] = user
-		case "wizard-uncensored-code-34b":
-			c.attachModel(model_name, chatID)
-			user.AiSession.GptModel = model_name
-			c.RenderLanguage(chatID)
+		user.DialogStatus = 5
+		db.UsersMap[chatID] = user
+	case "wizard-uncensored-code-34b":
+		c.attachModel(model_name, chatID)
+		user.AiSession.GptModel = model_name
+		c.RenderLanguage(chatID)
 
-			user.DialogStatus = 5
-			db.UsersMap[chatID] = user
+		user.DialogStatus = 5
+		db.UsersMap[chatID] = user
 
-		}
-	
+	}
+
 	callbackResponse := tgbotapi.NewCallback(updateMessage.ID, "🐈💨")
 	c.bot.Send(callbackResponse)
 
@@ -106,7 +87,6 @@ func (c *Commander) HandleModelChoose(updateMessage *tgbotapi.CallbackQuery) {
 	c.bot.Send(deleteMsg)
 
 }
-
 
 // low level attach model name to user profile
 func (c *Commander) attachModel(model_name string, chatID int64) {
@@ -122,7 +102,6 @@ func (c *Commander) attachModel(model_name string, chatID int64) {
 	c.bot.Send(msg)
 	db.UsersMap[chatID] = user
 }
-
 
 // internal for attach api key to a user
 func (c *Commander) AttachKey(gpt_key string, chatID int64) {
@@ -149,7 +128,6 @@ func (c *Commander) WrongResponse(updateMessage *tgbotapi.Message) {
 	c.bot.Send(msg)
 
 }
-
 
 // update update Dialog_Status 5 -> 6
 func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.CallbackQuery, ai_endpoint string) {
@@ -187,32 +165,37 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint 
 	chatID := updateMessage.Chat.ID
 	user := db.UsersMap[chatID]
 
-	if updateMessage != nil {
+	if updateMessage.Command() != "" {
+		HandleCommands(updateMessage, c)
+	} else {
 
-		if updateMessage.Text != "" && updateMessage.Photo == nil {
-			promt := updateMessage.Text
-			ctx := context.WithValue(c.ctx, "user", user)
-			go langchain.StartDialogSequence(c.bot, chatID, promt, ctx, ai_endpoint)
-		} else if updateMessage.Voice != nil {
-			voicePath, err := stt.HandleVoiceMessage(updateMessage, *c.bot)
-			if err != nil {
-				log.Println(err)
+		if updateMessage != nil {
+
+			if updateMessage.Text != "" && updateMessage.Photo == nil {
+				promt := updateMessage.Text
+				ctx := context.WithValue(c.ctx, "user", user)
+				go langchain.StartDialogSequence(c.bot, chatID, promt, ctx, ai_endpoint)
+			} else if updateMessage.Voice != nil {
+				voicePath, err := stt.HandleVoiceMessage(updateMessage, *c.bot)
+				if err != nil {
+					log.Println(err)
+				}
+				url, model := stt.GetEnvsForSST()
+				transcription, err := localai.TranscribeWhisper(url, model, voicePath)
+				if err != nil {
+					log.Println(err)
+				}
+				msg := tgbotapi.NewMessage(chatID, transcription)
+				c.bot.Send(msg)
+				DeleteFile(voicePath)
+			} else if updateMessage.Photo != nil {
+				response, err := imgrec.RecognizeImage(c.bot, updateMessage)
+				if err != nil {
+					log.Println(err)
+				}
+				msg := tgbotapi.NewMessage(chatID, response)
+				c.bot.Send(msg)
 			}
-			url, model := stt.GetEnvsForSST()
-			transcription, err := localai.TranscribeWhisper(url, model, voicePath)
-			if err != nil {
-				log.Println(err)
-			}
-			msg := tgbotapi.NewMessage(chatID, transcription)
-			c.bot.Send(msg)
-			DeleteFile(voicePath)
-		} else if updateMessage.Photo != nil {
-			response, err := imgrec.RecognizeImage(c.bot, updateMessage)
-			if err != nil {
-				log.Println(err)
-			}
-			msg := tgbotapi.NewMessage(chatID, response)
-			c.bot.Send(msg)
 		}
 	}
 }

@@ -1,64 +1,37 @@
-## Package: database
+# Database Package
+The database package provides functionality for managing user data and AI sessions. It includes data structures for representing users, sessions, and chat session graphs, as well as functions for adding users, updating usage, and creating new chat session graphs.
 
-### Imports:
-- github.com/tmc/langchaingo/llms
-- github.com/tmc/langchaingo/vectorstores
+## Environment Variables
+* `AI_ENDPOINT`
+* `EMBEDDINGS_DB_URL`
+* `GptKey` (api token)
 
-### External Data, Input Sources:
-- UsersMap: A map that stores user data, where the key is the Telegram user ID and the value is a User struct.
-- UsageMap: A map that stores session usage data, where the key is the session ID and the value is a SessionUsage struct.
+## Flags and Cmdline Arguments
+None
 
-### Major Code Parts:
+## Files and Paths
+* `newUserDataBase.go`
+* `user.go`
+* `lib/database/newUserDataBase.go`
+* `lib/database/user.go`
 
-#### User Struct:
-- Represents a user in the database.
-- Contains fields for user ID, username, dialog status, admin status, AI session, network, topics, and a vector store.
+## Edge Cases for Launching the Application
+The application can be launched as a command-line interface (CLI) using the following edge cases:
+* Running the `AddUser` function to add a new user
+* Running the `UpdateUserUsage` function to update a user's AI session usage
+* Running the `NewChatSessionGraph` function to create a new chat session graph
 
-#### SessionUsage Struct:
-- Represents a session's usage data.
-- Contains fields for session ID and a map of usage statistics.
+## Project Package Structure
+* `database/`
+	+ `newUserDataBase.go`
+	+ `user.go`
+* `lib/database/`
+	+ `newUserDataBase.go`
+	+ `user.go`
 
-#### AiSession Struct:
-- Represents an AI session.
-- Contains fields for GPT key, GPT model, AI type, dialog thread, base URL, and usage statistics.
+## Relations between Code Entities
+The `User` struct is related to the `AiSession` struct through the `AI session data` attribute. The `SessionUsage` struct is related to the `AiSession` struct through the `usage map` attribute. The `ChatSessionGraph` struct is related to the `User` struct through the `conversation buffer` attribute.
 
-#### ChatSessionGraph Struct:
-- Represents a chat session graph.
-- Contains a field for the conversation buffer, which stores the messages in the chat session.
-
-#### Functions:
-- AddUser: Adds a new user to the UsersMap.
-- UpdateUserUsage: Updates the usage statistics for a user's AI session.
-- UpdateSessionUsage: Updates the usage statistics for a session.
-- GetSessionUsage: Retrieves the usage statistics for a session.
-- NewChatSessionGraph: Creates a new ChatSessionGraph with a given conversation buffer.
-
-The code provides a basic framework for managing user data, AI sessions, and chat session graphs. It includes data structures and functions for adding users, updating usage statistics, and creating chat session graphs.
-
-lib/database/user.go
-## Package: database
-
-### Imports:
-
-- log
-- os
-- e (github.com/JackBekket/hellper/lib/embeddings)
-- godotenv
-- pgvector (github.com/tmc/langchaingo/vectorstores/pgvector)
-
-### External Data and Input Sources:
-
-- AI_ENDPOINT: Environment variable containing the API endpoint for the AI service.
-- GPT_KEY: User's AI session GPT key.
-- EMBEDDINGS_DB_URL: Environment variable containing the URL for the embeddings database.
-
-### Code Summary:
-
-#### SetContext Function:
-
-This function sets the context for a user by establishing a connection to the embeddings database and initializing a vector store. It first loads the environment variables and retrieves the necessary information for connecting to the AI service and the embeddings database. Then, it uses the provided information to create a vector store using the `GetVectorStoreWithOptions` function from the `embeddings` package. The vector store is stored in the user's `VectorStore` field. Finally, it sets up a defer function to ensure that the vector store is closed when the function exits.
-
-#### ClearContext Function:
-
-This function clears the context for a user by setting the `VectorStore` field to nil. This effectively disconnects the user from the embeddings database and closes the vector store.
+## Unclear Places or Dead Code
+The `ClearContext` function seems to be unclear in its purpose, as it only sets the `VectorStore` to nil without any additional functionality.
 

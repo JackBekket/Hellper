@@ -4,53 +4,23 @@ import (
 	"context"
 	"log"
 	"os"
-	"strconv"
 
 	"github.com/JackBekket/hellper/lib/bot/command"
 	"github.com/JackBekket/hellper/lib/bot/dialog"
-	"github.com/JackBekket/hellper/lib/bot/env"
 	"github.com/JackBekket/hellper/lib/database"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
 )
 
-/*
-type AdminData struct {
-	ID     int64
-	GPTKey string
-	//localhost_password string
-}
-*/
-
 func main() {
 
 	_ = godotenv.Load()
-	api_token := os.Getenv("OPENAI_API_KEY") // this is not openai key actually, it's local key for localai
-	//conn_pg_link := os.Getenv("PG_LINK")
 
-
-	//token := api_token
 	token := os.Getenv("TG_KEY")
-	log.Println("TG token is: ", token)
-
-	admin_key := api_token
-	admin_id := os.Getenv("ADMIN_ID")
-	id, err := strconv.ParseInt(admin_id, 0, 64)
-	if err != nil {
-		log.Printf("admin id error parse: %s", admin_id)
-	}
-	ai_endpoint := os.Getenv("AI_ENDPOINT")
-	log.Println("ai endpoint is: ", ai_endpoint)
 
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
 		log.Fatalf("tg token missing: %v\n", err)
-	}
-
-	adminData := make(map[string]env.AdminData)
-	adminData["ADMIN_ID"] = env.AdminData{
-		ID:     id,
-		GPTKey: admin_key,
 	}
 
 	// init database and commander
@@ -71,24 +41,8 @@ func main() {
 	// handling any incoming updates through channel
 	go dialog.HandleUpdates(upd_ch, bot, *comm)
 
-	//whenever bot gets a new message, check for user id in the database happens, if it's a new user, the entry in the database is created.
-
 	for update := range updates {
-		//inline keyboards logic (it works as a callback)
-		var chatID int64
-		if update.CallbackQuery != nil {
-			chatID = update.CallbackQuery.Message.Chat.ID
-		} else {
-			chatID = update.Message.Chat.ID
-		}
-		_, ok := usersDatabase[chatID]
-		if !ok {
-			upd_ch <- update
-		}
-		if ok {
-			upd_ch <- update
-		}
-
+		upd_ch <- update
 	}
 
 } // end of main func

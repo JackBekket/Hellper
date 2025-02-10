@@ -277,7 +277,7 @@ func semanticSearch(ctx context.Context, state []llms.MessageContent) ([]llms.Me
 			_ = godotenv.Load()
 			ai_url := os.Getenv("AI_ENDPOINT") // there are global, there might be resetting.
 			api_token := os.Getenv("OPENAI_API_KEY")
-			db_link := os.Getenv("EMBEDDINGS_DB_URL")
+			db_link := os.Getenv("PG_LINK")
 
 			log.Println("Collection Name: ", args.Collection)
 			log.Println("db_link: ", db_link)
@@ -285,7 +285,7 @@ func semanticSearch(ctx context.Context, state []llms.MessageContent) ([]llms.Me
 			// Retrieve your vector store based on the store value in the args
 			// You'll likely need to have a method for getting the vector store based
 			// on the store string ("store" value in the args)
-			store, err := embeddings.GetVectorStoreWithOptions(ai_url, api_token, db_link, args.Collection) // TODO: changed argument 'Name' to 'CollectionName' or something like that
+			store, err := embeddings.GetVectorStoreWithOptions(ai_url, api_token, db_link, args.Collection)
 			if err != nil {
 				// Handle errors in retrieving the vector store
 				log.Println("error getting store")

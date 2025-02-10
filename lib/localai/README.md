@@ -1,49 +1,40 @@
-# localai package
+# localai
+The localai package provides a set of functions for text and image recognition, including chat completion, image generation, and audio transcription. The package uses environment variables, file paths, and URLs for API requests to configure its behavior.
 
-This package provides functions for interacting with various AI models, including chat models and image generation models. It also includes a function for transcribing audio using the Whisper model.
+## Environment Variables
+* **OPENAI_API_KEY**: API key for OpenAI requests
 
-### Imports
+## Flags and Cmdline Arguments
+None specified
 
-The package imports the following packages:
+## Files and Paths
+* Audio files for transcription (e.g., audioRecognition/stt.go)
+* Image files for recognition (e.g., imageRecognition/imageRecognition.go)
+* localai.go: main entry point of the program
+* lib/localai/localai.go: library implementation of localai functions
 
-- bytes
-- encoding/json
-- fmt
-- io
-- io/ioutil
-- log
-- mime/multipart
-- net/http
-- os
-- path/filepath
-- strings
+## Edge Cases for Launch
+The application can be launched in the following ways:
+* Running the main function in localai.go
+* Using the GenerateCompletion function with a prompt, model name, and URL
+* Using the GenerateCompletionWithPWD function with a prompt, model name, URL, and password
+* Using the GenerateImageStableDiffusion function with a prompt, size, URL, and model
+* Using the TranscribeWhisper function with an audio file
 
-### External Data, Input Sources
+## Project Package Structure
+* localai/
+	+ audioRecognition/
+		- stt.go
+	+ imageRecognition/
+		- imageRecognition.go
+	+ localai.go
+	+ lib/
+		- localai/
+			- localai.go
 
-The package uses the following external data and input sources:
+## Relations between Code Entities
+The package defines several data structures, including ChatRequest, Message, ChatResponse, Choice, UsageStatistics, GenerationResponse, GenerationData, GenerationUsage, and WrongPwdError. These data structures are used by the functions in the package, such as main, GenerateCompletion, GenerateCompletionWithPWD, GenerateImageStableDiffusion, TranscribeWhisper, and cleanText. The functions use environment variables, file paths, and URLs to configure their behavior.
 
-- API endpoints for chat models and image generation models (e.g., "http://localhost:8080/v1/chat/completions")
-- Whisper model for audio transcription
-- Environment variable "OPENAI_API_KEY" for authentication with the API
+## Unclear Places or Dead Code
+None found
 
-### Code Summary
-
-1. Chat Request and Response Structures: The package defines structures for chat requests and responses, including fields for model, messages, temperature, created, object, ID, model, choices, and usage statistics.
-
-2. Generation Response Structure: A structure for generation responses is also defined, including fields for created, ID, data, and usage.
-
-3. Wrong Password Error: A custom error type, WrongPwdError, is defined to handle incorrect passwords.
-
-4. Main Function: The main function demonstrates how to use the package by sending a chat request to a chat model and printing the assistant's response.
-
-5. GenerateCompletion Function: This function takes a prompt, model name, and API URL as input and returns a chat response. It creates a chat request, converts it to JSON, sends the request to the API, and parses the response.
-
-6. GenerateCompletionWithPWD Function: This function is similar to GenerateCompletion but also takes a secret password as input and returns an error if the password is incorrect.
-
-7. GenerateImageStableDiffusion Function: This function takes a prompt, size, API URL, and model as input and returns an image URL. It creates a payload with the prompt, size, and model, sends a POST request to the API, and parses the response to extract the image URL.
-
-8. TranscribeWhisper Function: This function takes a URL, model, and path to an audio file as input and returns the transcribed text. It opens the audio file, creates a multipart request body, sends the request to the API, and parses the response to extract the transcribed text.
-
-9. cleanText Function: This function removes "[BLANK_AUDIO]" from the output of the TranscribeWhisper function.
-
-### End of Output

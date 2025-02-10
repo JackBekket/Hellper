@@ -1,44 +1,30 @@
 # imageRecognition
+The provided code is for an image recognition package that uses the Telegram bot API and an external image recognition model. The package has several functions to handle image messages, recognize images, and retrieve environment variables.
 
-This package provides functionality for image recognition using an external AI service.
+Environment variables:
+* `AI_ENDPOINT`
+* `IMAGE_RECOGNITION_SUFFIX`
+* `IMAGE_RECOGNITION_MODEL`
+* `OPENAI_API_KEY`
 
-### Imports
+Flags, cmdline arguments: None
 
-* bytes
-* encoding/json
-* fmt
-* io/ioutil
-* net/http
-* os
-* tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+Files and their paths:
+* `imageRecognition.go`
+* `lib/localai/imageRecognition/imageRecognition.go`
 
-### External Data, Input Sources
+Edge cases for launching the application:
+* The application can be launched as a Telegram bot, handling image messages and recognizing images using the external model.
 
-* Environment variables:
-    * AI_ENDPOINT: URL of the AI service endpoint.
-    * IMAGE_RECOGNITION_SUFFIX: Suffix to append to the AI endpoint URL.
-    * IMAGE_RECOGNITION_MODEL: Model to use for image recognition.
-    * OPENAI_API_KEY: API key for the AI service.
+Project package structure:
+* `imageRecognition`
+	+ `imageRecognition.go`
+* `lib`
+	+ `localai`
+		- `imageRecognition`
+			- `imageRecognition.go`
 
-### Code Summary
+The code entities are related as follows: the `handleImageMessage` function retrieves the image file URL from a Telegram message, which is then sent to the `imageRecognitionLAI` function to recognize the image. The `getEnvsForImgRec` function retrieves the environment variables for image recognition, and the `getMessageContent` function reads the response from the image recognition model.
 
-#### getEnvsForImgRec()
-
-This function retrieves the necessary environment variables for image recognition. It returns the AI endpoint URL, the model to use, and the API key.
-
-#### RecognizeImage()
-
-This function handles image recognition for a given Telegram message. It first extracts the image URL from the message, then calls the imageRecognitionLAI() function to perform the actual recognition. Finally, it returns the recognition result.
-
-#### handleImageMessage()
-
-This function extracts the image URL from a Telegram message. It retrieves the file information from the message and constructs the image URL using the bot's token and the file path.
-
-#### imageRecognitionLAI()
-
-This function performs image recognition using the provided AI service. It constructs a JSON payload with the model, prompt, and image URL, then sends a POST request to the AI endpoint with the payload and the API key. It then extracts the recognition result from the response and returns it.
-
-#### getMessageContent()
-
-This function extracts the recognition result from the response from the AI service. It parses the JSON response and returns the content of the message.
+The `RecognizeImage` function is the main function that recognizes an image sent as a Telegram message and returns a response from the image recognition model.
 

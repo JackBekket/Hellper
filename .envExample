@@ -1,8 +1,8 @@
 TG_KEY=
-ADMIN_ID=
 AI_ENDPOINT=
+AI_BASEURL=
 OPENAI_API_KEY=
-PG_LINK=postgresql://
+PG_LINK=
 IMAGE_GENERATION_MODEL=stablediffusion-cpp
 IMAGE_GENERATION_SUFFIX=/v1/images/generations
 IMAGE_RECOGNITION_MODEL=bunny-llama-3-8b-v

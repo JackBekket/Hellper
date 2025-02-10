@@ -11,7 +11,6 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/JackBekket/hellper/lib/agent"
 	db "github.com/JackBekket/hellper/lib/database"
 	"github.com/JackBekket/hellper/lib/embeddings"
 	"github.com/JackBekket/hellper/lib/localai"
@@ -19,8 +18,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-
-func (c *Commander) HelpCommandMessage(updateMessage *tgbotapi.Message)  {
+func (c *Commander) HelpCommandMessage(updateMessage *tgbotapi.Message) {
 	chatID := updateMessage.Chat.ID
 	user := db.UsersMap[chatID]
 	msg := tgbotapi.NewMessage(user.ID, msgTemplates["help_command"])
@@ -28,7 +26,7 @@ func (c *Commander) HelpCommandMessage(updateMessage *tgbotapi.Message)  {
 }
 
 func (c *Commander) SearchDocuments(chatID int64, promt string, maxResults int) {
-	
+
 	_ = godotenv.Load()
 
 	conn_pg_link := os.Getenv("PG_LINK")
@@ -36,77 +34,38 @@ func (c *Commander) SearchDocuments(chatID int64, promt string, maxResults int) 
 	db_conn := conn_pg_link
 	user := db.UsersMap[chatID]
 	api_token := user.AiSession.GptKey
-	store,err := embeddings.GetVectorStore(base_url,api_token,db_conn)
+	store, err := embeddings.GetVectorStore(base_url, api_token, db_conn)
 	if err != nil {
 		//return nil, err
-		msg := tgbotapi.NewMessage(user.ID, "error occured: " + err.Error())
+		msg := tgbotapi.NewMessage(user.ID, "error occured: "+err.Error())
 		c.bot.Send(msg)
 	}
 
-
-	results, err := embeddings.SemanticSearch(promt,maxResults,store)
+	results, err := embeddings.SemanticSearch(promt, maxResults, store)
 	if err != nil {
 		//return nil, err
-		msg := tgbotapi.NewMessage(user.ID, "error occured: " + err.Error())
+		msg := tgbotapi.NewMessage(user.ID, "error occured: "+err.Error())
 		c.bot.Send(msg)
 	}
 
 	for i, result := range results {
 		content := result.PageContent
-		msg := tgbotapi.NewMessage(user.ID, "result number: " + fmt.Sprint(i))
+		msg := tgbotapi.NewMessage(user.ID, "result number: "+fmt.Sprint(i))
 		c.bot.Send(msg)
-		msg = tgbotapi.NewMessage(user.ID, "page content: " + content)
+		msg = tgbotapi.NewMessage(user.ID, "page content: "+content)
 		c.bot.Send(msg)
 
 		score := result.Score
 		score_string := fmt.Sprintf("%f", score)
 
-		msg = tgbotapi.NewMessage(user.ID, "score: " + score_string)
+		msg = tgbotapi.NewMessage(user.ID, "score: "+score_string)
 		c.bot.Send(msg)
 	}
 
 }
 
-
-// TODO: OBSOLETE
-// Retrival-Augmented Generation
-func (c *Commander) RAG(chatID int64, promt string, maxResults int) {
-	user := db.UsersMap[chatID]
-	_ = godotenv.Load()
-
-	//conn_pg_link := os.Getenv("PG_LINK")
-	//base_url := os.Getenv("AI_BASEURL")
-	//db_conn := conn_pg_link
-	//api_token := user.AiSession.GptKey
-	//store := user.VectorStore
-	//store,err := embeddings.GetVectorStore(base_url,api_token,db_conn)
-	/*
-	if err != nil {
-		//return nil, err
-		msg := tgbotapi.NewMessage(user.ID, "error occured when getting store: " + err.Error())
-		c.bot.Send(msg)
-	}
-		*/
-
-
-	// TODO: Refactor to better readability, remove unused code
-	// TODO: Superagents
-	//result, err := embeddings.Rag(base_url,api_token,promt,maxResults,store)
-	llm := agent.CreateGenericLLM()
-	result := agent.OneShotRun(promt, llm)
-	/*
-	if err != nil {
-		msg := tgbotapi.NewMessage(user.ID, "error occured when calling RAG: " + err.Error())
-		c.bot.Send(msg)
-	}
-	*/
-	msg := tgbotapi.NewMessage(user.ID, result)
-	c.bot.Send(msg)
-}
-
-
-// Get usage for user 
-func (c *Commander) GetUsage(chatID int64)  {
+// Get usage for user
+func (c *Commander) GetUsage(chatID int64) {
 	user := db.UsersMap[chatID]
 	log.Println("user", user)
 	promt_tokens := user.AiSession.Usage["Promt"]
@@ -117,57 +76,54 @@ func (c *Commander) GetUsage(chatID int64)  {
 	ct_str := fmt.Sprint(completion_tokens)
 	tt_str := fmt.Sprint(total_tokens)
 
-	msg := tgbotapi.NewMessage(user.ID, "Promt tokens: " + pt_str)
+	msg := tgbotapi.NewMessage(user.ID, "Promt tokens: "+pt_str)
 	c.bot.Send(msg)
-	msg = tgbotapi.NewMessage(user.ID, "Completion tokens: " + ct_str)
+	msg = tgbotapi.NewMessage(user.ID, "Completion tokens: "+ct_str)
 	c.bot.Send(msg)
-	msg = tgbotapi.NewMessage(user.ID, "Total tokens: " + tt_str)
+	msg = tgbotapi.NewMessage(user.ID, "Total tokens: "+tt_str)
 	c.bot.Send(msg)
 }
 
-
-
 func (c *Commander) SendMediaHelper(chatID int64) {
 
-		// Send helper video error
-		// Get a list of all files in the media directory
-		//files, err := os.ReadDir("../../media/")
-		files, err := os.ReadDir("./media/")
-		if err != nil {
-		  log.Println("Could not read media directory:", err)
-		  return
-		}
-	
-		if len(files) == 0 {
-			log.Println("No files in media directory")
-			return  
-		}
+	// Send helper video error
+	// Get a list of all files in the media directory
+	//files, err := os.ReadDir("../../media/")
+	files, err := os.ReadDir("./media/")
+	if err != nil {
+		log.Println("Could not read media directory:", err)
+		return
+	}
 
+	if len(files) == 0 {
+		log.Println("No files in media directory")
+		return
+	}
 
-		// Select a random file
-		//rand.Seed(time.Now().UnixNano())
-		randomFile := files[rand.Intn(len(files))]
-	
-	  // Open the video file
-	  videoFile, err := os.Open(filepath.Join("./media/", randomFile.Name()))
-	  if err != nil {
+	// Select a random file
+	//rand.Seed(time.Now().UnixNano())
+	randomFile := files[rand.Intn(len(files))]
+
+	// Open the video file
+	videoFile, err := os.Open(filepath.Join("./media/", randomFile.Name()))
+	if err != nil {
 		log.Println("Could not open video file:", err)
 		return
-	  }
-	  defer videoFile.Close()
-	
-	  // Create a new video message
-	  videoMsg := tgbotapi.NewVideo(chatID, tgbotapi.FileReader{
-		Name: randomFile.Name(),
+	}
+	defer videoFile.Close()
+
+	// Create a new video message
+	videoMsg := tgbotapi.NewVideo(chatID, tgbotapi.FileReader{
+		Name:   randomFile.Name(),
 		Reader: videoFile,
 		//Size: -1, // Let the tgbotapi package determine the size
-	  })
-	
-	  // Send the video message
-	  _, err = c.bot.Send(videoMsg)
-	  if err != nil {
+	})
+
+	// Send the video message
+	_, err = c.bot.Send(videoMsg)
+	if err != nil {
 		log.Println("Could not send video message:", err)
-	  }
+	}
 
 }
 
@@ -177,19 +133,23 @@ func sendImage(bot *tgbotapi.BotAPI, chatID int64, path string) {
 
 	fileName, err := getImage(path, auth)
 	if err != nil {
-		fmt.Errorf("getImageFail: %w", err)
+		log.Println("getImageFail: %w", err)
 	}
 	filePath := filepath.Join("tmp", "generated", "images", fileName)
 	photoBytes, err := os.ReadFile(filePath)
 	if err != nil {
-		panic(err)
+		log.Println("ReadImageFail: %w", err)
 	}
 	photoFileBytes := tgbotapi.FileBytes{
 		Name:  "picture",
 		Bytes: photoBytes,
 	}
-	bot.Send(tgbotapi.NewPhoto(int64(chatID), photoFileBytes))
-	DeleteFile(filePath)
+	if err == nil {
+		bot.Send(tgbotapi.NewPhoto(int64(chatID), photoFileBytes))
+		DeleteFile(filePath)
+	} else {
+		bot.Send(tgbotapi.NewMessage(int64(chatID), err.Error()))
+	}
 }
 
 func getImage(imageURL, authHeader string) (string, error) {
@@ -232,14 +192,10 @@ func DeleteFile(fileName string) {
 }
 
 func transformURL(inputURL string) string {
-	// Replace "http://localhost:8080" with "/tmp" using strings.Replace
 	parsedURL, _ := url.Parse(inputURL)
-
-	// Use path.Base to get the filename from the URL path
 	fileName := path.Base(parsedURL.Path)
 	return fileName
 }
-
 
 // stable diffusion
 func (c *Commander) GenerateNewImageLAI_SD(promt, url string, chatID int64, bot *tgbotapi.BotAPI) {
@@ -263,5 +219,3 @@ func (c *Commander) GenerateNewImageLAI_SD(promt, url string, chatID int64, bot 
 
 	sendImage(bot, chatID, filepath)
 }
-
-
