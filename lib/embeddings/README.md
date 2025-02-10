@@ -1,118 +1,42 @@
-## Package: embeddings
+# embeddings
+## Summary
+The embeddings package provides functions for loading and querying vector stores. It uses environment variables such as `PG_HOST`, `PG_USER`, `PG_PASSWORD`, `PG_DB`, and `API_KEY` for configuration. The package has three main files: `common.go`, `load.go`, and `query.go`.
 
-### Imports:
+## Environment Variables and Flags
+* `PG_HOST`: the host of the PostgreSQL database
+* `PG_USER`: the user of the PostgreSQL database
+* `PG_PASSWORD`: the password of the PostgreSQL database
+* `PG_DB`: the name of the PostgreSQL database
+* `API_KEY`: the API key for the OpenAI service
 
-```
-"context"
-"fmt"
-"log"
-"github.com/tmc/langchaingo/embeddings"
-"github.com/tmc/langchaingo/llms/openai"
-"github.com/tmc/langchaingo/vectorstores"
-"github.com/tmc/langchaingo/vectorstores/pgvector"
-"github.com/jackc/pgx/v5/pgxpool"
-```
+## Command Line Arguments
+The package can be launched with the following command line arguments:
+* `ai_url`: the URL of the AI service
+* `api_token`: the token for the AI service
+* `db_link`: the link to the database
+* `name`: the name of the vector store
 
-### External Data, Input Sources:
+## Edge Cases
+The package can be launched in the following ways:
+* With a database link and AI URL
+* With a database link, AI URL, and API token
+* With a database link, AI URL, API token, and name
 
-1. Environment variables:
-    - `PG_HOST`
-    - `PG_USER`
-    - `PG_PASSWORD`
-    - `PG_DB`
-    - `API_KEY`
+## Project Package Structure
+The project package structure is as follows:
+* `embeddings`
+	+ `common.go`
+	+ `load.go`
+	+ `query.go`
+* `lib`
+	+ `embeddings`
+		- `common.go`
+		- `load.go`
+		- `query.go`
 
-2. Function arguments:
-    - `ai_url`: AI URL (localhost, OpenAI, or Docker)
-    - `api_token`: AI token
-    - `db_link`: Database link
-    - `name`: Collection name for vector store
+## Relations Between Code Entities
+The `common.go` file provides functions for getting a vector store from a database. The `load.go` file provides functions for loading documents into a vector store. The `query.go` file provides functions for querying a vector store.
 
-### Code Summary:
-
-#### LoadEnv() function:
-
-This function is not implemented in the provided code.
-
-#### GetVectorStore() function:
-
-This function creates a vector store from a database using the provided AI URL, API token, and database link. It first parses the database link and creates a connection pool. Then, it creates an embeddings client using the OpenAI API and an embedder using the embeddings client. Finally, it creates a vector store using the pgvector library, which uses the connection pool and embedder.
-
-#### GetVectorStoreWithOptions() function:
-
-This function is similar to GetVectorStore() but allows specifying a collection name for the vector store. It takes the same arguments as GetVectorStore() plus an additional argument, `name`, which specifies the collection name. The rest of the logic is the same as GetVectorStore().
-
-
-
-lib/embeddings/load.go
-## Package: embeddings
-
-### Imports:
-
-```
-"context"
-"fmt"
-"net/http"
-"log"
-"github.com/tmc/langchaingo/documentloaders"
-"github.com/tmc/langchaingo/schema"
-"github.com/tmc/langchaingo/textsplitter"
-"github.com/tmc/langchaingo/vectorstores"
-"github.com/tmc/langchaingo/vectorstores/pgvector"
-```
-
-### External Data, Input Sources:
-
-1. `source` string: This is used to fetch documents from a given URL.
-
-### Code Summary:
-
-#### LoadDocsToStore Function:
-
-This function takes a slice of `schema.Document` and a `vectorstores.VectorStore` as input. It first prints the number of documents to be loaded and then adds the documents to the vector store using the `AddDocuments` method. If there is an error during the process, it logs the error and panics. After the documents are loaded, it closes the vector store using the `Close` method.
-
-#### getDocs Function:
-
-This function takes a `source` string as input and returns a slice of `schema.Document` and an error. It first fetches the content from the given URL using `http.Get`. Then, it loads and splits the content into documents using the `documentloaders.NewHTML` and `textsplitter.NewRecursiveCharacter` functions. Finally, it returns the slice of documents and any error encountered during the process.
-
-
-
-lib/embeddings/query.go
-## Package: embeddings
-
-### Imports:
-
-```
-"context"
-"fmt"
-"log"
-"github.com/tmc/langchaingo/chains"
-"github.com/tmc/langchaingo/llms/openai"
-"github.com/tmc/langchaingo/schema"
-"github.com/tmc/langchaingo/vectorstores"
-"github.com/tmc/langchaingo/vectorstores/pgvector"
-```
-
-### External Data, Input Sources:
-
-1. `ai_url`: URL of the AI service (e.g., OpenAI API).
-2. `api_token`: API token for authentication with the AI service.
-3. `question`: The question to be answered or the query for semantic search.
-4. `numOfResults`: The number of results to return for the retrieval-based QA.
-5. `store`: A vector store to store and retrieve embeddings.
-6. `option`: Additional options for the vector store.
-7. `searchQuery`: The query for semantic search.
-8. `maxResults`: The maximum number of results to return for semantic search.
-
-### Code Summary:
-
-#### Rag Function:
-
-This function performs retrieval-augmented generation (RAG) using an LLM and a vector store. It first creates an embeddings client using the provided AI URL and API token. Then, it runs a retrieval-based QA chain using the embeddings client and the vector store. The chain takes the question as input and returns the answer. Finally, it prints the final answer and closes the vector store.
-
-#### SemanticSearch Function:
-
-This function performs semantic search using a vector store. It takes a search query, maximum number of results, and a vector store as input. It then performs a similarity search on the vector store using the provided query and returns the top `maxResults` results. The function also prints the similarity search results, including the page content and score for each result. Finally, it closes the vector store.
-
-
+## Code Explanation
+The `GetVectorStore` function in `common.go` takes `ai_url`, `api_token`, and `db_link` as parameters and returns a `vectorstores.VectorStore` and an error. The `LoadDocsToStore` function in `load.go` loads a slice of `schema.Document` objects into a `vectorstores.VectorStore` object. The `Rag` function in `query.go` takes in several parameters, including the AI URL, API token, question, number of results, and vector store, and returns the result and an error.
 

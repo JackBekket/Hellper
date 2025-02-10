@@ -2,8 +2,6 @@ package env
 
 import (
 	"errors"
-	"log"
-	"strconv"
 
 	"github.com/joho/godotenv"
 )
@@ -24,56 +22,6 @@ func Load() error {
 		return err
 	}
 	return nil
-}
-
-// returns a map with admin data
-func LoadAdminData() map[string]AdminData {
-	adminData := make(map[string]AdminData)
-	for admin, data := range env {
-		switch admin {
-		case "ADMIN_ID":
-
-			id, err := strconv.ParseInt(data, 0, 64)
-			if err != nil {
-				log.Printf("admin id error parse: %s", data)
-			}
-			adminData["ADMIN_ID"] = AdminData{
-				ID:     id,
-				GPTKey: env["ADMIN_KEY"],
-			}
-
-		case "MINTY_ID":
-			id, err := strconv.ParseInt(data, 0, 64)
-			if err != nil {
-				log.Printf("minty id error parse: %s", data)
-			}
-			adminData["MINTY_ID"] = AdminData{
-				ID:     id,
-				GPTKey: env["MINTY_KEY"],
-			}
-
-		case "OK_ID":
-			id, err := strconv.ParseInt(data, 0, 64)
-			if err != nil {
-				log.Printf("ok id error parse: %s", data)
-			}
-			adminData["OK_ID"] = AdminData{
-				ID:     id,
-				GPTKey: env["OK_KEY"],
-			}
-
-		case "MURS_ID":
-			id, err := strconv.ParseInt(data, 0, 64)
-			if err != nil {
-				log.Printf("murs id error parse: %s", data)
-			}
-			adminData["MURS_ID"] = AdminData{
-				ID:     id,
-				GPTKey: env["MURS_KEY"],
-			}
-		}
-	}
-	return adminData
 }
 
 // return token
