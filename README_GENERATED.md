@@ -1,58 +1,63 @@
-# Package: main
+**main**
+================
 
-### Imports:
+**Summary**
+-----------
 
-* context
-* log
-* os
-* strconv
-* github.com/JackBekket/hellper/lib/bot/command
-* github.com/JackBekket/hellper/lib/bot/dialog
-* github.com/JackBekket/hellper/lib/bot/env
-* github.com/JackBekket/hellper/lib/database
-* github.com/go-telegram-bot-api/telegram-bot-api/v5
-* github.com/joho/godotenv
+The `main` package is a bot application that initializes a Telegram bot and sets up a database and commander. It then enters an infinite loop, waiting for updates and processing them through the `dialog` package.
 
-### External Data, Input Sources:
+**Configuration**
+----------------
 
-* OPENAI_API_KEY (local key for localai)
-* PG_LINK (not used in the code)
-* TG_KEY (Telegram bot token)
-* ADMIN_ID (admin user ID)
-* AI_ENDPOINT (AI endpoint)
+* Environment variables:
+	+ `TG_KEY`: required
+* Flags/CommandLine Arguments: None
+* Files and their paths: None
 
-### Summary:
+**Launch Options**
+-----------------
 
-#### Initialization:
+The application can be launched in the following ways:
 
-1. Loads environment variables using `godotenv.Load()`.
-2. Retrieves the Telegram bot token from the environment variable `TG_KEY`.
-3. Retrieves the admin user ID from the environment variable `ADMIN_ID` and parses it as an integer.
-4. Retrieves the AI endpoint from the environment variable `AI_ENDPOINT`.
+1. Set the `TG_KEY` environment variable and run the application.
+2. Use the `godotenv` package to load environment variables from a `.env` file.
 
-#### Bot Initialization:
+**Edge Cases**
+--------------
 
-1. Creates a new Telegram bot instance using the retrieved token.
-2. Creates a map of admin data, including the admin ID and their local AI key.
+* None found
 
-#### Database and Commander Initialization:
+**Package Structure**
+-------------------
 
-1. Initializes the database using `database.UsersMap`.
-2. Creates a new command commander using the bot, database, and a context.
+```
+main.go
+lib/
+bot/
+command/
+dialog/
+database/
+embeddings/
+langchain/
+localai/
+...
+media/
+error_*.mp4
+prompt-templates/
+...
+tmp/
+...
+token_speed.txt
+```
 
-#### Update Handling:
+**Code Relations**
+-----------------
 
-1. Sets up a channel to handle incoming updates from the Telegram bot.
-2. Starts a goroutine to handle updates using the `dialog.HandleUpdates` function.
-3. Iterates through incoming updates and checks if the user is new. If so, adds the user to the database.
+The code appears to be well-organized, with clear separation of concerns between packages. The `main` function initializes the bot and sets up the database and commander, while the `dialog` package handles incoming updates. The `langchain` and `localai` packages seem to be used for natural language processing and image recognition tasks, respectively.
 
-#### Inline Keyboard Logic:
+**Unclear Places/Dead Code**
+---------------------------
 
-1. Handles inline keyboard interactions by checking for callback queries.
-2. Retrieves the chat ID from the update and checks if the user is already in the database.
-3. If the user is new, adds them to the database and sends the update to the update channel.
+None found.
 
-#### End of main function:
-
-1. The main function ends, and the program continues to handle updates and inline keyboard interactions.
-
+**

@@ -1,45 +1,44 @@
 # lib/localai/audioRecognition/stt.go  
-## Package: stt  
+**Package Name:** stt  
   
-### Imports:  
+**Imports:**  
   
-```  
-fmt  
-io  
-log  
-net/http  
-os  
-path/filepath  
-github.com/go-telegram-bot-api/telegram-bot-api/v5  
-```  
+* `fmt`  
+* `io`  
+* `log`  
+* `net/http`  
+* `os`  
+* `path/filepath`  
+* `github.com/go-telegram-bot-api/telegram-bot-api/v5` (tgbotapi)  
   
-### External Data, Input Sources:  
+**External Data/Inputs:**  
   
-1. Environment variables:  
-    - `AI_ENDPOINT`: URL of the AI endpoint for speech-to-text conversion.  
-    - `VOICE_RECOGNITION_SUFFIX`: Suffix to append to the AI endpoint URL for voice recognition. Defaults to `/v1/audio/transcriptions` if not set.  
-    - `VOICE_RECOGNITION_MODEL`: Model to use for speech-to-text conversion. Defaults to "whisper-1" if not set.  
+* `updateMessage` ( Telegram message object)  
+* `bot` (Telegram bot API object)  
+* Environment variables:  
+	+ `AI_ENDPOINT`  
+	+ `VOICE_RECOGNITION_SUFFIX`  
+	+ `VOICE_RECOGNITION_MODEL`  
   
-2. Telegram bot API:  
-    - `tgbotapi.BotAPI`: Used to interact with the Telegram bot API.  
+**TODO Comments:**  
   
-### Code Summary:  
+* None found  
   
-#### HandleVoiceMessage:  
+**Summary:**  
   
-This function handles voice messages received from the Telegram bot. It first extracts the file ID of the voice message and then uses the `GetFileURL` function to retrieve the URL of the voice file. The file is then downloaded to a local file using the `DownloadFile` function. Finally, the function returns the local file path and any errors encountered during the process.  
+### Main Functionality  
   
-#### GetFileURL:  
+The `stt` package provides a function `HandleVoiceMessage` that handles voice messages sent to a Telegram bot. It retrieves the file URL of the voice message, downloads the file, and returns the local file path.  
   
-This function takes the file ID of a Telegram file and the bot API as input. It uses the bot API to retrieve the file information and constructs the URL to access the file from Telegram's servers. The function returns the file URL and any errors encountered during the process.  
+### File Retrieval and Download  
   
-#### DownloadFile:  
+The `GetFileURL` function retrieves the file URL of a Telegram file given its ID. It constructs the URL by combining the bot token and the file path.  
   
-This function takes a URL and a local file path as input. It creates a new file at the specified local path and downloads the data from the given URL to the file. The function returns any errors encountered during the process.  
+The `DownloadFile` function downloads a file from a given URL to a local file path.  
   
-#### GetEnvsForSST:  
+### Environment Variables  
   
-This function retrieves the necessary environment variables for speech-to-text conversion. It first retrieves the AI endpoint URL from the `AI_ENDPOINT` environment variable. If the `VOICE_RECOGNITION_SUFFIX` environment variable is not set, it defaults to `/v1/audio/transcriptions`. The function also retrieves the voice recognition model from the `VOICE_RECOGNITION_MODEL` environment variable, defaulting to "whisper-1" if not set. Finally, the function returns the constructed AI endpoint URL and the voice recognition model.  
+The `GetEnvsForSST` function retrieves environment variables for SST (Speech-to-Text) functionality. It sets default values for `VOICE_RECOGNITION_SUFFIX` and `VOICE_RECOGNITION_MODEL` if they are not set.  
   
   
   
