@@ -35,14 +35,6 @@ type AiSession struct {
 	Usage        map[string]int
 }
 
-/*
-type ChatSession struct {
-	ConversationBuffer memory.ConversationBuffer
-	DialogThread       chains.LLMChain
-}
-*/
-
-
 
 // langgraph doesn't work with same types as langchain, so we have to improvise here.
 type ChatSessionGraph struct {
@@ -80,14 +72,6 @@ func GetSessionUsage(id int64) map[string]int {
 	return usage
 }
 
-/*
-func NewChatSession(buffer  memory.ConversationBuffer, thread chains.LLMChain) *ChatSession {
-	return &ChatSession{
-		ConversationBuffer: buffer,
-		DialogThread: thread,
-	}
-}
-*/
 
 func NewChatSessionGraph(buffer  []llms.MessageContent) *ChatSessionGraph {
 	return &ChatSessionGraph{
