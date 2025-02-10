@@ -1,58 +1,97 @@
-# Package: main
+# hellper
+## Short Summary
+The provided code is for a Telegram bot written in Go, utilizing the `tgbotapi` package. It initializes the bot, sets up a database, and handles incoming updates.
 
-### Imports:
+## Environment Variables and Flags
+* `TG_KEY`: Telegram Bot API key
+* `GODOTENV`: environment variables loaded using `godotenv`
 
-* context
-* log
-* os
-* strconv
-* github.com/JackBekket/hellper/lib/bot/command
-* github.com/JackBekket/hellper/lib/bot/dialog
-* github.com/JackBekket/hellper/lib/bot/env
-* github.com/JackBekket/hellper/lib/database
-* github.com/go-telegram-bot-api/telegram-bot-api/v5
-* github.com/joho/godotenv
+## Command Line Arguments
+None
 
-### External Data, Input Sources:
+## Files and Paths
+* `configuration/README.MD`: configuration README file
+* `docker-compose.yaml`: Docker Compose file
+* `hf_models_config/`: directory containing model configuration files
+* `lib/agent/`: directory containing agent-related code
+* `lib/bot/`: directory containing bot-related code
+* `lib/database/`: directory containing database-related code
+* `media/`: directory containing media files
+* `models/`: directory containing model files
+* `prompt-templates/`: directory containing prompt templates
+* `tmp/`: directory containing temporary files
 
-* OPENAI_API_KEY (local key for localai)
-* PG_LINK (not used in the code)
-* TG_KEY (Telegram bot token)
-* ADMIN_ID (admin user ID)
-* AI_ENDPOINT (AI endpoint)
+## Edge Cases
+The application can be launched using the `go run main.go` command.
 
-### Summary:
+## Project Package Structure
+```
+hellper/
+|-- .dockerignore
+|-- .envExample
+|-- .gitignore
+|-- .vscode/
+|   |-- launch.json
+|-- Dockerfile
+|-- configuration/
+|   |-- README.MD
+|-- docker-compose.yaml
+|-- drafts/
+|   |-- deepseeker.yaml
+|-- go.mod
+|-- go.sum
+|-- hf_models_config/
+|   |-- animagine-xl.yaml
+|   |-- bert.yaml
+|   |-- ...
+|-- img/
+|   |-- helper.jpg
+|   |-- local_ai.png
+|-- lib/
+|   |-- agent/
+|   |   |-- duck_search_agent.go
+|   |   |-- semantic_search_agent.go
+|   |   |-- ...
+|   |-- bot/
+|   |   |-- command/
+|   |   |   |-- addNewUsertoMap.go
+|   |   |   |-- cases.go
+|   |   |   |-- ...
+|   |-- database/
+|   |   |-- newUserDataBase.go
+|   |   |-- user.go
+|   |-- ...
+|-- main.go
+|-- media/
+|   |-- error_10.mp4
+|   |-- error_11.mp4
+|   |-- ...
+|-- models/
+|   |-- animagine-xl.yaml
+|   |-- bert.yaml
+|   |-- ...
+|-- prompt-templates/
+|   |-- alpaca.tmpl
+|   |-- getting_started.tmpl
+|   |-- ...
+|-- tmp/
+|   |-- audio/
+|   |   |-- transcriptions_folder.txt
+|   |-- generated/
+|   |   |-- images/
+|   |   |   |-- generated_images_folder.txt
+|   |-- images/
+|   |   |-- images_folder.txt
+|-- token_speed.txt
+```
 
-#### Initialization:
+## Relations Between Code Entities
+The code entities are related as follows:
+* The `main.go` file initializes the Telegram Bot API and sets up the database and commander.
+* The `lib/agent/` package contains code for agents, such as the `duck_search_agent` and `semantic_search_agent`.
+* The `lib/bot/` package contains code for the bot, including command handling and dialog management.
+* The `lib/database/` package contains code for the database, including user data management.
 
-1. Loads environment variables using `godotenv.Load()`.
-2. Retrieves the Telegram bot token from the environment variable `TG_KEY`.
-3. Retrieves the admin user ID from the environment variable `ADMIN_ID` and parses it as an integer.
-4. Retrieves the AI endpoint from the environment variable `AI_ENDPOINT`.
-
-#### Bot Initialization:
-
-1. Creates a new Telegram bot instance using the retrieved token.
-2. Creates a map of admin data, including the admin ID and their local AI key.
-
-#### Database and Commander Initialization:
-
-1. Initializes the database using `database.UsersMap`.
-2. Creates a new command commander using the bot, database, and a context.
-
-#### Update Handling:
-
-1. Sets up a channel to handle incoming updates from the Telegram bot.
-2. Starts a goroutine to handle updates using the `dialog.HandleUpdates` function.
-3. Iterates through incoming updates and checks if the user is new. If so, adds the user to the database.
-
-#### Inline Keyboard Logic:
-
-1. Handles inline keyboard interactions by checking for callback queries.
-2. Retrieves the chat ID from the update and checks if the user is already in the database.
-3. If the user is new, adds them to the database and sends the update to the update channel.
-
-#### End of main function:
-
-1. The main function ends, and the program continues to handle updates and inline keyboard interactions.
+## Unclear Places or Dead Code
+There are no unclear places or dead code in the provided code.
 
