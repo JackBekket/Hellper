@@ -6,6 +6,8 @@ import (
 	"log"
 	"strings"
 
+	//"github.com/JackBekket/hellper/lib/database"
+
 	db "github.com/JackBekket/hellper/lib/database"
 	"github.com/JackBekket/hellper/lib/langchain"
 	"github.com/JackBekket/hellper/lib/localai"
@@ -19,8 +21,11 @@ type contextKey string
 
 const UserKey contextKey = "user"
 
+
 // update Dialog_Status 3 -> 4
-func (c *Commander) ChooseModel(updateMessage *tgbotapi.Message) {
+func (c *Commander) ChooseModel(updateMessage *tgbotapi.Message,db_service *db.Service) {
+	ds := db_service
+	
 	updateMessage.Text = strings.TrimSpace(updateMessage.Text)
 	chatID := updateMessage.Chat.ID
 	gptKey := updateMessage.Text // handling previouse message
@@ -30,7 +35,9 @@ func (c *Commander) ChooseModel(updateMessage *tgbotapi.Message) {
 	// Since this part is oftenly get an usernamecaught exeption, we debug what user input as key. It's bad, I know, but usernametil we got key validation we need this part.
 	log.Println("Key promt: ", gptKey)
 	user.AiSession.GptKey = gptKey // store key in memory
-	c.RenderModelMenuLAI(chatID)
+	//c.getModels(chatID,ds,user)
+	//c.RenderModelMenuLAI(chatID)
+	c.RenderModels(chatID,ds,user)
 	user.DialogStatus = 4
 	db.UsersMap[chatID] = user
 }
@@ -39,7 +46,10 @@ func (c *Commander) ChooseModel(updateMessage *tgbotapi.Message) {
 func (c *Commander) HandleModelChoose(updateMessage *tgbotapi.CallbackQuery) {
 	chatID := updateMessage.Message.Chat.ID
 	messageID := updateMessage.Message.MessageID
-	model_name := updateMessage.Data
+	content := updateMessage.Data
+    // Use strings.Split to separate the string by "_".
+    parts := strings.Split(content, "_")
+    model_name := parts[1]
 	user := db.UsersMap[chatID]
 	switch model_name {
 	case "wizard-uncensored-13b":
@@ -148,7 +158,7 @@ func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.CallbackQ
 // Generates and sends text to the user. This is *main loop*
 //
 // update Dialog_Status 6 -> 6 (loop),
-func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint string) {
+func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint string, ds *db.Service) {
 	chatID := updateMessage.Chat.ID
 	user := db.UsersMap[chatID]
 
@@ -161,7 +171,7 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint 
 			if updateMessage.Text != "" && updateMessage.Photo == nil {
 				promt := updateMessage.Text
 				ctx := context.WithValue(c.ctx, "user", user)
-				go langchain.StartDialogSequence(c.bot, chatID, promt, ctx, ai_endpoint)	// main call
+				go langchain.StartDialogSequence(c.bot, chatID, promt, ctx, ai_endpoint,ds)	// main call
 			} else if updateMessage.Voice != nil {
 				voicePath, err := stt.HandleVoiceMessage(updateMessage, *c.bot)
 				if err != nil {

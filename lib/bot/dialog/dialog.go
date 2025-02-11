@@ -12,6 +12,7 @@ import (
 )
 
 func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm command.Commander, db_service *database.Service) {
+	ai_endpoint := os.Getenv("AI_ENDPOINT") // TODO: should not be here?
 	for update := range updates {
 		if update.CallbackQuery == nil {
 
@@ -63,14 +64,17 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 					//history := ds.GetHistory(chatID)
 					//TODO: download and paste messages history to the dialog buffer here
 
-
 					database.AddUser(user)	// add user to cash db
 				}
+
 				// user do not exist nor in cash nor in persistent db
 				// then we setup dialog
-				comm.AddNewUserToMap(update.Message)
+				comm.AddNewUserToMap(update.Message,ai_endpoint)
+				//user.AiSession.Base_url = ai_endpoint 	// TODO: it is hardcode here, need refactor
+				//db[chatID] = user
 			}
-			ai_endpoint := os.Getenv("AI_ENDPOINT") // TODO: should not be here?
+			
+			
 
 			if ok {
 
@@ -79,7 +83,7 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 				}
 
 				if !ok {
-					comm.AddNewUserToMap(update.Message)
+					comm.AddNewUserToMap(update.Message,ai_endpoint)	// TODO: is it double? why is it here?
 				}
 				if ok {
 
@@ -97,11 +101,11 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 					switch user.DialogStatus {
 
 					case 3:
-						comm.ChooseModel(update.Message)
+						comm.ChooseModel(update.Message,db_service)
 					case 4, 5:
 						comm.WrongResponse(update.Message)
 					case 6:
-						comm.DialogSequence(update.Message, ai_endpoint)
+						comm.DialogSequence(update.Message, ai_endpoint,db_service)
 
 					}
 
@@ -121,6 +125,10 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 				comm.HandleModelChoose(update.CallbackQuery)
 			case 5:
 				comm.ConnectingToAiWithLanguage(update.CallbackQuery, ai_endpoint)
+				// after successful connection we can save user from cashe to persistent db
+				// TODO: find a way to get thread id here
+				db_service.CreateChatSession(update.CallbackQuery.Message.Chat.ID,1,chatID,chatID,user.AiSession.GptModel)
+				db_service.CreateLSession(chatID,user.AiSession.GptModel)
 			}
 		}
 	} // end of main func

@@ -17,7 +17,7 @@ func main() {
 	_ = godotenv.Load()
 
 	token := os.Getenv("TG_KEY")
-	db_link := os.Getenv("EMBEDDINGS_DB_URL")
+	db_link := os.Getenv("DB_LINK")
 
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {

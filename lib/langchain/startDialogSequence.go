@@ -11,6 +11,8 @@ import (
 
 	"io/fs"
 
+	"github.com/JackBekket/hellper/lib/agent"
+	"github.com/JackBekket/hellper/lib/database"
 	db "github.com/JackBekket/hellper/lib/database"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
@@ -81,7 +83,7 @@ func errorMessage(err error, bot *tgbotapi.BotAPI, user db.User) {
 }
 
 
-func StartDialogSequence(bot *tgbotapi.BotAPI, chatID int64, promt string, ctx context.Context, ai_endpoint string) {
+func StartDialogSequence(bot *tgbotapi.BotAPI, chatID int64, promt string, ctx context.Context, ai_endpoint string, ds *database.Service) {
 	mu.Lock()
 	defer mu.Unlock()
 
@@ -125,7 +127,13 @@ func StartDialogSequence(bot *tgbotapi.BotAPI, chatID int64, promt string, ctx c
 		*/
 
 		user.AiSession.DialogThread = *post_session
-		db.UsersMap[chatID] = user
+		buffer := post_session.ConversationBuffer
+		last_msg := buffer[len(buffer)-1]
+		db.UsersMap[chatID] = user	//save in cash
+		//TODO: here we should save user conversation to the db?
+		h := agent.CreateMessageContentHuman(promt)
+		ds.UpdateHistory(chatID,1,chatID,chatID,gptModel,h[0])
+		ds.UpdateHistory(chatID,1,chatID,chatID,gptModel,last_msg)
 	}
 
 }

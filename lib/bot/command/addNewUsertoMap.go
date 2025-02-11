@@ -8,7 +8,7 @@ import (
 )
 
 // Adds a new user to the database and assigns "Dialog_status" = 0.
-func (c *Commander) AddNewUserToMap(updateMessage *tgbotapi.Message) {
+func (c *Commander) AddNewUserToMap(updateMessage *tgbotapi.Message, base_url string) {
 	chatID := updateMessage.Chat.ID
 	user := database.User{
 		ID:           chatID,
@@ -16,6 +16,7 @@ func (c *Commander) AddNewUserToMap(updateMessage *tgbotapi.Message) {
 		DialogStatus: 3,
 		Admin:        false,
 	}
+	user.AiSession.Base_url = base_url
 
 	database.AddUser(user)
 
@@ -29,11 +30,5 @@ func (c *Commander) AddNewUserToMap(updateMessage *tgbotapi.Message) {
 	msg := tgbotapi.NewMessage(user.ID, msgTemplates["hello"])
 	c.bot.Send(msg)
 
-	// check for registration
-	//	registred := IsAlreadyRegistred(session, chatID)
-	/*
-		if registred {
-			c.usersDb[chatID] = db.User{updateMessage.Chat.ID, updateMessage.Chat.UserName, 1}
-		}
-	*/
+
 }
