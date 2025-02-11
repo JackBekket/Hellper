@@ -103,22 +103,9 @@ func (c *Commander) attachModel(model_name string, chatID int64) {
 	db.UsersMap[chatID] = user
 }
 
-// internal for attach api key to a user
-func (c *Commander) AttachKey(gpt_key string, chatID int64) {
-	log.Println("Key promt: ", gpt_key)
-	user := db.UsersMap[chatID]
-	user.AiSession.GptKey = gpt_key // store key in memory
-	db.UsersMap[chatID] = user
-}
 
-// Dangerouse! NOTE -- probably work only internal
-func (c *Commander) ChangeDialogStatus(chatID int64, ds int8) {
-	user := db.UsersMap[chatID]
-	old_status := user.DialogStatus
-	log.Println("dialog status changed, old status is ", old_status)
-	log.Println("new status is ", ds)
-	user.DialogStatus = ds
-}
+
+
 
 func (c *Commander) WrongResponse(updateMessage *tgbotapi.Message) {
 	chatID := updateMessage.Chat.ID
@@ -174,7 +161,7 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint 
 			if updateMessage.Text != "" && updateMessage.Photo == nil {
 				promt := updateMessage.Text
 				ctx := context.WithValue(c.ctx, "user", user)
-				go langchain.StartDialogSequence(c.bot, chatID, promt, ctx, ai_endpoint)
+				go langchain.StartDialogSequence(c.bot, chatID, promt, ctx, ai_endpoint)	// main call
 			} else if updateMessage.Voice != nil {
 				voicePath, err := stt.HandleVoiceMessage(updateMessage, *c.bot)
 				if err != nil {

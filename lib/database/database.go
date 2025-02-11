@@ -508,6 +508,16 @@ func (s *Service) GetSession(userId int64) (AISession, error) {
 	return session, err
 }
 
+// check if session exists
+func (s *Service) CheckSession(userId int64) bool {
+	_, err := s.GetSession(userId)
+	if err != nil {
+		return false
+	} else {
+		return true
+	}
+}
+
 func (s *Service) SetSession(userId int64, endpointId int64, model string, endpointName string, endpointURL string, endpointAuthMethod int64) error {
     _, err := s.DBHandler.DB.Exec(`
         UPDATE ai_sessions

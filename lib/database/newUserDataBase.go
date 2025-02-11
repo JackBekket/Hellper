@@ -1,14 +1,11 @@
 package database
 
-//TODO
-// user should be fully functional user class and all operation with user should be placed here (in separate user.go package)
-
 import (
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/vectorstores"
 )
 
-// main database for dialogs, key (int64) is telegram user id
+// main in-memory struct for dialogs, key (int64) is telegram user id
 type User struct {
 	ID           int64
 	Username     string
@@ -26,6 +23,7 @@ type SessionUsage struct {
 	Usage map[string]int
 }
 
+//memory
 type AiSession struct {
 	GptKey       string
 	GptModel     string

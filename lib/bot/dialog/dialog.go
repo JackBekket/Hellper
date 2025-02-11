@@ -7,10 +7,11 @@ import (
 	"strings"
 
 	"github.com/JackBekket/hellper/lib/bot/command"
+	"github.com/JackBekket/hellper/lib/database"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm command.Commander) {
+func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm command.Commander, db_service *database.Service) {
 	for update := range updates {
 		if update.CallbackQuery == nil {
 
@@ -31,12 +32,45 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 			}
 
 			chatID := int64(update.Message.Chat.ID)
+			// in memory (cashe) db
 			db := comm.GetUsersDb()
 			user, ok := db[int64(chatID)]
-			if !ok {
+			if !ok {	// if there are no record in memory
+				
+				//TODO: Here we should try to fetch user from actual db and put it in cash if found
+				ds := db_service
+				user_exist_in_db := ds.CheckSession(chatID)
+
+				if user_exist_in_db == true {
+					// download user data from database into cashe
+					ai_session, _ := ds.GetSession(chatID)
+					model := ai_session.Model
+					url := ai_session.Endpoint.URL
+					user := database.User{
+						ID:           chatID,
+						Username:     update.Message.From.UserName,
+						DialogStatus: 6,
+						Admin:        false,
+					}
+					user.AiSession.GptModel = *model
+					user.AiSession.Base_url = url
+					api_key, err := ds.GetToken(chatID,1)
+					if err != nil {
+						log.Println("error getting user api key", err)
+					}
+					user.AiSession.GptKey = api_key
+
+					//history := ds.GetHistory(chatID)
+					//TODO: download and paste messages history to the dialog buffer here
+
+
+					database.AddUser(user)	// add user to cash db
+				}
+				// user do not exist nor in cash nor in persistent db
+				// then we setup dialog
 				comm.AddNewUserToMap(update.Message)
 			}
-			ai_endpoint := os.Getenv("AI_ENDPOINT")
+			ai_endpoint := os.Getenv("AI_ENDPOINT") // TODO: should not be here?
 
 			if ok {
 
