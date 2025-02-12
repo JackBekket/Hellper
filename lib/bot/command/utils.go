@@ -128,7 +128,6 @@ func (c *Commander) SendMediaHelper(chatID int64) {
 }
 
 func sendImage(bot *tgbotapi.BotAPI, chatID int64, path string) {
-
 	auth := os.Getenv("OPENAI_API_KEY")
 
 	fileName, err := getImage(path, auth)
@@ -218,4 +217,10 @@ func (c *Commander) GenerateNewImageLAI_SD(promt, url string, chatID int64, bot 
 	log.Println("url_path: ", filepath)
 
 	sendImage(bot, chatID, filepath)
+}
+
+
+func (c *Commander) SendMessage(chatID int64, message string) {
+	msg := tgbotapi.NewMessage(chatID,message)
+	c.bot.Send(msg)
 }

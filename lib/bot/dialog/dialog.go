@@ -42,7 +42,7 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 				ds := db_service
 				user_exist_in_db := ds.CheckSession(chatID)
 
-				if user_exist_in_db == true {
+				if user_exist_in_db {
 					// download user data from database into cashe
 					ai_session, _ := ds.GetSession(chatID)
 					model := ai_session.Model
@@ -61,17 +61,20 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 					}
 					user.AiSession.GptKey = api_key
 
-					//TODO: download and paste messages history to the dialog buffer here
+					
 					history ,err := ds.GetHistory(chatID,ai_session.Endpoint.ID,chatID,chatID,*model)
 					if err != nil {
 						log.Println(err)
 					}
 					user.AiSession.DialogThread.ConversationBuffer = history
 					database.AddUser(user)	// add user from persistent db into memory
-				}
+					comm.SendMessage(chatID,"Hello again!")
+					
+				} else {
 				// user do not exist nor in cash nor in persistent db
 				// then we setup dialog
-				comm.AddNewUserToMap(update.Message,ai_endpoint)
+				comm.AddNewUserToMap(update.Message,ai_endpoint)	//TODO:
+				} 
 			}
 			
 

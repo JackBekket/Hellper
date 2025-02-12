@@ -505,16 +505,7 @@ func (s *Service) CheckSession(userId int64) bool {
 	}
 }
 
-//TODO
-func (s *Service) SetSession(userId int64, endpointId int64, model string, endpointName string, endpointURL string, endpointAuthMethod int64) error {
-    _, err := s.DBHandler.DB.Exec(`
-        UPDATE ai_sessions
-        SET tg_user_id = $1, endpoint = $2, model = $3, name = $4, url = $5, auth_method = $6
-        WHERE tg_user_id = $1 AND endpoint = $2
-        RETURNING id
-        `, userId, endpointId, model, endpointName, endpointURL, endpointAuthMethod)
-    return err
-}
+
 
 
 func (s *Service) CreateLSession(userId int64, model string, endpoint int8) error {

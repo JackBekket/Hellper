@@ -8,24 +8,6 @@ import (
 	"github.com/go-telegram/bot/models"
 )
 
-// Render LLaMA-based Model Menu with Inline Keyboard
-func (c *Commander) RenderModelMenuLAI(chatID int64) {
-	msg := tgbotapi.NewMessage(chatID, msgTemplates["case1"])
-	msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("wizard-uncensored-13b", "wizard-uncensored-13b"),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("wizard-uncensored-30b", "wizard-uncensored-30b"),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("tiger-gemma-9b-v1-i1", "tiger-gemma-9b-v1-i1"),
-		),
-	)
-	c.bot.Send(msg)
-}
-
-
 // Get list of models from endpoint and render them
 func (c *Commander) RenderModels(chatID int64,db_service *database.Service, user database.User) {
 	models_list,err := c.getModels(db_service,user)

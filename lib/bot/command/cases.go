@@ -30,12 +30,10 @@ func (c *Commander) ChooseModel(updateMessage *tgbotapi.Message,db_service *db.S
 	gptKey := updateMessage.Text // handling previouse message
 	user := db.UsersMap[chatID]
 
-	// I can't validate key at this stage. The only way to validate key is to send test sequence (see case 3)
-	// Since this part is oftenly get an usernamecaught exeption, we debug what user input as key. It's bad, I know, but usernametil we got key validation we need this part.
 	log.Println("Key promt: ", gptKey)
 	user.AiSession.GptKey = gptKey // store key in memory
-	//c.getModels(chatID,ds,user)
-	//c.RenderModelMenuLAI(chatID)
+	ds.InsertToken(chatID,1,gptKey)	
+	
 	c.RenderModels(chatID,ds,user)
 	user.DialogStatus = 4
 	db.UsersMap[chatID] = user
