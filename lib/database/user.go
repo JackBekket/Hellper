@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	//"github.com/JackBekket/hellper/lib/database"
 	e "github.com/JackBekket/hellper/lib/embeddings"
 	"github.com/joho/godotenv"
 	"github.com/tmc/langchaingo/vectorstores/pgvector"
@@ -42,4 +43,28 @@ func (u *User) SetContext (collectionName string) error{
 
 func (u *User)ClearContext() {
 	u.VectorStore = nil
+}
+
+
+func (u *User) FlushThread() {
+	 u.AiSession.DialogThread.ConversationBuffer = nil 
+}
+
+
+func (u *User) FlushMemory(ds *Service) {
+	ds.DropHistory(u.ID,int64(u.AiSession.AI_Type),u.ID,u.ID,u.AiSession.GptModel)
+}
+
+
+func (u *User) Kill (ds *Service)	{
+	u.FlushThread()
+	u.FlushMemory(ds)
+	ds.DeleteToken(u.ID,1)
+	ds.DeleteLSession(u.ID)
+	delete(UsersMap,u.ID)
+}
+
+func (u *User) DropSession(ds *Service) {
+	ds.DeleteLSession(u.ID)
+	//ds.DropHistory(u.ID,int64(u.AiSession.AI_Type),u.ID,u.ID,u.AiSession.GptModel)
 }

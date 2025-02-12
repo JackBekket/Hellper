@@ -141,7 +141,7 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint 
 	user := db.UsersMap[chatID]
 
 	if updateMessage.Command() != "" {
-		HandleCommands(updateMessage, c)
+		HandleCommands(updateMessage, c, ds)
 	} else {
 
 		if updateMessage != nil {

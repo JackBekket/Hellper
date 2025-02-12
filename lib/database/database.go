@@ -401,6 +401,7 @@ func (s *Service) GetHistory(
 	return messages, err
 }
 
+//TODO: debug
 func (s *Service) DropHistory(
 	userId, endpointId, chatId, threadId int64, model string,
 ) error {
@@ -517,6 +518,14 @@ func (s *Service) CreateLSession(userId int64, model string, endpoint int8) erro
 	RETURNING tg_user_id
 	`, userId, model,endpoint)
 return err
+}
+
+func (s *Service) DeleteLSession(userId int64) error {
+    _, err := s.DBHandler.DB.Exec(`
+    DELETE FROM ai_sessions
+    WHERE tg_user_id = $1
+    `, userId)
+    return err
 }
 
 func (s *Service) GetToken(userId, authMethod int64) (string, error) {

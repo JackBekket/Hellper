@@ -78,3 +78,8 @@ func NewChatSessionGraph(buffer  []llms.MessageContent) *ChatSessionGraph {
 }
 
 
+func (s *ChatSessionGraph) ClearBuffer() {
+    s.ConversationBuffer = nil
+}
+
+
