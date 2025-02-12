@@ -63,13 +63,6 @@ func (c *Commander) HandleModelChoose(updateMessage *tgbotapi.CallbackQuery) {
 
 		user.DialogStatus = 5
 		db.UsersMap[chatID] = user
-	case "deepseek-coder-6b-instruct":
-		c.attachModel(model_name, chatID)
-		user.AiSession.GptModel = model_name
-		c.RenderLanguage(chatID)
-
-		user.DialogStatus = 5
-		db.UsersMap[chatID] = user
 	case "tiger-gemma-9b-v1-i1":
 		c.attachModel(model_name, chatID)
 		user.AiSession.GptModel = model_name
@@ -77,14 +70,6 @@ func (c *Commander) HandleModelChoose(updateMessage *tgbotapi.CallbackQuery) {
 
 		user.DialogStatus = 5
 		db.UsersMap[chatID] = user
-	case "wizard-uncensored-code-34b":
-		c.attachModel(model_name, chatID)
-		user.AiSession.GptModel = model_name
-		c.RenderLanguage(chatID)
-
-		user.DialogStatus = 5
-		db.UsersMap[chatID] = user
-
 	}
 
 	callbackResponse := tgbotapi.NewCallback(updateMessage.ID, "🐈💨")
@@ -109,9 +94,6 @@ func (c *Commander) attachModel(model_name string, chatID int64) {
 	c.bot.Send(msg)
 	db.UsersMap[chatID] = user
 }
-
-
-
 
 
 func (c *Commander) WrongResponse(updateMessage *tgbotapi.Message) {

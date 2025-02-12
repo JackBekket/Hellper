@@ -38,7 +38,7 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 			user, ok := db[int64(chatID)]
 			if !ok {	// if there are no record in memory
 				
-				//TODO: Here we should try to fetch user from actual db and put it in cash if found
+				//Here we try to fetch user from actual db and put it in cash if found
 				ds := db_service
 				user_exist_in_db := ds.CheckSession(chatID)
 
@@ -73,11 +73,10 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 				} else {
 				// user do not exist nor in cash nor in persistent db
 				// then we setup dialog
-				comm.AddNewUserToMap(update.Message,ai_endpoint)	//TODO:
+				comm.AddNewUserToMap(update.Message,ai_endpoint)
 				} 
 			}
 			
-
 			if ok {			//	if there are record in memory
 				if update.Message == nil {
 					continue

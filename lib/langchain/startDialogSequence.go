@@ -105,7 +105,7 @@ func StartDialogSequence(bot *tgbotapi.BotAPI, chatID int64, promt string, ctx c
 		errorMessage(err, bot, user)
 	} else {
 
-		log.Println("AI response: ", resp)
+		//log.Println("AI response: ", resp)
 		msg := tgbotapi.NewMessage(chatID, resp)
 		msg.ParseMode = "MARKDOWN"
 		bot.Send(msg)
@@ -115,7 +115,6 @@ func StartDialogSequence(bot *tgbotapi.BotAPI, chatID int64, promt string, ctx c
 		user.AiSession.Usage = usage
 		//db.UsersMap[chatID] = user
 
-		//log.Println(history)
 		total_turns := len(thread.ConversationBuffer)
 		log.Println("total number of turns: ", total_turns)
 		// Iterate over each message and print
