@@ -14,7 +14,6 @@ import (
 	stt "github.com/JackBekket/hellper/lib/localai/audioRecognition"
 	imgrec "github.com/JackBekket/hellper/lib/localai/imageRecognition"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/joho/godotenv"
 )
 
 type contextKey string
@@ -128,14 +127,13 @@ func (c *Commander) WrongResponse(updateMessage *tgbotapi.Message) {
 
 // update update Dialog_Status 5 -> 6
 func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.CallbackQuery, ai_endpoint string) {
-	_ = godotenv.Load()
+	//_ = godotenv.Load()
 	messageID := updateMessage.Message.MessageID
 	chatID := updateMessage.Message.Chat.ID
 	language := updateMessage.Data
 	user := db.UsersMap[chatID]
 	log.Println("check gpt key exist:", user.AiSession.GptKey)
 
-	//network := user.Network
 
 	msg := tgbotapi.NewMessage(user.ID, "connecting to ai node")
 	c.bot.Send(msg)

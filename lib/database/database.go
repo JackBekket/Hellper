@@ -2,8 +2,6 @@ package database
 
 import (
 	"database/sql"
-	"fmt"
-	"log"
 
 	"github.com/tmc/langchaingo/llms"
 )
@@ -249,25 +247,6 @@ func (s *Service) UpdateHistory(
 	return err
 }
 
-func (s *Service) CreateChatSession(
-    userId, endpointId, chatId, threadId int64,
-    model string,
-) error {
-	m_name := fmt.Sprintf("'" + model + "'")
-	log.Println("model_name", model)
-	log.Println("model shield: ", m_name)
-	// TODO: fix here to shield string as 'tiger-gemma' and fix non-existence check
-    _, err := s.DBHandler.DB.Exec(
-        `INSERT INTO chat_sessions (tg_user_id, endpoint, chat_id, thread_id, model)
-        VALUES ($1, $2, $3, $4, $5)
-        WHERE NOT EXISTS (SELECT 1 FROM chat_sessions
-        WHERE tg_user_id = $1 AND endpoint = $2 AND chat_id = $3
-        AND thread_id = $4 AND model = $5)
-        RETURNING id`,
-        userId, endpointId, chatId, threadId, m_name,
-    )
-    return err
-}
 
 func (s *Service) UpdateUsage(
 	userId, endpointId, chatId, threadId int64,

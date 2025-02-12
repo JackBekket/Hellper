@@ -127,7 +127,10 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 				comm.ConnectingToAiWithLanguage(update.CallbackQuery, ai_endpoint)
 				// after successful connection we can save user from cashe to persistent db
 				// TODO: find a way to get thread id here
-				db_service.CreateChatSession(update.CallbackQuery.Message.Chat.ID,1,chatID,chatID,user.AiSession.GptModel)
+				//db_service.CreateChatSession(update.CallbackQuery.Message.Chat.ID,1,chatID,chatID,user.AiSession.GptModel)
+				//req := update.CallbackQuery
+				//req_msg :=
+				//db_service.UpdateHistory(chatID,1,chatID,chatID,user.AiSession.GptModel,)
 				db_service.CreateLSession(chatID,user.AiSession.GptModel)
 			}
 		}
