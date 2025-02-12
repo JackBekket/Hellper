@@ -195,6 +195,7 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint 
 	}
 }
 
+// in-memory db
 func (c *Commander) GetUsersDb() map[int64]db.User {
 	data_base := db.UsersMap
 	return data_base

@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"log"
 
 	"github.com/tmc/langchaingo/llms"
 )
@@ -497,12 +498,14 @@ func (s *Service) GetSession(userId int64) (AISession, error) {
 func (s *Service) CheckSession(userId int64) bool {
 	_, err := s.GetSession(userId)
 	if err != nil {
+		log.Println(err)
 		return false
 	} else {
 		return true
 	}
 }
 
+//TODO
 func (s *Service) SetSession(userId int64, endpointId int64, model string, endpointName string, endpointURL string, endpointAuthMethod int64) error {
     _, err := s.DBHandler.DB.Exec(`
         UPDATE ai_sessions
@@ -513,13 +516,15 @@ func (s *Service) SetSession(userId int64, endpointId int64, model string, endpo
     return err
 }
 
-func (s *Service) CreateLSession(userId int64, model string) error {
+
+func (s *Service) CreateLSession(userId int64, model string, endpoint int8) error {
 	_, err := s.DBHandler.DB.Exec(`
-	UPDATE ai_sessions
-	SET tg_user_id = $1, endpoint = $2, model = $3, name = $4, url = $5, auth_method = $6
-	WHERE tg_user_id = $1 AND endpoint = $2
-	RETURNING id
-	`, userId, 1, model, "LocalAI Federated", "http://172.86.66.189:8337/lai/federated/v1", 1)
+	INSERT INTO ai_sessions (tg_user_id, model, endpoint)
+	VALUES ($1,$2,$3)
+	ON CONFLICT(tg_user_id) DO UPDATE SET
+	model = $2
+	RETURNING tg_user_id
+	`, userId, model,endpoint)
 return err
 }
 

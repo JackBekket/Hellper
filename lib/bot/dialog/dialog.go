@@ -61,31 +61,25 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 					}
 					user.AiSession.GptKey = api_key
 
-					//history := ds.GetHistory(chatID)
 					//TODO: download and paste messages history to the dialog buffer here
-
-					database.AddUser(user)	// add user to cash db
+					history ,err := ds.GetHistory(chatID,ai_session.Endpoint.ID,chatID,chatID,*model)
+					if err != nil {
+						log.Println(err)
+					}
+					user.AiSession.DialogThread.ConversationBuffer = history
+					database.AddUser(user)	// add user from persistent db into memory
 				}
-
 				// user do not exist nor in cash nor in persistent db
 				// then we setup dialog
 				comm.AddNewUserToMap(update.Message,ai_endpoint)
-				//user.AiSession.Base_url = ai_endpoint 	// TODO: it is hardcode here, need refactor
-				//db[chatID] = user
 			}
 			
-			
 
-			if ok {
-
+			if ok {			//	if there are record in memory
 				if update.Message == nil {
 					continue
 				}
-
-				if !ok {
-					comm.AddNewUserToMap(update.Message,ai_endpoint)	// TODO: is it double? why is it here?
-				}
-				if ok {
+				if ok {		// why is it two if ok?
 
 					log.Println("user dialog status:", user.DialogStatus)
 					log.Println(user.ID)
@@ -125,13 +119,8 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 				comm.HandleModelChoose(update.CallbackQuery)
 			case 5:
 				comm.ConnectingToAiWithLanguage(update.CallbackQuery, ai_endpoint)
-				// after successful connection we can save user from cashe to persistent db
-				// TODO: find a way to get thread id here
-				//db_service.CreateChatSession(update.CallbackQuery.Message.Chat.ID,1,chatID,chatID,user.AiSession.GptModel)
-				//req := update.CallbackQuery
-				//req_msg :=
-				//db_service.UpdateHistory(chatID,1,chatID,chatID,user.AiSession.GptModel,)
-				db_service.CreateLSession(chatID,user.AiSession.GptModel)
+				// after successful connection we can save user session from cashe to persistent db
+				db_service.CreateLSession(chatID,user.AiSession.GptModel,1)
 			}
 		}
 	} // end of main func
