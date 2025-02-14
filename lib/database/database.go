@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 
 	"github.com/tmc/langchaingo/llms"
@@ -248,7 +249,6 @@ func (s *Service) UpdateHistory(
 	return err
 }
 
-
 func (s *Service) UpdateUsage(
 	userId, endpointId, chatId, threadId int64,
 	model string, usage map[string]any,
@@ -367,6 +367,7 @@ func (s *Service) GetUsage(
 func (s *Service) GetHistory(
 	userId, endpointId, chatId, threadId int64, model string,
 ) ([]llms.MessageContent, error) {
+
 	messages := []llms.MessageContent{}
 	rows, err := s.DBHandler.DB.Query(`
         SELECT m.message_data
@@ -401,11 +402,12 @@ func (s *Service) GetHistory(
 	return messages, err
 }
 
-//TODO: debug
+// TODO: debug
 func (s *Service) DropHistory(
 	userId, endpointId, chatId, threadId int64, model string,
 ) error {
-	_, err := s.DBHandler.DB.Exec(`
+	endpointId = 1 //TODO: this variable is not set anywhere in user object, so it equals to 0. In our db we use 1, that's why query fails.
+	res, err := s.DBHandler.DB.Exec(`
         DELETE FROM chat_messages
         WHERE chat_session IN (
             SELECT id
@@ -417,6 +419,8 @@ func (s *Service) DropHistory(
 				model = $5
         )
 		`, userId, endpointId, chatId, threadId, model)
+	rowsAffected, _ := res.RowsAffected()
+	log.Printf("Query executed successfully. Rows affected: %d", rowsAffected)
 	return err
 }
 
@@ -437,7 +441,7 @@ func (s *Service) UpdateModel(userId int64, model *string) error {
 	return err
 }
 
-//also create new session?
+// also create new session?
 func (s *Service) UpdateEndpoint(userId int64, endpointId *int64) error {
 	var endpointIdValue interface{}
 	if endpointId != nil {
@@ -506,26 +510,34 @@ func (s *Service) CheckSession(userId int64) bool {
 	}
 }
 
-
-
-
 func (s *Service) CreateLSession(userId int64, model string, endpoint int8) error {
-	_, err := s.DBHandler.DB.Exec(`
-	INSERT INTO ai_sessions (tg_user_id, model, endpoint)
-	VALUES ($1,$2,$3)
-	ON CONFLICT(tg_user_id) DO UPDATE SET
-	model = $2
-	RETURNING tg_user_id
-	`, userId, model,endpoint)
-return err
+	log.Printf("CreateLSession called with userId: %d, model: %s, endpoint: %d", userId, model, endpoint)
+
+	res, err := s.DBHandler.DB.Exec(`
+		INSERT INTO ai_sessions (tg_user_id, model, endpoint)
+		VALUES ($1, $2, $3)
+		ON CONFLICT(tg_user_id) DO UPDATE SET
+		model = $2
+		RETURNING tg_user_id
+	`, userId, model, endpoint)
+
+	if err != nil {
+		log.Printf("Error executing query: %v", err)
+		return err
+	}
+
+	rowsAffected, _ := res.RowsAffected()
+	log.Printf("Query executed successfully. Rows affected: %d", rowsAffected)
+
+	return nil
 }
 
 func (s *Service) DeleteLSession(userId int64) error {
-    _, err := s.DBHandler.DB.Exec(`
+	_, err := s.DBHandler.DB.Exec(`
     DELETE FROM ai_sessions
     WHERE tg_user_id = $1
     `, userId)
-    return err
+	return err
 }
 
 func (s *Service) GetToken(userId, authMethod int64) (string, error) {
@@ -539,10 +551,16 @@ func (s *Service) GetToken(userId, authMethod int64) (string, error) {
 }
 
 func (s *Service) InsertToken(userId, authMethod int64, token string) error {
-	_, err := s.DBHandler.DB.Exec(`INSERT INTO auth
+	res, err := s.DBHandler.DB.Exec(`INSERT INTO auth
 		(tg_user_id, auth_method, token)
 		VALUES ($1, $2, $3)`, userId, authMethod, token)
-	return err
+	if err != nil {
+		fmt.Println("Error inserting token:", err)
+		return err
+	}
+	rowsAffected, _ := res.RowsAffected()
+	fmt.Println("Insert token fired. Rows affected:", rowsAffected)
+	return nil
 }
 
 func (s *Service) DeleteToken(userId, authMethod int64) error {

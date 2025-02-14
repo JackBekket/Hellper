@@ -4,6 +4,7 @@ package langchain
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"math/rand"
 	"os"
@@ -82,13 +83,12 @@ func errorMessage(err error, bot *tgbotapi.BotAPI, user db.User) {
 
 }
 
-
 func StartDialogSequence(bot *tgbotapi.BotAPI, chatID int64, promt string, ctx context.Context, ai_endpoint string, ds *db.Service) {
 	mu.Lock()
 	defer mu.Unlock()
 
 	user := db.UsersMap[chatID]
-
+	fmt.Println(user.AiSession.DialogThread)
 	gptModel := user.AiSession.GptModel
 	log.Printf(
 		"GPT model: %s,\npromt: %s\n",
@@ -128,11 +128,11 @@ func StartDialogSequence(bot *tgbotapi.BotAPI, chatID int64, promt string, ctx c
 		user.AiSession.DialogThread = *post_session
 		buffer := post_session.ConversationBuffer
 		last_msg := buffer[len(buffer)-1]
-		db.UsersMap[chatID] = user	//save in cash
+		db.UsersMap[chatID] = user //save in cash
 		//here we save user conversation to the db?
 		h := agent.CreateMessageContentHuman(promt)
-		ds.UpdateHistory(chatID,1,chatID,chatID,gptModel,h[0])
-		ds.UpdateHistory(chatID,1,chatID,chatID,gptModel,last_msg)
+		ds.UpdateHistory(chatID, 1, chatID, chatID, gptModel, h[0])
+		ds.UpdateHistory(chatID, 1, chatID, chatID, gptModel, last_msg)
 	}
 
 }
