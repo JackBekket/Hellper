@@ -550,6 +550,18 @@ func (s *Service) GetToken(userId, authMethod int64) (string, error) {
 	return token, err
 }
 
+func (s *Service) CheckToken(userId, authMethod int64) bool {
+	token, err := s.GetToken(userId, authMethod)
+	if err != nil {
+		fmt.Println(err)
+	}
+	tokenPresent := false
+	if token != "" {
+		tokenPresent = true
+	}
+	return tokenPresent
+}
+
 func (s *Service) InsertToken(userId, authMethod int64, token string) error {
 	res, err := s.DBHandler.DB.Exec(`INSERT INTO auth
 		(tg_user_id, auth_method, token)

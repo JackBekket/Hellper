@@ -40,10 +40,12 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 
 				//Here we try to fetch user from actual db and put it in cash if found
 				ds := db_service
-				user_exist_in_db := ds.CheckSession(chatID)
+				user_exist_in_db_with_session := ds.CheckSession(chatID)
+				isRegistered := ds.CheckToken(chatID, 1) //TODO: when we do the endpoints part, remove this hardcode
 
-				if user_exist_in_db {
+				if user_exist_in_db_with_session {
 					// download user data from database into cashe
+
 					ai_session, _ := ds.GetSession(chatID)
 					model := ai_session.Model
 					url := ai_session.Endpoint.URL
@@ -69,6 +71,8 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 					database.AddUser(user) // add user from persistent db into memory
 					comm.DialogSequence(update.Message, ai_endpoint, db_service)
 
+				} else if isRegistered {
+					comm.RecoverUserAfterDrop(ai_endpoint, update.Message.Chat.ID, &update, ds)
 				} else {
 					// user do not exist nor in cash nor in persistent db
 					// then we setup dialog

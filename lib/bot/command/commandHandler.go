@@ -42,11 +42,12 @@ func HandleCommands(message *tgbotapi.Message, comm *Commander, ds *database.Ser
 	case "purge":
 		msg := tgbotapi.NewMessage(user.ID, "Deleting all user data from database and restarting session..., type any key")
 		bot.Send(msg)
-		user.Kill(ds) //TODO: debug
+		user.Kill(ds)
 	case "drop":
 		msg := tgbotapi.NewMessage(user.ID, "Dropping session..., type any key")
 		bot.Send(msg)
-		user.DropSession(ds) //TODO: debug
+		user.DropSession(ds)
+		user.FlushMemory(ds)
 		userDb := database.UsersMap
 		delete(userDb, user.ID)
 	case "help":

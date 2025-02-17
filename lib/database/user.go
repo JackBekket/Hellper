@@ -62,5 +62,8 @@ func (u *User) Kill(ds *Service) {
 
 func (u *User) DropSession(ds *Service) {
 	ds.DeleteLSession(u.ID)
+	u.FlushThread()
+	u.FlushMemory(ds)
+
 	//ds.DropHistory(u.ID,int64(u.AiSession.AI_Type),u.ID,u.ID,u.AiSession.GptModel)
 }

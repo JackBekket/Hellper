@@ -8,6 +8,7 @@ import (
 
 	//"github.com/JackBekket/hellper/lib/database"
 
+	"github.com/JackBekket/hellper/lib/database"
 	db "github.com/JackBekket/hellper/lib/database"
 	"github.com/JackBekket/hellper/lib/langchain"
 	"github.com/JackBekket/hellper/lib/localai"
@@ -20,21 +21,17 @@ type contextKey string
 
 const UserKey contextKey = "user"
 
-
 // update Dialog_Status 3 -> 4
-func (c *Commander) ChooseModel(updateMessage *tgbotapi.Message,db_service *db.Service) {
+func (c *Commander) ChooseModel(updateMessage *tgbotapi.Message, db_service *db.Service) {
 	ds := db_service
-	
 	updateMessage.Text = strings.TrimSpace(updateMessage.Text)
 	chatID := updateMessage.Chat.ID
 	gptKey := updateMessage.Text // handling previouse message
 	user := db.UsersMap[chatID]
-
 	log.Println("Key promt: ", gptKey)
 	user.AiSession.GptKey = gptKey // store key in memory
-	ds.InsertToken(chatID,1,gptKey)	
-	
-	c.RenderModels(chatID,ds,user)
+	ds.InsertToken(chatID, 1, gptKey)
+	c.RenderModels(chatID, ds, user)
 	user.DialogStatus = 4
 	db.UsersMap[chatID] = user
 }
@@ -44,9 +41,9 @@ func (c *Commander) HandleModelChoose(updateMessage *tgbotapi.CallbackQuery) {
 	chatID := updateMessage.Message.Chat.ID
 	messageID := updateMessage.Message.MessageID
 	content := updateMessage.Data
-    // Use strings.Split to separate the string by "_".
-    parts := strings.Split(content, "_")
-    model_name := parts[1]
+	// Use strings.Split to separate the string by "_".
+	parts := strings.Split(content, "_")
+	model_name := parts[1]
 	user := db.UsersMap[chatID]
 	switch model_name {
 	case "wizard-uncensored-13b":
@@ -95,7 +92,6 @@ func (c *Commander) attachModel(model_name string, chatID int64) {
 	db.UsersMap[chatID] = user
 }
 
-
 func (c *Commander) WrongResponse(updateMessage *tgbotapi.Message) {
 	chatID := updateMessage.Chat.ID
 	user := db.UsersMap[chatID]
@@ -113,7 +109,6 @@ func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.CallbackQ
 	language := updateMessage.Data
 	user := db.UsersMap[chatID]
 	log.Println("check gpt key exist:", user.AiSession.GptKey)
-
 
 	msg := tgbotapi.NewMessage(user.ID, "connecting to ai node")
 	c.bot.Send(msg)
@@ -149,7 +144,7 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint 
 			if updateMessage.Text != "" && updateMessage.Photo == nil {
 				promt := updateMessage.Text
 				ctx := context.WithValue(c.ctx, "user", user)
-				go langchain.StartDialogSequence(c.bot, chatID, promt, ctx, ai_endpoint,ds)	// main call
+				go langchain.StartDialogSequence(c.bot, chatID, promt, ctx, ai_endpoint, ds) // main call
 			} else if updateMessage.Voice != nil {
 				voicePath, err := stt.HandleVoiceMessage(updateMessage, *c.bot)
 				if err != nil {
@@ -184,4 +179,26 @@ func (c *Commander) GetUsersDb() map[int64]db.User {
 func (c *Commander) GetUser(id int64) db.User {
 	user := db.UsersMap[id]
 	return user
+}
+
+func (c *Commander) RenderModelsForRegisteredUser(updateMessage *tgbotapi.Message, db_service *db.Service) {
+	ds := db_service
+	chatID := updateMessage.Chat.ID
+	user := db.UsersMap[chatID]
+	c.RenderModels(chatID, ds, user)
+	db.UsersMap[chatID] = user
+}
+
+func (c *Commander) RecoverUserAfterDrop(ai_endpoint string, chatID int64, update *tgbotapi.Update, ds *database.Service) {
+	fmt.Println("User is registered!")
+	user := database.User{
+		ID:           chatID,
+		Username:     update.Message.From.UserName,
+		DialogStatus: 4,
+		Admin:        false,
+	}
+	user.AiSession.GptKey, _ = ds.GetToken(user.ID, 1) //TODO: same for hardcode
+	user.AiSession.Base_url = ai_endpoint
+	database.AddUser(user)
+	c.RenderModelsForRegisteredUser(update.Message, ds)
 }
