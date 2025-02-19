@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/joho/godotenv"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai"
 
@@ -40,7 +39,6 @@ import (
     Then explain/describe how agent node works, what tools does it have. Then describe how each tool works.
     Then make a general summary for this package
 
-
 */
 
 // global var
@@ -62,9 +60,7 @@ func OneShotRun(prompt string, model openai.LLM, history_state ...llms.MessageCo
 		// Access the first element of the slice
 		history := history_state
 		// ... use the history variable as needed
-		for _, message := range history {
-			intialState = append(intialState, message) // load history as initial state
-		}
+			intialState = append(intialState, history...) // load history as initial state
 		intialState = append(
 			intialState,
 			agentState..., // append agent system prompt
@@ -210,9 +206,7 @@ func agent(ctx context.Context, state []llms.MessageContent) ([]llms.MessageCont
 				if len(response.Choices[0].ToolCalls) > 0 {
 					for _, toolCall := range response.Choices[0].ToolCalls {
 						if toolCall.FunctionCall.Name == "semanticSearch" { // AI catch that there is a function call in messages, so *now* it actually calls the function.
-
 							msg.Parts = append(msg.Parts, toolCall) // Add result to messages stack
-
 						}
 					}
 					state = append(state, msg)
@@ -235,7 +229,6 @@ func agent(ctx context.Context, state []llms.MessageContent) ([]llms.MessageCont
 // this function is only HANDLES tool calls, so this is a handler, not a deciding mechanism. agent decide whether or not to call tool in agent func and this func is handling tool call here.
 func shouldSearchDocuments(ctx context.Context, state []llms.MessageContent) string {
 	// this function (I suppose) can be reworked to work with a *set* of a functions, not just one func.
-
 	lastMsg := state[len(state)-1]
 	for _, part := range lastMsg.Parts {
 		toolCall, ok := part.(llms.ToolCall)
@@ -245,7 +238,6 @@ func shouldSearchDocuments(ctx context.Context, state []llms.MessageContent) str
 			return "semanticSearch"
 		}
 	}
-
 	return graph.END // never reach this point, should be removed?
 }
 
@@ -274,7 +266,7 @@ func semanticSearch(ctx context.Context, state []llms.MessageContent) ([]llms.Me
 			searchQuery := args.Query
 
 			//get env
-			_ = godotenv.Load()
+			//_ = godotenv.Load()
 			ai_url := os.Getenv("AI_ENDPOINT") // there are global, there might be resetting.
 			api_token := os.Getenv("OPENAI_API_KEY")
 			db_link := os.Getenv("PG_LINK")
@@ -283,11 +275,8 @@ func semanticSearch(ctx context.Context, state []llms.MessageContent) ([]llms.Me
 			log.Println("db_link: ", db_link)
 
 			// Retrieve your vector store based on the store value in the args
-			// You'll likely need to have a method for getting the vector store based
-			// on the store string ("store" value in the args)
 			store, err := embeddings.GetVectorStoreWithOptions(ai_url, api_token, db_link, args.Collection)
 			if err != nil {
-				// Handle errors in retrieving the vector store
 				log.Println("error getting store")
 				return state, err
 			}

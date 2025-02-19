@@ -14,7 +14,7 @@ import (
 func OnePunch(prompt string) {
 
 	llm := CreateGenericLLM()
-	call := OneShotRun(prompt, *&llm)
+	call := OneShotRun(prompt, llm)
 	log.Println(call)
 }
 
