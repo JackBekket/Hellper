@@ -1,97 +1,43 @@
-# hellper
+# Hellper
 ## Short Summary
-The provided code is for a Telegram bot written in Go, utilizing the `tgbotapi` package. It initializes the bot, sets up a database, and handles incoming updates.
+The Hellper package is a Telegram bot that uses natural language processing and machine learning models to handle user interactions. It initializes the bot, sets up a database connection, and handles incoming updates.
 
 ## Environment Variables and Flags
-* `TG_KEY`: Telegram Bot API key
-* `GODOTENV`: environment variables loaded using `godotenv`
+* `TG_KEY`: Telegram Bot API token
+* `DB_LINK`: database connection link
+* No command-line arguments or flags are specified.
 
-## Command Line Arguments
-None
-
-## Files and Paths
-* `configuration/README.MD`: configuration README file
-* `docker-compose.yaml`: Docker Compose file
-* `hf_models_config/`: directory containing model configuration files
-* `lib/agent/`: directory containing agent-related code
-* `lib/bot/`: directory containing bot-related code
-* `lib/database/`: directory containing database-related code
-* `media/`: directory containing media files
-* `models/`: directory containing model files
-* `prompt-templates/`: directory containing prompt templates
-* `tmp/`: directory containing temporary files
-
-## Edge Cases
-The application can be launched using the `go run main.go` command.
+## Edge Cases for Launching the Application
+The application can be launched by running the `main.go` file. There are no specified edge cases for launching the application.
 
 ## Project Package Structure
-```
-hellper/
-|-- .dockerignore
-|-- .envExample
-|-- .gitignore
-|-- .vscode/
-|   |-- launch.json
-|-- Dockerfile
-|-- configuration/
-|   |-- README.MD
-|-- docker-compose.yaml
-|-- drafts/
-|   |-- deepseeker.yaml
-|-- go.mod
-|-- go.sum
-|-- hf_models_config/
-|   |-- animagine-xl.yaml
-|   |-- bert.yaml
-|   |-- ...
-|-- img/
-|   |-- helper.jpg
-|   |-- local_ai.png
-|-- lib/
-|   |-- agent/
-|   |   |-- duck_search_agent.go
-|   |   |-- semantic_search_agent.go
-|   |   |-- ...
-|   |-- bot/
-|   |   |-- command/
-|   |   |   |-- addNewUsertoMap.go
-|   |   |   |-- cases.go
-|   |   |   |-- ...
-|   |-- database/
-|   |   |-- newUserDataBase.go
-|   |   |-- user.go
-|   |-- ...
-|-- main.go
-|-- media/
-|   |-- error_10.mp4
-|   |-- error_11.mp4
-|   |-- ...
-|-- models/
-|   |-- animagine-xl.yaml
-|   |-- bert.yaml
-|   |-- ...
-|-- prompt-templates/
-|   |-- alpaca.tmpl
-|   |-- getting_started.tmpl
-|   |-- ...
-|-- tmp/
-|   |-- audio/
-|   |   |-- transcriptions_folder.txt
-|   |-- generated/
-|   |   |-- images/
-|   |   |   |-- generated_images_folder.txt
-|   |-- images/
-|   |   |-- images_folder.txt
-|-- token_speed.txt
-```
+The project package structure is as follows:
+* `hellper/`
+	+ `main.go`
+	+ `lib/`
+		- `agent/`
+		- `bot/`
+		- `database/`
+		- `embeddings/`
+		- `langchain/`
+		- `localai/`
+	+ `models/`
+	+ `prompt-templates/`
+	+ `tmp/`
+	+ `media/`
+	+ `img/`
+	+ `configuration/`
+	+ `docker/`
 
 ## Relations Between Code Entities
 The code entities are related as follows:
-* The `main.go` file initializes the Telegram Bot API and sets up the database and commander.
-* The `lib/agent/` package contains code for agents, such as the `duck_search_agent` and `semantic_search_agent`.
-* The `lib/bot/` package contains code for the bot, including command handling and dialog management.
-* The `lib/database/` package contains code for the database, including user data management.
+* The `main.go` file initializes the bot and sets up the database connection.
+* The `lib/bot/` package handles bot-related functionality, such as command handling and update handling.
+* The `lib/database/` package handles database-related functionality, such as setting up a database connection and creating a new database handler.
+* The `lib/langchain/` package handles language chain-related functionality, such as setting up a language chain and handling updates.
+* The `lib/localai/` package handles local AI-related functionality, such as audio recognition and image recognition.
 
 ## Unclear Places or Dead Code
 There are no unclear places or dead code in the provided code.
 
+The main goal of the Hellper package is to provide a Telegram bot that can handle user interactions using natural language processing and machine learning models.
