@@ -36,14 +36,16 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 			// in memory (cashe) db
 			db := comm.GetUsersDb()
 			user, ok := db[int64(chatID)]
-			if !ok {	// if there are no record in memory
-				
+			if !ok { // if there are no record in memory
+
 				//Here we try to fetch user from actual db and put it in cash if found
 				ds := db_service
-				user_exist_in_db := ds.CheckSession(chatID)
+				user_exist_in_db_with_session := ds.CheckSession(chatID)
+				isRegistered := ds.CheckToken(chatID, 1) //TODO: when we do the endpoints part, remove this hardcode
 
-				if user_exist_in_db {
+				if user_exist_in_db_with_session {
 					// download user data from database into cashe
+
 					ai_session, _ := ds.GetSession(chatID)
 					model := ai_session.Model
 					url := ai_session.Endpoint.URL
@@ -55,55 +57,52 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 					}
 					user.AiSession.GptModel = *model
 					user.AiSession.Base_url = url
-					api_key, err := ds.GetToken(chatID,1)
+					api_key, err := ds.GetToken(chatID, 1)
 					if err != nil {
 						log.Println("error getting user api key", err)
 					}
 					user.AiSession.GptKey = api_key
 
-					
-					history ,err := ds.GetHistory(chatID,ai_session.Endpoint.ID,chatID,chatID,*model)
+					history, err := ds.GetHistory(chatID, ai_session.Endpoint.ID, chatID, chatID, *model)
 					if err != nil {
 						log.Println(err)
 					}
 					user.AiSession.DialogThread.ConversationBuffer = history
-					database.AddUser(user)	// add user from persistent db into memory
-					comm.SendMessage(chatID,"Hello again!")
-					
+					database.AddUser(user) // add user from persistent db into memory
+					comm.DialogSequence(update.Message, ai_endpoint, db_service)
+
+				} else if isRegistered {
+					comm.RecoverUserAfterDrop(ai_endpoint, update.Message.Chat.ID, &update, ds)
 				} else {
-				// user do not exist nor in cash nor in persistent db
-				// then we setup dialog
-				comm.AddNewUserToMap(update.Message,ai_endpoint)
-				} 
+					// user do not exist nor in cash nor in persistent db
+					// then we setup dialog
+					comm.AddNewUserToMap(update.Message, ai_endpoint)
+				}
 			}
-			
-			if ok {			//	if there are record in memory
+
+			if ok { //	if there are record in memory
 				if update.Message == nil {
 					continue
 				}
-				if ok {		// why is it two if ok?
+				log.Println("user dialog status:", user.DialogStatus)
+				log.Println(user.ID)
+				log.Println(user.Username)
 
-					log.Println("user dialog status:", user.DialogStatus)
-					log.Println(user.ID)
-					log.Println(user.Username)
+				if group && update.Message.Voice != nil && user.DialogStatus != 6 {
+					continue
+				}
+				if update.Message.Text != "" {
+					re := regexp.MustCompile(`@?` + regexp.QuoteMeta(bot.Self.UserName))
+					update.Message.Text = re.ReplaceAllString(update.Message.Text, "")
+				}
+				switch user.DialogStatus {
 
-					if group && update.Message.Voice != nil && user.DialogStatus != 6 {
-						continue
-					}
-					if update.Message.Text != "" {
-						re := regexp.MustCompile(`@?` + regexp.QuoteMeta(bot.Self.UserName))
-						update.Message.Text = re.ReplaceAllString(update.Message.Text, "")
-					}
-					switch user.DialogStatus {
-
-					case 3:
-						comm.ChooseModel(update.Message,db_service)
-					case 4, 5:
-						comm.WrongResponse(update.Message)
-					case 6:
-						comm.DialogSequence(update.Message, ai_endpoint,db_service)
-
-					}
+				case 3:
+					comm.ChooseModel(update.Message, db_service)
+				case 4, 5:
+					comm.WrongResponse(update.Message)
+				case 6:
+					comm.DialogSequence(update.Message, ai_endpoint, db_service)
 
 				}
 
@@ -122,7 +121,7 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 			case 5:
 				comm.ConnectingToAiWithLanguage(update.CallbackQuery, ai_endpoint)
 				// after successful connection we can save user session from cashe to persistent db
-				db_service.CreateLSession(chatID,user.AiSession.GptModel,1)
+				db_service.CreateLSession(chatID, user.AiSession.GptModel, 1)
 			}
 		}
 	} // end of main func
