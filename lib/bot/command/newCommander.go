@@ -24,5 +24,3 @@ func NewCommander(
 		ctx:     ctx,
 	}
 }
-
-//func GetCommander()

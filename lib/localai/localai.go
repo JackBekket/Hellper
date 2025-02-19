@@ -9,6 +9,7 @@ import (
 	"log"
 	"mime/multipart"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -73,19 +74,46 @@ func (e *WrongPwdError) Error() string {
 	return e.message
 }
 
-func main() {
-	prompt := "How are you?"
-	modelName := "wizard-uncensored-13b"
-	url := "http://localhost:8080/v1/chat/completions"
+type OpenAIDataObject struct {
+	ID     string `json:"id"`
+	Object string `json:"object"`
+}
 
-	resp, err := GenerateCompletion(prompt, modelName, url)
+type OpenAIModelsResponse struct {
+	Data []OpenAIDataObject `json:"data"`
+}
+
+func GetModelsList(endpoint, token string) ([]string, error) {
+	modelsList := []string{}
+	urlPath, err := url.JoinPath(endpoint, "models")
 	if err != nil {
-		fmt.Println("Error:", err)
-		return
+		return modelsList, err
+	}
+	req, err := http.NewRequest("GET", urlPath, nil)
+	req.Header.Set("Authorization", "Bearer "+token)
+	if err != nil {
+		return modelsList, err
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return modelsList, err
 	}
 
-	fmt.Println("Assistant's response:", resp.Choices[0].Message.Content)
+	modelsResp := OpenAIModelsResponse{}
+	err = json.NewDecoder(resp.Body).Decode(&modelsResp)
+	if err != nil {
+		return modelsList, err
+	}
+
+	for _, obj := range modelsResp.Data {
+		modelsList = append(modelsList, obj.ID)
+	}
+
+	return modelsList, nil
 }
+
+
+
 
 func GenerateCompletion(prompt, modelName string, url string) (*ChatResponse, error) {
 
@@ -136,20 +164,6 @@ func GenerateCompletion(prompt, modelName string, url string) (*ChatResponse, er
 	log.Println(chatResp)
 
 	return &chatResp, nil
-}
-
-func GenerateCompletionWithPWD(prompt, modelName string, url string, s_pwd string, u_pwd string) (*ChatResponse, error) {
-	if u_pwd != s_pwd {
-		err := &WrongPwdError{"wrong password"}
-		return nil, err
-	} else {
-		result, err := GenerateCompletion(prompt, modelName, url)
-		if err != nil {
-			return nil, err
-		} else {
-			return result, nil
-		}
-	}
 }
 
 func GenerateImageStableDiffusion(prompt, size, url, model string) (string, error) {
