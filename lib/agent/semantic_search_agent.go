@@ -82,6 +82,8 @@ func OneShotRun(prompt string, model openai.LLM, history_state ...llms.MessageCo
 	}
 
 	Tools,_ = tools.GetTools()
+
+	//Tools = tools
 	Model = model
 
 	// MAIN WORKFLOW
