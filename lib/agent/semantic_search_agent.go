@@ -7,9 +7,11 @@ import (
 	"log"
 	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai"
 
+	"github.com/JackBekket/hellper/lib/agent/tools"
 	"github.com/JackBekket/hellper/lib/embeddings"
 	"github.com/JackBekket/langgraphgo/graph"
 )
@@ -45,6 +47,7 @@ import (
 var Model openai.LLM
 var Tools []llms.Tool
 
+
 // This is the main function for this package
 func OneShotRun(prompt string, model openai.LLM, history_state ...llms.MessageContent) string {
 
@@ -78,47 +81,7 @@ func OneShotRun(prompt string, model openai.LLM, history_state ...llms.MessageCo
 
 	}
 
-	// toolS definition interfaces
-	tools := []llms.Tool{
-		{
-			Type: "function",
-			Function: &llms.FunctionDefinition{
-				Name:        "search",
-				Description: "Preforms Duck Duck Go web search",
-				Parameters: map[string]any{
-					"type": "object",
-					"properties": map[string]any{
-						"query": map[string]any{
-							"type":        "string",
-							"description": "The search query",
-						},
-					},
-				},
-			},
-		},
-		{
-			Type: "function",
-			Function: &llms.FunctionDefinition{
-				Name:        "semanticSearch",
-				Description: "Performs semantic search using a vector store",
-				Parameters: map[string]any{
-					"type": "object",
-					"properties": map[string]any{
-						"query": map[string]any{
-							"type":        "string",
-							"description": "The search query",
-						},
-						"collection": map[string]any{ //TODO: there should NOT exist arguments which called NAME cause it cause COLLISION with actual function name.    .....more like confusion then collision so there are no error
-							"type":        "string",
-							"description": "name of collection store in which we perform the search",
-						},
-					},
-				},
-			},
-		},
-	}
-
-	Tools = tools
+	Tools,_ = tools.GetTools()
 	Model = model
 
 	// MAIN WORKFLOW
@@ -266,7 +229,7 @@ func semanticSearch(ctx context.Context, state []llms.MessageContent) ([]llms.Me
 			searchQuery := args.Query
 
 			//get env
-			//_ = godotenv.Load()
+			_ = godotenv.Load()
 			ai_url := os.Getenv("AI_ENDPOINT") // there are global, there might be resetting.
 			api_token := os.Getenv("OPENAI_API_KEY")
 			db_link := os.Getenv("PG_LINK")
