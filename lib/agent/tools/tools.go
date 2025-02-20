@@ -16,6 +16,10 @@ type SemanticSearchTool struct {
     // ... tool-specific implementation
 }
 
+type Tool interface {
+    Execute(ctx context.Context, state []llms.MessageContent) ([]llms.MessageContent, error)
+}
+
 func  GetTools() ([]llms.Tool, error) {
     // ... tool init logic
 		// toolS definition interfaces
