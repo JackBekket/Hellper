@@ -1,10 +1,12 @@
 package command
 
 import (
+	"context"
 	"log"
 
 	"github.com/JackBekket/hellper/lib/database"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	tgbot "github.com/go-telegram/bot"
+	tgbotapi "github.com/go-telegram/bot/models"
 )
 
 // Adds a new user to the database and assigns "Dialog_status" = 0.
@@ -12,7 +14,7 @@ func (c *Commander) AddNewUserToMap(updateMessage *tgbotapi.Message, base_url st
 	chatID := updateMessage.Chat.ID
 	user := database.User{
 		ID:           chatID,
-		Username:     updateMessage.From.UserName,
+		Username:     updateMessage.From.Username,
 		DialogStatus: 3,
 		Admin:        false,
 	}
@@ -27,8 +29,8 @@ func (c *Commander) AddNewUserToMap(updateMessage *tgbotapi.Message, base_url st
 		user.Username,
 	)
 
-	msg := tgbotapi.NewMessage(user.ID, msgTemplates["hello"])
-	c.bot.Send(msg)
+	msg := tgbot.SendMessageParams{ChatID: user.ID, Text:  msgTemplates["hello"]}
+	c.bot.SendMessage(context.Background(),&msg)
 
 
 }

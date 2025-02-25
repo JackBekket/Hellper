@@ -9,7 +9,7 @@ import (
 
 	db "github.com/JackBekket/hellper/lib/database"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	tgbot "github.com/go-telegram/bot"
 )
 
 var mu = sync.Mutex{}
@@ -18,7 +18,7 @@ const UserKey contextKey = "user"
 
 
 func SetupSequenceWithKey(
-	bot *tgbotapi.BotAPI,
+	bot *tgbot.Bot,
 	user db.User,
 	language string,
 	ctx context.Context,
@@ -40,8 +40,8 @@ func SetupSequenceWithKey(
 			errorMessage(err, bot, user)
 		} else {
 
-			msg := tgbotapi.NewMessage(chatID, response)
-			bot.Send(msg)
+			msg := tgbot.SendMessageParams{ChatID: chatID, Text: response}
+			bot.SendMessage(ctx,&msg)
 			user.DialogStatus = 6
 			user.AiSession.DialogThread = *probe
 			usage := db.GetSessionUsage(user.ID)
@@ -54,8 +54,8 @@ func SetupSequenceWithKey(
 		if err != nil {
 			errorMessage(err, bot, user)
 		} else {
-			msg := tgbotapi.NewMessage(chatID, response)
-			bot.Send(msg)
+			msg := tgbot.SendMessageParams{ChatID: chatID, Text:response}
+			bot.SendMessage(ctx,&msg)
 			user.AiSession.DialogThread = *probe
 			user.DialogStatus = 6
 			usage := db.GetSessionUsage(user.ID)
@@ -68,8 +68,8 @@ func SetupSequenceWithKey(
 		if err != nil {
 			errorMessage(err, bot, user)
 		} else {
-			msg := tgbotapi.NewMessage(chatID, response)
-			bot.Send(msg)
+msg := tgbot.SendMessageParams{ChatID: chatID, Text:response}
+			bot.SendMessage(ctx,&msg)
 			user.AiSession.DialogThread = *probe
 			user.DialogStatus = 6
 			usage := db.GetSessionUsage(user.ID)

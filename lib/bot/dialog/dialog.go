@@ -8,10 +8,11 @@ import (
 
 	"github.com/JackBekket/hellper/lib/bot/command"
 	"github.com/JackBekket/hellper/lib/database"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	tgbot "github.com/go-telegram/bot"
+	tgbotapi "github.com/go-telegram/bot/models"
 )
 
-func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm command.Commander, db_service *database.Service) {
+func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbot.Bot, comm command.Commander, db_service *database.Service) {
 	ai_endpoint := os.Getenv("AI_ENDPOINT") // TODO: should not be here?
 	for update := range updates {
 		if update.CallbackQuery == nil {
@@ -51,7 +52,7 @@ func HandleUpdates(updates <-chan tgbotapi.Update, bot *tgbotapi.BotAPI, comm co
 					url := ai_session.Endpoint.URL
 					user := database.User{
 						ID:           chatID,
-						Username:     update.Message.From.UserName,
+						Username:     update.Message.From.Username,
 						DialogStatus: 6,
 						Admin:        false,
 					}

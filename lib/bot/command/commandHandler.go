@@ -1,14 +1,17 @@
 package command
 
 import (
+	"context"
 	"log"
 	"os"
 
 	"github.com/JackBekket/hellper/lib/database"
 	"github.com/JackBekket/hellper/lib/langchain"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	tgbot "github.com/go-telegram/bot"
+	tgbotapi "github.com/go-telegram/bot/models"
 )
 
+//old api
 func HandleCommands(message *tgbotapi.Message, comm *Commander, ds *database.Service) {
 	bot := comm.bot
 	chatID := message.Chat.ID
@@ -17,8 +20,8 @@ func HandleCommands(message *tgbotapi.Message, comm *Commander, ds *database.Ser
 	switch message.Command() {
 
 	case "image":
-		msg := tgbotapi.NewMessage(user.ID, "Image link generation...")
-		bot.Send(msg)
+		msg := tgbot.SendMessageParams{ChatID: user.ID, Text: "Image link generation..."}
+		bot.SendMessage(context.Background(), &msg)
 		baseUrl := os.Getenv("AI_ENDPOINT")
 		promt := message.CommandArguments()
 		log.Printf("Command /image arg: %s\n", promt)
@@ -29,23 +32,23 @@ func HandleCommands(message *tgbotapi.Message, comm *Commander, ds *database.Ser
 		}
 		//go openaibot.StartImageSequence(c.bot, updateMessage, chatID, promt, c.ctx)
 	case "reload":
-		msg := tgbotapi.NewMessage(user.ID, "Reloading session..., type any key")
-		bot.Send(msg)
+		msg := tgbot.SendMessageParams{ChatID: user.ID, Text: "Reloading session..., type any key"}
+		bot.SendMessage(context.Background(), &msg)
 		userDb := database.UsersMap
 		delete(userDb, user.ID)
 	case "clear":
-		msg := tgbotapi.NewMessage(user.ID, "Deleting dialog thread from database..., type any key")
-		bot.Send(msg)
+		msg := tgbot.SendMessageParams{ChatID: user.ID, Text: "Deleting dialog thread from database..., type any key"}
+		bot.SendMessage(context.Background(), &msg)
 		user.FlushMemory(ds)
 		userDb := database.UsersMap
 		delete(userDb, user.ID)
 	case "purge":
-		msg := tgbotapi.NewMessage(user.ID, "Deleting all user data from database and restarting session..., type any key")
-		bot.Send(msg)
+		msg := tgbot.SendMessageParams{ChatID: user.ID, Text: "Deleting all user data from database and restarting session..., type any key"}
+		bot.SendMessage(context.Background(), &msg)
 		user.Kill(ds)
 	case "drop":
-		msg := tgbotapi.NewMessage(user.ID, "Dropping session..., type any key")
-		bot.Send(msg)
+		msg := tgbot.SendMessageParams{ChatID: user.ID, Text: "Dropping session..., type any key"}
+		bot.SendMessage(context.Background(), &msg)
 		user.DropSession(ds)
 		user.FlushMemory(ds)
 		userDb := database.UsersMap
@@ -79,3 +82,27 @@ func HandleCommands(message *tgbotapi.Message, comm *Commander, ds *database.Ser
 	default:
 	}
 }
+
+// in new approach we should delcare and register handler for each sepatare command (?)
+
+
+// example
+func helloHandler(ctx context.Context, b *tgbot.Bot, update *tgbotapi.Update) {
+	b.SendMessage(ctx, &tgbot.SendMessageParams{
+		ChatID:    update.Message.Chat.ID,
+		Text:      "Hello, *" + tgbot.EscapeMarkdown(update.Message.From.FirstName) + "*",
+		ParseMode: tgbotapi.ParseModeMarkdown,
+	})
+}
+
+
+/*
+func imageHandler (ctx context.Context, b *tgbot.Bot, update *tgbotapi.Update) {
+	chatID := update.Message.Chat.ID
+	user_id := update.Message.From.ID
+	msg := tgbot.SendMessageParams{ChatID: user_id, Text: "Image link generation..."}
+		bot.SendMessage(context.Background(), &msg)
+		baseUrl := os.Getenv("AI_ENDPOINT")
+		promt := 	
+}
+*/

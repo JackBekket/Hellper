@@ -15,7 +15,8 @@ import (
 	"github.com/JackBekket/hellper/lib/agent"
 	//"github.com/JackBekket/hellper/lib/database"
 	db "github.com/JackBekket/hellper/lib/database"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	tgbot "github.com/go-telegram/bot"
+	tgbotapi "github.com/go-telegram/bot/models"
 
 	//TODO: investigate why meme videos with helper are not sent by this func!
 	// Notifies the user that an error occurred while creating the request.
@@ -24,12 +25,12 @@ import (
 	"sort"
 )
 
-func errorMessage(err error, bot *tgbotapi.BotAPI, user db.User) {
+func errorMessage(err error, bot *tgbot.Bot, user db.User) {
 	log.Println("error :", err)
-	msg := tgbotapi.NewMessage(user.ID, err.Error())
-	bot.Send(msg)
-	msg = tgbotapi.NewMessage(user.ID, "an error has occured. In order to proceed we need to recreate client and initialize new session")
-	bot.Send(msg)
+	msg := tgbot.SendMessageParams{ChatID: user.ID, Text: err.Error()}
+	bot.SendMessage(context.Background(),&msg)
+	msg = tgbot.SendMessageParams{ChatID: user.ID, Text: "an error has occured. In order to proceed we need to recreate client and initialize new session"}
+	bot.SendMessage(context.Background(),&msg)
 
 	// Send helper video error
 	// Get a list of all files in the media directory
@@ -83,7 +84,7 @@ func errorMessage(err error, bot *tgbotapi.BotAPI, user db.User) {
 
 }
 
-func StartDialogSequence(bot *tgbotapi.BotAPI, chatID int64, promt string, ctx context.Context, ai_endpoint string, ds *db.Service) {
+func StartDialogSequence(bot *tgbot.Bot, chatID int64, promt string, ctx context.Context, ai_endpoint string, ds *db.Service) {
 	mu.Lock()
 	defer mu.Unlock()
 
@@ -106,9 +107,9 @@ func StartDialogSequence(bot *tgbotapi.BotAPI, chatID int64, promt string, ctx c
 	} else {
 
 		//log.Println("AI response: ", resp)
-		msg := tgbotapi.NewMessage(chatID, resp)
+		msg := tgbot.SendMessageParams{ChatID: user.ID, Text:  resp}
 		msg.ParseMode = "MARKDOWN"
-		bot.Send(msg)
+		bot.SendMessage(ctx,&msg)
 
 		user.DialogStatus = 6
 		usage := db.GetSessionUsage(user.ID)
