@@ -3,13 +3,25 @@ package handlers
 import (
 	"context"
 
+	"github.com/JackBekket/hellper/lib/database"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 )
 
 // structure to hold dependencies of other packages: postgres, cache, llmHandlers
 type handlers struct {
-	/*Pass dependencies here */
+	// Stub for the cache
+	cache *cache
+	// Postgres database and LLMHandlers
+	db_service *database.Service
+
+	ai_endpoint string
+
+	// Pass dependencies here
+}
+
+type cache struct {
+	data map[int64]database.User
 }
 
 // Constructor of the handlers type
@@ -26,7 +38,11 @@ func (h *handlers) NewRegisterHandlers(ctx context.Context, tgb *bot.Bot) {
 	tgb.RegisterHandlerMatchFunc(matchTextMessage, h.textMessageRouter)
 
 	// Router for callbacks
-	tgb.RegisterHandlerMatchFunc(matchCallbackQuery, h.callbackRouter)
+	tgb.RegisterHandlerMatchFunc(
+		matchCallbackQuery,
+		h.callbackRouter,
+		callbackSingleExecutionMiddleWare,
+	)
 
 	tgb.RegisterHandlerMatchFunc(matchPhoto, h.photoHandler)
 
