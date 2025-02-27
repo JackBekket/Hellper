@@ -7,6 +7,11 @@ import (
 	"github.com/go-telegram/bot/models"
 )
 
+// Router for tg bot command handlers
+func (h *handlers) cmdRouter(ctx context.Context, b *bot.Bot, update *models.Update) {
+
+}
+
 func (h *handlers) cmdImage(ctx context.Context, tgb *bot.Bot, msg *models.Update)
 
 func (h *handlers) cmdReload(ctx context.Context, tgb *bot.Bot, msg *models.Update)
