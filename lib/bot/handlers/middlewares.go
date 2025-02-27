@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"sync"
 
 	"github.com/JackBekket/hellper/lib/database"
 	"github.com/go-telegram/bot"
@@ -49,5 +50,20 @@ func (h *handlers) IdentifyUserMiddleware(next bot.HandlerFunc) bot.HandlerFunc 
 		}
 
 		// todo
+	}
+}
+
+// this func ensures that a callback query is processed only once at a time per message
+func callbackSingleExecutionMiddleWare(next bot.HandlerFunc) bot.HandlerFunc {
+	sf := sync.Map{}
+	return func(ctx context.Context, tgb *bot.Bot, update *models.Update) {
+		if update.CallbackQuery != nil {
+			key := update.CallbackQuery.Message.Message.ID
+			if _, loaded := sf.LoadOrStore(key, struct{}{}); loaded {
+				return
+			}
+			defer sf.Delete(key)
+			next(ctx, tgb, update)
+		}
 	}
 }
