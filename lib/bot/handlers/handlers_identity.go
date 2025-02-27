@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/JackBekket/hellper/lib/database"
 	"github.com/go-telegram/bot"
@@ -79,4 +80,39 @@ func (h *handlers) handleRecoverUserAfterDrop(ctx context.Context, tgb *bot.Bot,
 	h.cache.data[chatID] = user
 
 	h.RenderModelsForRegisteredUser(ctx, tgb, update) //todo
+}
+
+// download user data from database into cashe
+func restoreUserSessionFromDB(ds *database.Service, chatID int64, username string) (*database.User, error) {
+	ai_session, err := ds.GetSession(chatID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve session: %w", err)
+	}
+
+	apiKey, err := ds.GetToken(chatID, 1)
+	if err != nil {
+		return nil, fmt.Errorf("error retrieving user's API key : %w", err)
+	}
+
+	history, err := ds.GetHistory(chatID, ai_session.Endpoint.ID, chatID, chatID, *ai_session.Model)
+	if err != nil {
+		return nil, fmt.Errorf("error loading user's history : %w", err)
+	}
+
+	user := &database.User{
+		ID:           chatID,
+		Username:     username,
+		DialogStatus: 6,
+		Admin:        false,
+		AiSession: database.AiSession{
+			GptModel: *ai_session.Model,
+			Base_url: ai_session.Endpoint.URL,
+			GptKey:   apiKey,
+			DialogThread: database.ChatSessionGraph{
+				ConversationBuffer: history,
+			},
+		},
+	}
+	return user, nil
+
 }
