@@ -1,6 +1,10 @@
 package handlers
 
-import "github.com/go-telegram/bot"
+import (
+	"context"
+
+	"github.com/go-telegram/bot"
+)
 
 // structure to hold dependencies of other packages: postgres, cache, llmHandlers
 type handlers struct {
@@ -13,6 +17,6 @@ func NewHandlersBot( /*Pass dependencies here */ ) *handlers {
 }
 
 // Central function for registering bot handlers. New used commands should be added here
-func (h *handlers) NewRegisterHandlers(bot *bot.Bot) {
+func (h *handlers) NewRegisterHandlers(ctx context.Context, bot *bot.Bot) {
 
 }
