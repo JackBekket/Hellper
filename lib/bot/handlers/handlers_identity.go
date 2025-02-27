@@ -1,0 +1,47 @@
+package handlers
+
+import (
+	"context"
+
+	"github.com/JackBekket/hellper/lib/database"
+	"github.com/go-telegram/bot"
+	"github.com/go-telegram/bot/models"
+	"github.com/rs/zerolog/log"
+)
+
+// old func name: AddNewUserToMap.
+// Creates a session for a new user. Sends a welcome message.
+func (h *handlers) handleNewUser(ctx context.Context, tgb *bot.Bot, update *models.Update) {
+	if update.Message == nil {
+		return
+	}
+
+	chatID := update.Message.Chat.ID
+
+	user := database.User{
+		ID:           chatID,
+		Username:     update.Message.From.Username,
+		DialogStatus: 3,
+		Admin:        false,
+		AiSession: database.AiSession{
+			Base_url: h.ai_endpoint,
+		},
+	}
+
+	h.cache.data[chatID] = user
+
+	log.Info().
+		Int64("chat_id", user.ID).
+		Str("username", user.Username).
+		Msg("new user")
+
+	msg := &bot.SendMessageParams{
+		ChatID: chatID,
+		Text:   msgTemplates["hello"],
+	}
+
+	_, err := tgb.SendMessage(ctx, msg)
+	if err != nil {
+		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
+	}
+}
