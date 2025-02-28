@@ -15,11 +15,16 @@ import (
 func (h *handlers) IdentifyUserMiddleware(next bot.HandlerFunc) bot.HandlerFunc {
 	return func(ctx context.Context, tgb *bot.Bot, update *models.Update) {
 		var chatID int64
-		if update.Message != nil {
+		var username string
+
+		switch {
+		case update.Message != nil:
 			chatID = update.Message.From.ID
-		} else if update.CallbackQuery != nil {
+			username = update.Message.From.Username
+		case update.CallbackQuery != nil:
 			chatID = update.CallbackQuery.From.ID
-		} else {
+			username = update.CallbackQuery.From.Username
+		default:
 			next(ctx, tgb, update)
 			return
 		}
@@ -34,22 +39,34 @@ func (h *handlers) IdentifyUserMiddleware(next bot.HandlerFunc) bot.HandlerFunc 
 			user, err := restoreUserSessionFromDB(h.db_service, chatID, update.Message.From.Username)
 			if err != nil {
 				log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("failed to restore user from the database. The user has been sent for registration")
-				h.handleNewUser(ctx, tgb, update)
+				h.handleNewUserRegistration(ctx, tgb, update)
 				return
 			}
 
 			database.AddUser(*user) // add user from persistent db into cache
+			log.Info().Int64("chat_id", chatID).Msg("User session successfully restored from the database. User added to the cache.")
 			next(ctx, tgb, update)
 			return
 		}
 
 		//TODO: when we do the endpoints part, remove this hardcode
 		if h.db_service.CheckToken(chatID, 1) {
-			h.handleRecoverUserAfterDrop(ctx, tgb, update)
+			user, err := recoverUserAfterDrop(h.db_service, chatID, username, h.ai_endpoint)
+			if err != nil {
+				log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("failed to restore user from the database. The user has been sent for registration")
+				h.handleNewUserRegistration(ctx, tgb, update)
+				return
+			}
+
+			h.cache.data[chatID] = *user
+			log.Info().Int64("chat_id", chatID).Msg("User successfully restored after drop")
+			h.handleSendAIModelSelectionKeyboard(ctx, tgb, update)
 			return
 		}
 
-		// todo
+		log.Warn().Int64("chat_id", chatID).Msg("User not found in cache or database. Redirecting to registration.")
+		h.handleNewUserRegistration(ctx, tgb, update)
+
 	}
 }
 
