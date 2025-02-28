@@ -90,3 +90,39 @@ func (h *handlers) handleAIModelSelectionCallback(ctx context.Context, tgb *bot.
 	h.cache.UpdateUser(user)
 
 }
+
+func (h *handlers) handleConnectingToAiWithLangCallback(ctx context.Context, tgb *bot.Bot, update *models.Update) {
+	chatID := update.CallbackQuery.From.ID
+	lang := update.CallbackQuery.Data
+
+	log.Info().Int64("chat_id", chatID).Str("lang", lang).Msg("User initiated AI connection via callback")
+
+	messageID := update.CallbackQuery.ID
+	callbackResponse := &bot.AnswerCallbackQueryParams{
+		CallbackQueryID: messageID,
+		Text:            "🐈💨",
+	}
+	_, err := tgb.AnswerCallbackQuery(ctx, callbackResponse)
+	if err != nil {
+		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error answering callback query")
+		return
+	}
+
+	msg := &bot.SendMessageParams{
+		ChatID: chatID,
+		Text:   msg_Connecting_AI_node,
+	}
+	_, err = tgb.SendMessage(ctx, msg)
+	if err != nil {
+		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
+		return
+	}
+
+	// I commented out the line because the context with the value is not used anywhere
+	//ctxWithValue := context.WithValue(ctx, "user", user)
+	langPromt := getInitialLangPromt(lang)
+	log.Info().Int64("chat_id", chatID).Str("language", lang).Str("ai_endpoint", h.baseURL).
+		Msg("Starting AI conversation")
+
+	go h.handleStartAiConversationWithLang(ctx, tgb, chatID, langPromt)
+}
