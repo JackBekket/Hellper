@@ -12,7 +12,7 @@ import (
 
 // old func name: AddNewUserToMap.
 // Creates a session for a new user. Sends a welcome message.
-func (h *handlers) handleNewUser(ctx context.Context, tgb *bot.Bot, update *models.Update) {
+func (h *handlers) handleNewUserRegistration(ctx context.Context, tgb *bot.Bot, update *models.Update) {
 	if update.Message == nil {
 		return
 	}
@@ -22,7 +22,7 @@ func (h *handlers) handleNewUser(ctx context.Context, tgb *bot.Bot, update *mode
 	user := database.User{
 		ID:           chatID,
 		Username:     update.Message.From.Username,
-		DialogStatus: 3,
+		DialogStatus: 3, //   status_AIModelSelectionKeyboard
 		Admin:        false,
 		AiSession: database.AiSession{
 			Base_url: h.ai_endpoint,
@@ -47,41 +47,6 @@ func (h *handlers) handleNewUser(ctx context.Context, tgb *bot.Bot, update *mode
 	}
 }
 
-func (h *handlers) handleRecoverUserAfterDrop(ctx context.Context, tgb *bot.Bot, update *models.Update) {
-	if update.Message == nil {
-		return
-	}
-
-	chatID := update.Message.Chat.ID
-	username := update.Message.From.Username
-
-	log.Info().
-		Int64("chat_id", chatID).
-		Str("username", username).
-		Msg("Restoring a registered user")
-
-	user := database.User{
-		ID:           chatID,
-		Username:     username,
-		DialogStatus: 4,
-		Admin:        false,
-		AiSession: database.AiSession{
-			Base_url: h.ai_endpoint,
-		},
-	}
-
-	apiKey, err := h.db_service.GetToken(chatID, 1)
-	if err != nil {
-		log.Error().Err(err).Int64("chat_id", chatID).Msg("Ошибка получения API-ключа")
-		return
-	}
-	user.AiSession.GptKey = apiKey
-
-	h.cache.data[chatID] = user
-
-	h.RenderModelsForRegisteredUser(ctx, tgb, update) //todo
-}
-
 // download user data from database into cashe
 func restoreUserSessionFromDB(ds *database.Service, chatID int64, username string) (*database.User, error) {
 	ai_session, err := ds.GetSession(chatID)
@@ -89,7 +54,7 @@ func restoreUserSessionFromDB(ds *database.Service, chatID int64, username strin
 		return nil, fmt.Errorf("failed to retrieve session: %w", err)
 	}
 
-	apiKey, err := ds.GetToken(chatID, 1)
+	gptKey, err := ds.GetToken(chatID, 1)
 	if err != nil {
 		return nil, fmt.Errorf("error retrieving user's API key : %w", err)
 	}
@@ -107,7 +72,7 @@ func restoreUserSessionFromDB(ds *database.Service, chatID int64, username strin
 		AiSession: database.AiSession{
 			GptModel: *ai_session.Model,
 			Base_url: ai_session.Endpoint.URL,
-			GptKey:   apiKey,
+			GptKey:   gptKey,
 			DialogThread: database.ChatSessionGraph{
 				ConversationBuffer: history,
 			},
@@ -115,4 +80,31 @@ func restoreUserSessionFromDB(ds *database.Service, chatID int64, username strin
 	}
 	return user, nil
 
+}
+func recoverUserAfterDrop(ds *database.Service, chatID int64, username string, baseURL string) (*database.User, error) {
+
+	log.Info().
+		Int64("chat_id", chatID).
+		Str("username", username).
+		Msg("Restoring a registered user")
+
+	user := &database.User{
+		ID:           chatID,
+		Username:     username,
+		DialogStatus: 4,
+		Admin:        false,
+		AiSession: database.AiSession{
+			Base_url: baseURL,
+		},
+	}
+
+	gptKey, err := ds.GetToken(chatID, 1)
+	if err != nil {
+		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error retrieving GPT KEY")
+		log.Warn().Int64("chat_id", chatID).Msg("User redirected to registration handler due to GPT KEY error")
+		return &database.User{}, err
+	}
+
+	user.AiSession.GptKey = gptKey
+	return user, nil
 }
