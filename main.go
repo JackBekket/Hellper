@@ -10,6 +10,7 @@ import (
 	"github.com/JackBekket/hellper/lib/bot/dialog"
 	"github.com/JackBekket/hellper/lib/database"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -28,6 +29,13 @@ func main() {
 		TimeFormat:   time.DateTime,
 		TimeLocation: time.Local,
 	})
+
+	var err error
+	err = godotenv.Load()
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to load .env file")
+	}
+	log.Info().Msg(".env file loaded successfully")
 
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
