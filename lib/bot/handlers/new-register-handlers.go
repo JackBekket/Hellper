@@ -8,14 +8,19 @@ import (
 	"github.com/go-telegram/bot/models"
 )
 
+type Bot interface {
+	IdentifyUserMiddleware(next bot.HandlerFunc) bot.HandlerFunc
+	NewRegisterHandlers(ctx context.Context, tgb *bot.Bot)
+}
+
 // structure to hold dependencies of other packages: postgres, cache, llmHandlers
+// create interface
 type handlers struct {
-	// Stub for the cache
-	cache *cache
+	cache database.Cacher
 	// Postgres database and LLMHandlers
 	db_service *database.Service
-
-	ai_endpoint string
+	//ai_endpoint
+	baseURL string
 
 	// Pass dependencies here
 }
@@ -25,8 +30,12 @@ type cache struct {
 }
 
 // Constructor of the handlers type
-func NewHandlersBot( /*Pass dependencies here */ ) *handlers {
-	return &handlers{}
+func NewHandlersBot(cache database.Cacher, db_service *database.Service, baseURL string) Bot {
+	return &handlers{
+		cache:      cache,
+		db_service: db_service,
+		baseURL:    baseURL,
+	}
 }
 
 // Central function for registering bot handlers. New used commands should be added here
