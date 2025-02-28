@@ -10,6 +10,7 @@ import (
 )
 
 // Adds a new user to the database and assigns "Dialog_status" = 0.
+// done
 func (c *Commander) AddNewUserToMap(updateMessage *tgbotapi.Message, base_url string) {
 	chatID := updateMessage.Chat.ID
 	user := database.User{
@@ -29,8 +30,7 @@ func (c *Commander) AddNewUserToMap(updateMessage *tgbotapi.Message, base_url st
 		user.Username,
 	)
 
-	msg := tgbot.SendMessageParams{ChatID: user.ID, Text:  msgTemplates["hello"]}
-	c.bot.SendMessage(context.Background(),&msg)
-
+	msg := tgbot.SendMessageParams{ChatID: user.ID, Text: msgTemplates["hello"]}
+	c.bot.SendMessage(context.Background(), &msg)
 
 }

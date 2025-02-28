@@ -25,12 +25,13 @@ import (
 	"sort"
 )
 
+// done
 func errorMessage(err error, bot *tgbot.Bot, user db.User) {
 	log.Println("error :", err)
 	msg := tgbot.SendMessageParams{ChatID: user.ID, Text: err.Error()}
-	bot.SendMessage(context.Background(),&msg)
+	bot.SendMessage(context.Background(), &msg)
 	msg = tgbot.SendMessageParams{ChatID: user.ID, Text: "an error has occured. In order to proceed we need to recreate client and initialize new session"}
-	bot.SendMessage(context.Background(),&msg)
+	bot.SendMessage(context.Background(), &msg)
 
 	// Send helper video error
 	// Get a list of all files in the media directory
@@ -107,9 +108,9 @@ func StartDialogSequence(bot *tgbot.Bot, chatID int64, promt string, ctx context
 	} else {
 
 		//log.Println("AI response: ", resp)
-		msg := tgbot.SendMessageParams{ChatID: user.ID, Text:  resp}
+		msg := tgbot.SendMessageParams{ChatID: user.ID, Text: resp}
 		msg.ParseMode = "MARKDOWN"
-		bot.SendMessage(ctx,&msg)
+		bot.SendMessage(ctx, &msg)
 
 		user.DialogStatus = 6
 		usage := db.GetSessionUsage(user.ID)

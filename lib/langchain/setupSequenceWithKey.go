@@ -1,5 +1,7 @@
 package langchain
 
+// Deprecated
+
 //package main
 
 import (
@@ -13,10 +15,12 @@ import (
 )
 
 var mu = sync.Mutex{}
+
 type contextKey string
+
 const UserKey contextKey = "user"
 
-
+// done
 func SetupSequenceWithKey(
 	bot *tgbot.Bot,
 	user db.User,
@@ -35,13 +39,13 @@ func SetupSequenceWithKey(
 
 	switch language {
 	case "English":
-		response,probe, err := tryLanguage(user, "", 1,ai_endpoint)
+		response, probe, err := tryLanguage(user, "", 1, ai_endpoint)
 		if err != nil {
 			errorMessage(err, bot, user)
 		} else {
 
 			msg := tgbot.SendMessageParams{ChatID: chatID, Text: response}
-			bot.SendMessage(ctx,&msg)
+			bot.SendMessage(ctx, &msg)
 			user.DialogStatus = 6
 			user.AiSession.DialogThread = *probe
 			usage := db.GetSessionUsage(user.ID)
@@ -50,12 +54,12 @@ func SetupSequenceWithKey(
 			db.UsersMap[chatID] = user
 		}
 	case "Russian":
-		response,probe, err := tryLanguage(user, "", 2,ai_endpoint)
+		response, probe, err := tryLanguage(user, "", 2, ai_endpoint)
 		if err != nil {
 			errorMessage(err, bot, user)
 		} else {
-			msg := tgbot.SendMessageParams{ChatID: chatID, Text:response}
-			bot.SendMessage(ctx,&msg)
+			msg := tgbot.SendMessageParams{ChatID: chatID, Text: response}
+			bot.SendMessage(ctx, &msg)
 			user.AiSession.DialogThread = *probe
 			user.DialogStatus = 6
 			usage := db.GetSessionUsage(user.ID)
@@ -64,12 +68,12 @@ func SetupSequenceWithKey(
 			db.UsersMap[chatID] = user
 		}
 	default:
-		response,probe, err := tryLanguage(user, language, 0, ai_endpoint)
+		response, probe, err := tryLanguage(user, language, 0, ai_endpoint)
 		if err != nil {
 			errorMessage(err, bot, user)
 		} else {
-msg := tgbot.SendMessageParams{ChatID: chatID, Text:response}
-			bot.SendMessage(ctx,&msg)
+			msg := tgbot.SendMessageParams{ChatID: chatID, Text: response}
+			bot.SendMessage(ctx, &msg)
 			user.AiSession.DialogThread = *probe
 			user.DialogStatus = 6
 			usage := db.GetSessionUsage(user.ID)
@@ -79,15 +83,14 @@ msg := tgbot.SendMessageParams{ChatID: chatID, Text:response}
 		}
 	}
 
-  
 }
 
 // LanguageCode: 0 - default, 1 - Russian, 2 - English
-func tryLanguage(user db.User, language string, languageCode int, ai_endpoint string) (string,*db.ChatSessionGraph, error) {
+// done
+func tryLanguage(user db.User, language string, languageCode int, ai_endpoint string) (string, *db.ChatSessionGraph, error) {
 	var languagePromt string
 	//var languageResponse string
 	model := user.AiSession.GptModel
-
 
 	switch languageCode {
 	case 1:
@@ -105,12 +108,11 @@ func tryLanguage(user db.User, language string, languageCode int, ai_endpoint st
 	//model := user.AiSession.GptModel
 	//chatID := user.ID
 
-	
 	//result,thread, err := StartNewChat(ctx,gptKey,model,ai_endpoint,languagePromt)
-	result,thread, err := RunNewAgent(gptKey,model,ai_endpoint,languagePromt)
-		if err != nil {
-			log.Println(err)
-			return "",nil,err
-		}
-	return thread,result, nil
+	result, thread, err := RunNewAgent(gptKey, model, ai_endpoint, languagePromt)
+	if err != nil {
+		log.Println(err)
+		return "", nil, err
+	}
+	return thread, result, nil
 }
