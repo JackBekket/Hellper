@@ -37,6 +37,7 @@ func main() {
 	}
 	log.Info().Msg(".env file loaded successfully")
 
+	//If at least one environment variable is empty, fatal will be triggered
 	token, err := getEnv("TG_KEY")
 	db_link, err := getEnv("DB_LINK")
 	ai_endpoint, err := getEnv("AI_ENDPOINT")
@@ -48,6 +49,21 @@ func main() {
 			Err(err).Msg("env variable is empty")
 	}
 
+	dbHandler, err := database.NewHandler(db_link)
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to create database service")
+	}
+
+	if err := dbHandler.DB.Ping(); err != nil {
+		log.Fatal().Err(err).Msg("failed to ping database")
+	}
+	log.Info().Msg("database ping successful")
+
+	db_service, err := database.NewAIService(dbHandler)
+	if err != nil {
+		log.Fatal().Err(err).Msg("something wrong")
+	}
+
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
 		log.Fatal().Err(err).Msg("tg token missing")
@@ -55,12 +71,6 @@ func main() {
 
 	// in-memory (cash) db.
 	usersDatabase := database.UsersMap
-
-	db, err := database.NewHandler(db_link)
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to create database service")
-	}
-	db_service, err := database.NewAIService(db)
 
 	ctx := context.Background()
 	comm := command.NewCommander(bot, usersDatabase, ctx)
