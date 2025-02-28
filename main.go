@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"time"
 
@@ -12,6 +13,14 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
+
+func getEnv(key string) (string, error) {
+	value := os.Getenv(key)
+	if value == "" {
+		return "", fmt.Errorf("missing required environment variable: %s", key)
+	}
+	return value, nil
+}
 
 func main() {
 	log.Logger = log.Output(zerolog.ConsoleWriter{
