@@ -4,7 +4,6 @@ import (
 	"context"
 	"sync"
 
-	"github.com/JackBekket/hellper/lib/database"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 	"github.com/rs/zerolog/log"
@@ -29,7 +28,7 @@ func (h *handlers) IdentifyUserMiddleware(next bot.HandlerFunc) bot.HandlerFunc 
 			return
 		}
 
-		_, found := h.cache.data[chatID]
+		_, found := h.cache.GetUser(chatID)
 		if found {
 			next(ctx, tgb, update)
 			return
@@ -43,7 +42,7 @@ func (h *handlers) IdentifyUserMiddleware(next bot.HandlerFunc) bot.HandlerFunc 
 				return
 			}
 
-			database.AddUser(*user) // add user from persistent db into cache
+			h.cache.SetUser(chatID, *user) // add user from persistent db into cache
 			log.Info().Int64("chat_id", chatID).Msg("User session successfully restored from the database. User added to the cache.")
 			next(ctx, tgb, update)
 			return
@@ -51,14 +50,14 @@ func (h *handlers) IdentifyUserMiddleware(next bot.HandlerFunc) bot.HandlerFunc 
 
 		//TODO: when we do the endpoints part, remove this hardcode
 		if h.db_service.CheckToken(chatID, 1) {
-			user, err := recoverUserAfterDrop(h.db_service, chatID, username, h.ai_endpoint)
+			user, err := recoverUserAfterDrop(h.db_service, chatID, username, h.baseURL)
 			if err != nil {
 				log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("failed to restore user from the database. The user has been sent for registration")
 				h.handleNewUserRegistration(ctx, tgb, update)
 				return
 			}
 
-			h.cache.data[chatID] = *user
+			h.cache.SetUser(chatID, *user)
 			log.Info().Int64("chat_id", chatID).Msg("User successfully restored after drop")
 			h.handleSendAIModelSelectionKeyboard(ctx, tgb, update)
 			return
