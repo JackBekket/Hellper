@@ -18,9 +18,9 @@ type Bot interface {
 type handlers struct {
 	cache database.Cacher
 	// Postgres database and LLMHandlers
-	db_service *database.Service
-	//ai_endpoint
-	baseURL string
+	db_service  *database.Service
+	ai_endpoint string
+	baseURL     string
 
 	// Pass dependencies here
 }
@@ -30,11 +30,12 @@ type cache struct {
 }
 
 // Constructor of the handlers type
-func NewHandlersBot(cache database.Cacher, db_service *database.Service, baseURL string) Bot {
+func NewHandlersBot(cache database.Cacher, db_service *database.Service, ai_endpoint string, baseURL string) Bot {
 	return &handlers{
-		cache:      cache,
-		db_service: db_service,
-		baseURL:    baseURL,
+		cache:       cache,
+		db_service:  db_service,
+		ai_endpoint: ai_endpoint,
+		baseURL:     baseURL,
 	}
 }
 

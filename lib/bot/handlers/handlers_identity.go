@@ -25,7 +25,7 @@ func (h *handlers) handleNewUserRegistration(ctx context.Context, tgb *bot.Bot, 
 		DialogStatus: 3, //   status_AIModelSelectionKeyboard
 		Admin:        false,
 		AiSession: database.AiSession{
-			Base_url: h.baseURL,
+			Base_url: h.ai_endpoint,
 		},
 	}
 
@@ -81,7 +81,7 @@ func restoreUserSessionFromDB(ds *database.Service, chatID int64, username strin
 	return user, nil
 
 }
-func recoverUserAfterDrop(ds *database.Service, chatID int64, username string, baseURL string) (*database.User, error) {
+func recoverUserAfterDrop(ds *database.Service, chatID int64, username string, ai_endpoint string) (*database.User, error) {
 
 	log.Info().
 		Int64("chat_id", chatID).
@@ -94,7 +94,7 @@ func recoverUserAfterDrop(ds *database.Service, chatID int64, username string, b
 		DialogStatus: 4,
 		Admin:        false,
 		AiSession: database.AiSession{
-			Base_url: baseURL,
+			Base_url: ai_endpoint,
 		},
 	}
 

@@ -50,7 +50,7 @@ func (h *handlers) IdentifyUserMiddleware(next bot.HandlerFunc) bot.HandlerFunc 
 
 		//TODO: when we do the endpoints part, remove this hardcode
 		if h.db_service.CheckToken(chatID, 1) {
-			user, err := recoverUserAfterDrop(h.db_service, chatID, username, h.baseURL)
+			user, err := recoverUserAfterDrop(h.db_service, chatID, username, h.ai_endpoint)
 			if err != nil {
 				log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("failed to restore user from the database. The user has been sent for registration")
 				h.handleNewUserRegistration(ctx, tgb, update)
