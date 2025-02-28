@@ -37,6 +37,17 @@ func main() {
 	}
 	log.Info().Msg(".env file loaded successfully")
 
+	token, err := getEnv("TG_KEY")
+	db_link, err := getEnv("DB_LINK")
+	ai_endpoint, err := getEnv("AI_ENDPOINT")
+	baseURL, err := getEnv("AI_BASEURL")
+	if err != nil {
+		log.Fatal().
+			Str("token", token).Str("db_link", db_link).
+			Str("ai_endpoint", ai_endpoint).Str("baseURL", baseURL).
+			Err(err).Msg("env variable is empty")
+	}
+
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
 		log.Fatal().Err(err).Msg("tg token missing")
