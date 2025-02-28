@@ -9,7 +9,10 @@ import (
 )
 
 type Bot interface {
+	// The global middleware checks for the user's presence in the cache and PostgreSQL.
+	// If the user is absent, it initiates the registration or data recovery process
 	IdentifyUserMiddleware(next bot.HandlerFunc) bot.HandlerFunc
+	// Central function for registering bot handlers. New used commands should be added here
 	NewRegisterHandlers(ctx context.Context, tgb *bot.Bot)
 }
 
