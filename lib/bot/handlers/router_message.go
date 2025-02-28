@@ -23,14 +23,20 @@ func (h *handlers) textMessageRouter(ctx context.Context, tgb *bot.Bot, update *
 func (h *handlers) handleSendAIModelSelectionKeyboard(ctx context.Context, tgb *bot.Bot, update *models.Update) {
 	chatID := update.Message.Chat.ID
 	var gptKey string
-	user := h.cache.data[chatID]
+
+	user, ok := h.cache.GetUser(chatID)
+	if !ok {
+		log.Error().Int64("chat_id", chatID).Msg("user not found in cache")
+		return
+		// todo: Add actions in case the user is not found in the cache
+	}
 
 	if update.Message.Text != "" && user.AiSession.GptKey == "" {
 		gptKey = strings.TrimSpace(update.Message.Text)
 		h.db_service.InsertToken(chatID, 1, gptKey)
 		user.AiSession.GptKey = gptKey
 	}
-	baseURL := h.ai_endpoint
+	baseURL := h.baseURL
 	aiModelsList, err := h.db_service.GetModelsList(baseURL, gptKey)
 	if err != nil {
 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error retrieving LLM models list")
@@ -40,12 +46,12 @@ func (h *handlers) handleSendAIModelSelectionKeyboard(ctx context.Context, tgb *
 	}
 	//mainHandlerAfterUserIdentification
 	user.DialogStatus = 4
-	h.cache.data[chatID] = user
+	h.cache.UpdateUser(user)
 
 	msg := &bot.SendMessageParams{
 		ChatID:      chatID,
 		Text:        "Choose model",
-		ReplyMarkup: CreateAIModelsMarkup(aiModelsList),
+		ReplyMarkup: renderAIModelsInlineKeyboard(aiModelsList),
 	}
 
 	_, err = tgb.SendMessage(ctx, msg)
