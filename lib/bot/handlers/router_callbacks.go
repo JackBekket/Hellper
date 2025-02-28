@@ -2,6 +2,11 @@ package handlers
 
 import (
 	"context"
+	"io/fs"
+	"math/rand"
+	"os"
+	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/JackBekket/hellper/lib/database"
@@ -146,7 +151,7 @@ func (h *handlers) handleStartAiConversationWithLang(ctx context.Context, tgb *b
 			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
 		}
 
-		videoMsg, err := getMsgRandomErrorVideo(chatID)
+		videoMsg, err := getErrorMsgWithRandomVideo(chatID)
 		_, err = tgb.SendVideo(ctx, videoMsg)
 		if err != nil {
 			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending video message")
@@ -185,4 +190,52 @@ func getInitialLangPromt(lang string) string {
 	default:
 		return initialPromt_Lang_EN
 	}
+}
+
+// The function prepares a message with a random video
+// old func name - errorMessage.
+func getErrorMsgWithRandomVideo(chatID int64) (*bot.SendVideoParams, error) {
+	// Send helper video error
+	// Get a list of all files in the media directory
+	files, err := func() ([]fs.FileInfo, error) {
+		f, err := os.Open("../../media/")
+		if err != nil {
+			return nil, err
+		}
+		list, err := f.Readdir(-1)
+		f.Close()
+		if err != nil {
+			return nil, err
+		}
+		sort.Slice(list, func(i, j int) bool {
+			return list[i].Name() < list[j].Name()
+		})
+		return list, nil
+	}()
+	if err != nil {
+		log.Error().Err(err).Caller().Msg("could not read media directory")
+		return &bot.SendVideoParams{}, err
+	}
+
+	// Select a random file
+	//rand.Seed(time.Now().UnixNano())
+	randomFile := files[rand.Intn(len(files))]
+
+	// Open the video file
+	videoFile, err := os.Open(filepath.Join("../../media/", randomFile.Name()))
+	if err != nil {
+		log.Error().Err(err).Caller().Msg("could not open video file")
+		return &bot.SendVideoParams{}, err
+	}
+	defer videoFile.Close()
+
+	return &bot.SendVideoParams{
+		ChatID: chatID,
+		Video: &models.InputFileUpload{
+			Filename: randomFile.Name(),
+			Data:     videoFile,
+			//Size: -1, // Let the tgbotapi package determine the size
+		},
+	}, nil
+
 }
