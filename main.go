@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/signal"
 	"time"
 
-	"github.com/JackBekket/hellper/lib/bot/command"
-	"github.com/JackBekket/hellper/lib/bot/dialog"
+	"github.com/JackBekket/hellper/lib/bot/handlers"
 	"github.com/JackBekket/hellper/lib/database"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/go-telegram/bot"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -64,32 +64,40 @@ func main() {
 		log.Fatal().Err(err).Msg("something wrong")
 	}
 
-	bot, err := tgbotapi.NewBotAPI(token)
+	cache := database.NewMemoryCache()
+
+	botHandlers := handlers.NewHandlersBot(cache, db_service, ai_endpoint, baseURL)
+
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer cancel()
+
+	opts := []bot.Option{
+		bot.WithMiddlewares(botHandlers.IdentifyUserMiddleware),
+	}
+
+	tgb, err := bot.New(token, opts...)
 	if err != nil {
-		log.Fatal().Err(err).Msg("tg token missing")
+		log.Fatal().Err(err).Msg("token is missing")
 	}
 
-	// in-memory (cash) db.
-	usersDatabase := database.UsersMap
+	botHandlers.NewRegisterHandlers(ctx, tgb)
 
-	ctx := context.Background()
-	comm := command.NewCommander(bot, usersDatabase, ctx)
-
-	log.Printf("Authorized on account %s", bot.Self.UserName)
-
-	u := tgbotapi.NewUpdate(0)
-	u.Timeout = 60
-
-	upd_ch := make(chan tgbotapi.Update)
-
-	//updateHandler :=
-	updates := bot.GetUpdatesChan(u)
-
-	// handling any incoming updates through channel
-	go dialog.HandleUpdates(upd_ch, bot, *comm, db_service)
-
-	for update := range updates {
-		upd_ch <- update
+	botSelf, err := tgb.GetMe(ctx)
+	if err != nil {
+		log.Fatal().Err(err).Msg("invalid token")
 	}
 
-} // end of main func
+	go tgb.Start(ctx)
+	log.Info().Msg("Bot is starting")
+	log.Info().Int64("id", botSelf.ID).Msgf("authorized on account: %s", botSelf.Username)
+
+	<-ctx.Done()
+	log.Info().Msg("Termination signal received. Shutting down...")
+	if err := dbHandler.DB.Close(); err != nil {
+		log.Error().Err(err).Msg("failed to close database connection")
+	} else {
+		log.Info().Msg("database connection closed")
+	}
+	log.Info().Msg("Completed.")
+
+}
