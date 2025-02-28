@@ -25,11 +25,11 @@ func (h *handlers) handleNewUserRegistration(ctx context.Context, tgb *bot.Bot, 
 		DialogStatus: 3, //   status_AIModelSelectionKeyboard
 		Admin:        false,
 		AiSession: database.AiSession{
-			Base_url: h.ai_endpoint,
+			Base_url: h.baseURL,
 		},
 	}
 
-	h.cache.data[chatID] = user
+	h.cache.SetUser(chatID, user)
 
 	log.Info().
 		Int64("chat_id", user.ID).
@@ -38,7 +38,7 @@ func (h *handlers) handleNewUserRegistration(ctx context.Context, tgb *bot.Bot, 
 
 	msg := &bot.SendMessageParams{
 		ChatID: chatID,
-		Text:   msgTemplates["hello"],
+		Text:   msg_Hello,
 	}
 
 	_, err := tgb.SendMessage(ctx, msg)
