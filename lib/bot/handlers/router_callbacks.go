@@ -174,3 +174,15 @@ func (h *handlers) handleStartAiConversationWithLang(ctx context.Context, tgb *b
 	log.Info().Int64("chat_id", chatID).Str("username", user.Username).Str("ai_endpoint", h.baseURL).
 		Msg("AI conversation completed successfully")
 }
+
+// Returns the initial prompt with the selected language
+func getInitialLangPromt(lang string) string {
+	switch lang {
+	case "English":
+		return initialPromt_Lang_EN
+	case "Russian":
+		return initialPromt_Lang_RU
+	default:
+		return initialPromt_Lang_EN
+	}
+}
