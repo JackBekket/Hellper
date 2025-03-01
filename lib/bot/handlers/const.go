@@ -16,9 +16,10 @@ const (
 
 // Base prompts for the AI
 const (
-	basePrompt_Lang_RU   = "Привет, ты говоришь по-русски?"
-	basePrompt_Lang_EN   = "Hi, Do you speak english?"
-	basePrompt_WhatImage = "What's in the image?"
+	basePrompt_Lang_RU        = "Привет, ты говоришь по-русски?"
+	basePrompt_Lang_EN        = "Hi, Do you speak english?"
+	basePrompt_RecognizeImage = "What's in the image?"
+	basePromt_GenerateImage   = "evangelion, neon, anime"
 )
 
 // Context values for bot commands and arguments
@@ -39,18 +40,27 @@ const (
 const (
 	errorMsg_FailedToGenerateImage = "Failed to generate image"
 	errMsg_FailedTrascribeVoice    = "Failed to transcribe the voice message"
+	errMsg_FailedRecognizeImage    = "Failed to recognize the image"
 )
 
-// Default values for working with AI. Model names, URL suffixes, prompts
+// Default values for working with AI. Model names, URL suffixes
 const (
 	ai_StableDiffusionModel  = "stablediffusion"
 	ai_ImageGenerationSuffix = "/v1/images/generations"
-	ai_DefaultPromptForImage = "evangelion, neon, anime"
+
+	ai_BunnyLLAMAModel      = "bunny-llama-3-8b-v"
+	ai_ImageRecognizeSuffix = "/v1/chat/completions"
 )
 
 // Constructs a Telegram file URL.
 func urlTelegramServeFilesConstructor(token string, filePath string) string {
 	return fmt.Sprintf("https://api.telegram.org/file/bot%s/%s", token, filePath)
+}
+func urlConnectionToAIConstructor(endpoint string, suffix string) string {
+	if suffix == "" {
+		suffix = ai_ImageRecognizeSuffix
+	}
+	return endpoint + suffix
 }
 
 // Maximum number of results when searching for documents

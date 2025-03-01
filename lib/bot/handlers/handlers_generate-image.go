@@ -27,7 +27,7 @@ func (h *handlers) cmdGenerateImage(ctx context.Context, tgb *bot.Bot, chatID in
 	}
 
 	if prompt == "" {
-		prompt = ai_DefaultPromptForImage
+		prompt = basePromt_GenerateImage
 	}
 
 	url := h.config.AI_endpoint
