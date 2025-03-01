@@ -175,10 +175,10 @@ func (h *handlers) handleStartAiConversationWithLang(ctx context.Context, tgb *b
 func getInitialLangPrompt(lang string) string {
 	switch lang {
 	case "English":
-		return initialPrompt_Lang_EN
+		return basePrompt_Lang_EN
 	case "Russian":
-		return initialPrompt_Lang_RU
+		return basePrompt_Lang_RU
 	default:
-		return initialPrompt_Lang_EN
+		return basePrompt_Lang_EN
 	}
 }

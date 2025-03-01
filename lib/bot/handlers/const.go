@@ -14,10 +14,11 @@ const (
 	msg_AI_client_failure  = "An error has occured. In order to proceed we need to recreate client and initialize new session"
 )
 
-// Initial prompts for starting a conversation with the AI
+// Base prompts for the AI
 const (
-	initialPrompt_Lang_RU = "Привет, ты говоришь по-русски?"
-	initialPrompt_Lang_EN = "Hi, Do you speak english?"
+	basePrompt_Lang_RU   = "Привет, ты говоришь по-русски?"
+	basePrompt_Lang_EN   = "Hi, Do you speak english?"
+	basePrompt_WhatImage = "What's in the image?"
 )
 
 // Context values for bot commands and arguments
@@ -37,6 +38,7 @@ const (
 // Error messages for the user
 const (
 	errorMsg_FailedToGenerateImage = "Failed to generate image"
+	errMsg_FailedTrascribeVoice    = "Failed to transcribe the voice message"
 )
 
 // Default values for working with AI. Model names, URL suffixes, prompts
