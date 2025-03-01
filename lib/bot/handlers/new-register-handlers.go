@@ -19,9 +19,9 @@ type Bot interface {
 
 // structure to hold dependencies of other packages: postgres, cache, llmHandlers
 type handlers struct {
-	cache database.Cacher
+	cache   database.Cacher
+	db_Link string
 	// Postgres database and LLMHandlers
-	db_Link    string
 	db_service *database.Service
 	config     *config.AIConfig
 
@@ -53,10 +53,8 @@ func (h *handlers) NewRegisterHandlers(ctx context.Context, tgb *bot.Bot) {
 		callbackSingleExecutionMiddleWare,
 	)
 
-	tgb.RegisterHandlerMatchFunc(matchPhoto, h.photoHandler)
-
+	tgb.RegisterHandlerMatchFunc(matchPhoto, h.imageHandler)
 	tgb.RegisterHandlerMatchFunc(matchVoice, h.voiceHandler)
-
 	tgb.RegisterHandlerMatchFunc(matchTgGroup, h.tgGroupHandler)
 
 }
