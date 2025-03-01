@@ -9,6 +9,13 @@ import (
 	"github.com/go-telegram/bot/models"
 )
 
+// 1. Enforce encapsulation: external packages should not have access to internal `handler` structures except through the interface.
+// 2. All functions that send messages to the user on behalf of the bot should be implemented exclusively in this package.
+// 3. The logic for sending messages should not be moved to other packages.
+// 4. Configuration and dependencies should only be passed through the constructor. Global variables are prohibited.
+
+// Thanks! (=ↀωↀ=)
+
 type Bot interface {
 	// The global middleware checks for the user's presence in the cache and PostgreSQL.
 	// If the user is absent, it initiates the registration or data recovery process
