@@ -53,6 +53,7 @@ func main() {
 		cache, db_service, db_link,
 		&config.AIConfig{
 			AI_endpoint:            os.Getenv("AI_ENDPOINT"),
+			OpenAI_APIKey:          os.Getenv("OPENAI_API_KEY"),
 			BaseURL:                os.Getenv("AI_BASEURL"),
 			ImageGenerationModel:   os.Getenv("IMAGE_GENERATION_MODEL"),
 			ImageGenerationSuffix:  os.Getenv("IMAGE_GENERATION_SUFFIX"),
