@@ -2,11 +2,18 @@ package handlers
 
 import (
 	"context"
+	"strings"
 	"sync"
 
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 	"github.com/rs/zerolog/log"
+)
+
+// Context values for bot commands and arguments
+const (
+	context_BotCommand = "command"
+	context_CommandArg = "arg"
 )
 
 // The global middleware checks for the user's presence in the cache and PostgreSQL.
@@ -50,7 +57,7 @@ func (h *handlers) IdentifyUserMiddleware(next bot.HandlerFunc) bot.HandlerFunc 
 
 		//TODO: when we do the endpoints part, remove this hardcode
 		if h.db_service.CheckToken(chatID, 1) {
-			user, err := recoverUserAfterDrop(h.db_service, chatID, username, h.ai_endpoint)
+			user, err := recoverUserAfterDrop(h.db_service, chatID, username, h.config.AI_endpoint)
 			if err != nil {
 				log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("failed to restore user from the database. The user has been sent for registration")
 				h.handleNewUserRegistration(ctx, tgb, update)
@@ -82,4 +89,42 @@ func callbackSingleExecutionMiddleWare(next bot.HandlerFunc) bot.HandlerFunc {
 			next(ctx, tgb, update)
 		}
 	}
+}
+
+// Middleware that parses the msg into a command and arguments
+// to pass them to the next handler via context
+func cmdHandlerMiddleware(next bot.HandlerFunc) bot.HandlerFunc {
+	return func(ctx context.Context, b *bot.Bot, update *models.Update) {
+		if update.Message == nil || update.Message.Text == "" {
+			return
+		}
+		command, arg := extractCommandAndArg(update.Message.Text)
+		if command == "" {
+			return
+		}
+
+		log.Info().Str("command", command).Str("arg", arg).Int64("chat_id", update.Message.Chat.ID).Msg("processing command")
+
+		ctx = context.WithValue(ctx, context_BotCommand, command)
+		ctx = context.WithValue(ctx, context_CommandArg, arg)
+
+		next(ctx, b, update)
+	}
+}
+
+// Function to extract the command and argument.
+// Also removes the bot's name if the message was sent in a group chat.
+// At the moment, only one argument is allowed
+func extractCommandAndArg(msg string) (string, string) {
+	msg = strings.TrimSpace(msg)
+
+	if len(msg) == 0 || msg[0] != '/' {
+		return "", ""
+	}
+
+	parts := strings.Fields(msg)
+	command := strings.Split(parts[0], "@")[0]
+	arg := strings.TrimSpace(strings.Join(parts[1:], " "))
+
+	return command, arg
 }
