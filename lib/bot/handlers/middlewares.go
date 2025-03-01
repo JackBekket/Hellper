@@ -85,40 +85,23 @@ func callbackSingleExecutionMiddleWare(next bot.HandlerFunc) bot.HandlerFunc {
 	}
 }
 
-// Middleware that parses the msg into a command and arguments
-// to pass them to the next handler via context
-func cmdHandlerMiddleware(next bot.HandlerFunc) bot.HandlerFunc {
-	return func(ctx context.Context, b *bot.Bot, update *models.Update) {
-		if update.Message == nil || update.Message.Text == "" {
-			return
+// Middleware that filters messages in groups without bot mention
+func (h *handlers) filterGroupMessagesMiddleware(next bot.HandlerFunc) bot.HandlerFunc {
+	return func(ctx context.Context, tgb *bot.Bot, update *models.Update) {
+		if update.Message.Chat.ID < 0 {
+
+			if update.Message.Chat.ID < 0 && update.Message.Voice != nil {
+				return
+			}
+			if update.Message.Text != "" && !strings.Contains(update.Message.Text, h.botUsername) {
+				return
+			}
+
+			if update.Message.Photo != nil && (update.Message.Caption == "" || !strings.Contains(update.Message.Caption, h.botUsername)) {
+				return
+			}
 		}
-		command, arg := extractCommandAndArg(update.Message.Text)
-		if command == "" {
-			return
-		}
 
-		log.Info().Str("command", command).Str("arg", arg).Int64("chat_id", update.Message.Chat.ID).Msg("processing command")
-
-		ctx = context.WithValue(ctx, context_BotCommand, command)
-		ctx = context.WithValue(ctx, context_CommandArg, arg)
-
-		next(ctx, b, update)
+		next(ctx, tgb, update)
 	}
-}
-
-// Function to extract the command and argument.
-// Also removes the bot's name if the message was sent in a group chat.
-// At the moment, only one argument is allowed
-func extractCommandAndArg(msg string) (string, string) {
-	msg = strings.TrimSpace(msg)
-
-	if len(msg) == 0 || msg[0] != '/' {
-		return "", ""
-	}
-
-	parts := strings.Fields(msg)
-	command := strings.Split(parts[0], "@")[0]
-	arg := strings.TrimSpace(strings.Join(parts[1:], " "))
-
-	return command, arg
 }

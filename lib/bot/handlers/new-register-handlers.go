@@ -19,8 +19,9 @@ type Bot interface {
 
 // structure to hold dependencies of other packages: postgres, cache, llmHandlers
 type handlers struct {
-	cache   database.Cacher
-	db_Link string
+	botUsername string
+	cache       database.Cacher
+	db_Link     string
 	// Postgres database and LLMHandlers
 	db_service *database.Service
 	config     *config.AIConfig
@@ -40,11 +41,13 @@ func NewHandlersBot(cache database.Cacher, db_service *database.Service, db_Link
 
 // Central function for registering bot handlers. New used commands should be added here
 func (h *handlers) NewRegisterHandlers(ctx context.Context, tgb *bot.Bot) {
+	botSelf, _ := tgb.GetMe(ctx)
+	h.botUsername = botSelf.Username
 	// Router for tg bot command handlers
-	tgb.RegisterHandler(bot.HandlerTypeMessageText, "/", bot.MatchTypePrefix, h.cmdRouter, cmdHandlerMiddleware)
+	tgb.RegisterHandler(bot.HandlerTypeMessageText, "/", bot.MatchTypePrefix, h.cmdRouter)
 
 	// Router for text message handlers
-	tgb.RegisterHandlerMatchFunc(matchTextMessage, h.textMessageRouter)
+	tgb.RegisterHandlerMatchFunc(matchTextMessage, h.textMessageRouter, h.filterGroupMessagesMiddleware)
 
 	// Router for callbacks
 	tgb.RegisterHandlerMatchFunc(
@@ -53,16 +56,15 @@ func (h *handlers) NewRegisterHandlers(ctx context.Context, tgb *bot.Bot) {
 		callbackSingleExecutionMiddleWare,
 	)
 
-	tgb.RegisterHandlerMatchFunc(matchPhoto, h.handleRecognizeImage)
-	tgb.RegisterHandlerMatchFunc(matchVoice, h.handleVoiceTranscriber)
-	tgb.RegisterHandlerMatchFunc(matchTgGroup, h.tgGroupHandler)
+	tgb.RegisterHandlerMatchFunc(matchPhoto, h.handleRecognizeImage, h.filterGroupMessagesMiddleware)
+	tgb.RegisterHandlerMatchFunc(matchVoice, h.handleVoiceTranscriber, h.filterGroupMessagesMiddleware)
 
 }
 
 // Rules for calling the handler
 
 func matchTextMessage(update *models.Update) bool {
-	return update.Message.Text != "" && update.Message.Photo == nil
+	return update.Message != nil && update.Message.Text != ""
 }
 
 func matchCallbackQuery(update *models.Update) bool {
@@ -70,14 +72,9 @@ func matchCallbackQuery(update *models.Update) bool {
 }
 
 func matchPhoto(update *models.Update) bool {
-	return update.Message.Photo != nil
+	return update.Message != nil && update.Message.Photo != nil
 }
 
 func matchVoice(update *models.Update) bool {
-	return update.Message.Voice != nil
-}
-
-func matchTgGroup(update *models.Update) bool {
-	// Stub for the registration func
-	return false
+	return update.Message != nil && update.Message.Voice != nil
 }
