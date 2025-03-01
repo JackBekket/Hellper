@@ -22,7 +22,7 @@ func (h *handlers) handleNewUserRegistration(ctx context.Context, tgb *bot.Bot, 
 	user := database.User{
 		ID:           chatID,
 		Username:     update.Message.From.Username,
-		DialogStatus: 3, //   status_AIModelSelectionKeyboard
+		DialogStatus: status_AIModelSelectionKeyboard,
 		Admin:        false,
 		AiSession: database.AiSession{
 			Base_url: h.config.AI_endpoint,
@@ -67,7 +67,7 @@ func restoreUserSessionFromDB(ds *database.Service, chatID int64, username strin
 	user := &database.User{
 		ID:           chatID,
 		Username:     username,
-		DialogStatus: 6,
+		DialogStatus: status_StartDialogSequence,
 		Admin:        false,
 		AiSession: database.AiSession{
 			GptModel: *ai_session.Model,
@@ -91,7 +91,7 @@ func recoverUserAfterDrop(ds *database.Service, chatID int64, username string, a
 	user := &database.User{
 		ID:           chatID,
 		Username:     username,
-		DialogStatus: 4,
+		DialogStatus: status_AIModelSelectionChoice,
 		Admin:        false,
 		AiSession: database.AiSession{
 			Base_url: ai_endpoint,

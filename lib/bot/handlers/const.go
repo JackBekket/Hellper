@@ -30,10 +30,10 @@ const (
 
 // Dialog status. The user's current position in the conversation with the bot
 const (
-	status_AIModelSelectionKeyboard           = 3
-	status_AIModelSelectionChoice             = 4
-	status_ConnectingToAiWithLang             = 5
-	status_MainHandlerAfterUserIdentification = 6
+	status_AIModelSelectionKeyboard = 3
+	status_AIModelSelectionChoice   = 4
+	status_ConnectingToAiWithLang   = 5
+	status_StartDialogSequence      = 6
 )
 
 // Error messages for the user
