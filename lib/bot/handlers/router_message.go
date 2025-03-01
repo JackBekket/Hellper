@@ -9,11 +9,6 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-const (
-	status_MainHandlerAfterUserIdentification = "mainHandlerAfterUserIdentification" // old dialogStatus = 6
-	status_AIModelSelectionKeyboard           = "AIModelSelectionKeyboard"           // old dialogStatus = 3
-)
-
 // Router for text message handlers
 func (h *handlers) textMessageRouter(ctx context.Context, tgb *bot.Bot, update *models.Update) {
 
@@ -44,8 +39,7 @@ func (h *handlers) handleSendAIModelSelectionKeyboard(ctx context.Context, tgb *
 		log.Warn().Int64("chat_id", chatID).Msg("User redirected to registration handler due to LLM models list error")
 		return
 	}
-	//mainHandlerAfterUserIdentification
-	user.DialogStatus = 4
+	user.DialogStatus = status_AIModelSelectionChoice
 	h.cache.UpdateUser(user)
 
 	msg := &bot.SendMessageParams{

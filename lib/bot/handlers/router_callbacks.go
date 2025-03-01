@@ -2,11 +2,6 @@ package handlers
 
 import (
 	"context"
-	"io/fs"
-	"math/rand"
-	"os"
-	"path/filepath"
-	"sort"
 	"strings"
 
 	"github.com/JackBekket/hellper/lib/database"
@@ -14,14 +9,6 @@ import (
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 	"github.com/rs/zerolog/log"
-)
-
-//todo
-
-const (
-	status_AIModelSelectionChoice = "AIModelSelectionChoice" // old dialogStatus - 4
-	status_ConnectingToAiWithLang = "connectingToAiWithLang" // old dialogStatus - 5
-
 )
 
 func (h *handlers) callbackRouter(ctx context.Context, tgb *bot.Bot, update *models.Update) {
@@ -92,7 +79,7 @@ func (h *handlers) handleAIModelSelectionCallback(ctx context.Context, tgb *bot.
 		return
 	}
 	// status_ConnectingToAiWithLang
-	user.DialogStatus = 5
+	user.DialogStatus = status_ConnectingToAiWithLang
 	user.AiSession.GptModel = aiModelName
 	h.cache.UpdateUser(user)
 
@@ -152,6 +139,10 @@ func (h *handlers) handleStartAiConversationWithLang(ctx context.Context, tgb *b
 		}
 
 		videoMsg, err := getErrorMsgWithRandomVideo(chatID)
+		if err != nil {
+			log.Error().Err(err).Caller().Msg("")
+			return
+		}
 		_, err = tgb.SendVideo(ctx, videoMsg)
 		if err != nil {
 			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending video message")
@@ -168,7 +159,7 @@ func (h *handlers) handleStartAiConversationWithLang(ctx context.Context, tgb *b
 		return
 	}
 
-	user.DialogStatus = 6
+	user.DialogStatus = status_MainHandlerAfterUserIdentification
 	user.AiSession.DialogThread = *probe
 
 	// TODO: Replace with a thread-safe one
@@ -190,52 +181,4 @@ func getInitialLangPrompt(lang string) string {
 	default:
 		return initialPrompt_Lang_EN
 	}
-}
-
-// The function prepares a message with a random video
-// old func name - errorMessage.
-func getErrorMsgWithRandomVideo(chatID int64) (*bot.SendVideoParams, error) {
-	// Send helper video error
-	// Get a list of all files in the media directory
-	files, err := func() ([]fs.FileInfo, error) {
-		f, err := os.Open("../../media/")
-		if err != nil {
-			return nil, err
-		}
-		list, err := f.Readdir(-1)
-		f.Close()
-		if err != nil {
-			return nil, err
-		}
-		sort.Slice(list, func(i, j int) bool {
-			return list[i].Name() < list[j].Name()
-		})
-		return list, nil
-	}()
-	if err != nil {
-		log.Error().Err(err).Caller().Msg("could not read media directory")
-		return &bot.SendVideoParams{}, err
-	}
-
-	// Select a random file
-	//rand.Seed(time.Now().UnixNano())
-	randomFile := files[rand.Intn(len(files))]
-
-	// Open the video file
-	videoFile, err := os.Open(filepath.Join("../../media/", randomFile.Name()))
-	if err != nil {
-		log.Error().Err(err).Caller().Msg("could not open video file")
-		return &bot.SendVideoParams{}, err
-	}
-	defer videoFile.Close()
-
-	return &bot.SendVideoParams{
-		ChatID: chatID,
-		Video: &models.InputFileUpload{
-			Filename: randomFile.Name(),
-			Data:     videoFile,
-			//Size: -1, // Let the tgbotapi package determine the size
-		},
-	}, nil
-
 }

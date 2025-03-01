@@ -10,12 +10,6 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// Context values for bot commands and arguments
-const (
-	context_BotCommand = "command"
-	context_CommandArg = "arg"
-)
-
 // The global middleware checks for the user's presence in the cache and PostgreSQL.
 // If the user is absent, it initiates the registration or data recovery process
 func (h *handlers) IdentifyUserMiddleware(next bot.HandlerFunc) bot.HandlerFunc {
