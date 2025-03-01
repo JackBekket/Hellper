@@ -17,19 +17,18 @@ import (
 // The handler transcribes the voice message and sends the result to the user
 func (h *handlers) handleVoiceTranscriber(ctx context.Context, tgb *bot.Bot, update *models.Update) {
 	chatID := update.Message.Chat.ID
-	fileID := update.Message.Voice.FileID
-	params := &bot.GetFileParams{FileID: fileID}
+	params := &bot.GetFileParams{FileID: update.Message.Voice.FileID}
 
-	msgFailedVoiceFunc := func() error {
-		msg := &bot.SendMessageParams{ChatID: chatID, Text: "Failed to transcribe the voice message"}
+	msgFailedVoiceFunc := func() {
+		msg := &bot.SendMessageParams{ChatID: chatID, Text: errMsg_FailedTrascribeVoice}
 		_, err := tgb.SendMessage(ctx, msg)
 		if err != nil {
-			return err
+			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
 		}
-		return nil
 	}
 	file, err := tgb.GetFile(ctx, params)
 	if err != nil {
+		msgFailedVoiceFunc()
 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("failed to get file from Telegram API")
 		return
 	}
@@ -40,21 +39,16 @@ func (h *handlers) handleVoiceTranscriber(ctx context.Context, tgb *bot.Bot, upd
 	err = downloadFile(fileURL, localFilePath)
 	if err != nil {
 		log.Error().Err(err).Str("file_url", fileURL).Str("file_path", localFilePath).Caller().Msg("failed to download file")
-		if err := msgFailedVoiceFunc(); err != nil {
-			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
-			return
-		}
+		msgFailedVoiceFunc()
 		return
 	}
 
 	url, model := stt.GetEnvsForSST()
 	transcription, err := localai.TranscribeWhisper(url, model, localFilePath)
 	if err != nil {
+		msgFailedVoiceFunc()
 		log.Error().Err(err).Str("url", url).Str("model", model).Str("file_path", localFilePath).Caller().Msg("failed to transcribe audio")
-		if err := msgFailedVoiceFunc(); err != nil {
-			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
-			return
-		}
+		return
 	}
 
 	msg := &bot.SendMessageParams{ChatID: chatID, Text: transcription}
