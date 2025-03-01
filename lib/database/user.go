@@ -54,7 +54,7 @@ func (u *User) FlushMemory(ds *Service) {
 
 func (u *User) Kill(ds *Service) {
 	u.FlushThread()
-	u.FlushMemory(ds)
+	u.FlushMemory(ds) // dublicate
 	ds.DeleteToken(u.ID, 1)
 	ds.DeleteLSession(u.ID)
 	delete(UsersMap, u.ID)
@@ -63,7 +63,7 @@ func (u *User) Kill(ds *Service) {
 func (u *User) DropSession(ds *Service) {
 	ds.DeleteLSession(u.ID)
 	u.FlushThread()
-	u.FlushMemory(ds)
+	u.FlushMemory(ds) // dublicate
 
 	//ds.DropHistory(u.ID,int64(u.AiSession.AI_Type),u.ID,u.ID,u.AiSession.GptModel)
 }
