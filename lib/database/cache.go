@@ -2,6 +2,8 @@ package database
 
 import (
 	"sync"
+
+	"github.com/rs/zerolog/log"
 )
 
 // I was forced to create a primitive thread-safe cache. The new bot library requires it.
@@ -36,6 +38,8 @@ func (c *memoryCache) SetUser(id int64, user User) {
 	c.mu.Lock()
 	c.users[id] = user
 	c.mu.Unlock()
+	log.Info().Int64("chat_id", id).Msg("New user added to cache")
+
 }
 
 func (c *memoryCache) UpdateUser(user User) {
@@ -54,6 +58,7 @@ func (c *memoryCache) DeleteUser(id int64) {
 	c.mu.Lock()
 	delete(c.users, id)
 	c.mu.Unlock()
+	log.Info().Int64("chat_id", id).Msg("User removed from cache")
 }
 func (c *memoryCache) SetUsage(id int64, usage SessionUsage) {
 	c.mu.Lock()
