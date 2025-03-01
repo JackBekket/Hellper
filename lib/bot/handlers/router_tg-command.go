@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/rs/zerolog/log"
 
@@ -13,18 +14,30 @@ import (
 	"github.com/go-telegram/bot/models"
 )
 
+// Function to extract the command and argument.
+// Also removes the bot's name if the message was sent in a group chat.
+// At the moment, only one argument is allowed
+func extractCommandAndArg(msg string) (string, string) {
+	msg = strings.TrimSpace(msg)
+
+	if len(msg) == 0 || msg[0] != '/' {
+		return "", ""
+	}
+
+	parts := strings.Fields(msg)
+	command := strings.Split(parts[0], "@")[0]
+	arg := strings.TrimSpace(strings.Join(parts[1:], " "))
+
+	return command, arg
+}
+
 // Router for tg bot command handlers
 func (h *handlers) cmdRouter(ctx context.Context, tgb *bot.Bot, update *models.Update) {
 	chatID := update.Message.Chat.ID
-	command, ok := ctx.Value(context_BotCommand).(string)
-	if !ok {
-		log.Warn().Int64("chat_id", chatID).Msg("received update without command")
-		return
-	}
-
-	arg := ctx.Value(context_CommandArg).(string) // arg may be empty
+	command, arg := extractCommandAndArg(update.Message.Text)
 
 	log.Info().Int64("chat_id", chatID).Str("command", command).Str("arg", arg).Msg("processing command")
+
 	switch command {
 	case "image":
 		h.cmdGenerateImage(ctx, tgb, chatID, arg)
