@@ -7,8 +7,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 func getEnvsForImgRec() (string, string, string) {
@@ -29,39 +27,41 @@ func getEnvsForImgRec() (string, string, string) {
 
 }
 
-func RecognizeImage(bot *tgbotapi.BotAPI, msg *tgbotapi.Message) (string, error) {
+// Deprecated, move to handlers
+// func RecognizeImage(bot *tgbotapi.BotAPI, msg *tgbotapi.Message) (string, error) {
 
-	imgLink, err := handleImageMessage(bot, msg)
-	if err != nil {
-		return "", err
-	}
-	endpoint, model, token := getEnvsForImgRec()
-	prompt := "What's in the image?"
+// 	imgLink, err := handleImageMessage(bot, msg)
+// 	if err != nil {
+// 		return "", err
+// 	}
+// 	endpoint, model, token := getEnvsForImgRec()
+// 	prompt := "What's in the image?"
 
-	if msg.Caption != "" {
-		prompt = msg.Caption
-	}
-	response, err := imageRecognitionLAI(endpoint, model, token, imgLink, prompt)
-	if err != nil {
-		return "", err
-	}
-	return response, nil
+// 	if msg.Caption != "" {
+// 		prompt = msg.Caption
+// 	}
+// 	response, err := ImageRecognitionLAI(endpoint, model, token, imgLink, prompt)
+// 	if err != nil {
+// 		return "", err
+// 	}
+// 	return response, nil
 
-}
+// }
 
-func handleImageMessage(bot *tgbotapi.BotAPI, msg *tgbotapi.Message) (string, error) {
+// Deprecated, move to handlers
+// func handleImageMessage(bot *tgbotapi.BotAPI, msg *tgbotapi.Message) (string, error) {
 
-	file, err := bot.GetFile(tgbotapi.FileConfig{FileID: msg.Photo[0].FileID})
-	if err != nil {
-		return "", fmt.Errorf("could not get file info: %v", err)
-	}
+// 	file, err := bot.GetFile(tgbotapi.FileConfig{FileID: msg.Photo[0].FileID})
+// 	if err != nil {
+// 		return "", fmt.Errorf("could not get file info: %v", err)
+// 	}
 
-	fileURL := fmt.Sprintf("https://api.telegram.org/file/bot%s/%s", bot.Token, file.FilePath)
+// 	fileURL := fmt.Sprintf("https://api.telegram.org/file/bot%s/%s", bot.Token, file.FilePath)
 
-	return fileURL, nil
-}
+// 	return fileURL, nil
+// }
 
-func imageRecognitionLAI(url string, model string, token string, imgLink string, prompt string) (string, error) {
+func ImageRecognitionLAI(url string, model string, token string, imgLink string, prompt string) (string, error) {
 
 	client := &http.Client{}
 
