@@ -53,8 +53,8 @@ func (h *handlers) NewRegisterHandlers(ctx context.Context, tgb *bot.Bot) {
 		callbackSingleExecutionMiddleWare,
 	)
 
-	tgb.RegisterHandlerMatchFunc(matchPhoto, h.imageHandler)
-	tgb.RegisterHandlerMatchFunc(matchVoice, h.voiceHandler)
+	tgb.RegisterHandlerMatchFunc(matchPhoto, h.handleRecognizeImage)
+	tgb.RegisterHandlerMatchFunc(matchVoice, h.handleVoiceTranscriber)
 	tgb.RegisterHandlerMatchFunc(matchTgGroup, h.tgGroupHandler)
 
 }
