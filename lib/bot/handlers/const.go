@@ -10,6 +10,6 @@ const (
 	msg_Help_command       = "Authorize for additional commands: /help -- print this message, /restart -- restart session (if you want to switch between local-ai and openai chatGPT), /search_doc -- searching documents, /rag -- process Retrival-Augmented Generation, /instruct -- use system promt template instead of langchain (higher priority, see examples), /image -- generate image ....all funcs are experimental so bot can halt and catch fire"
 	msg_AI_client_failure  = "An error has occured. In order to proceed we need to recreate client and initialize new session"
 
-	initialPromt_Lang_RU = "Привет, ты говоришь по-русски?"
-	initialPromt_Lang_EN = "Hi, Do you speak english?"
+	initialPrompt_Lang_RU = "Привет, ты говоришь по-русски?"
+	initialPrompt_Lang_EN = "Hi, Do you speak english?"
 )

@@ -127,15 +127,15 @@ func (h *handlers) handleConnectingToAiWithLangCallback(ctx context.Context, tgb
 
 	// I commented out the line because the context with the value is not used anywhere
 	//ctxWithValue := context.WithValue(ctx, "user", user)
-	langPromt := getInitialLangPromt(lang)
+	langPrompt := getInitialLangPrompt(lang)
 	log.Info().Int64("chat_id", chatID).Str("language", lang).Str("ai_endpoint", h.config.AI_endpoint).
 		Msg("Starting AI conversation")
 
-	go h.handleStartAiConversationWithLang(ctx, tgb, chatID, langPromt)
+	go h.handleStartAiConversationWithLang(ctx, tgb, chatID, langPrompt)
 }
 
 // old name func - SetupSequenceWithKey
-func (h *handlers) handleStartAiConversationWithLang(ctx context.Context, tgb *bot.Bot, chatID int64, langPromt string) {
+func (h *handlers) handleStartAiConversationWithLang(ctx context.Context, tgb *bot.Bot, chatID int64, langPrompt string) {
 	user, ok := h.cache.GetUser(chatID)
 	if !ok {
 		log.Error().Int64("chat_id", chatID).Msg("user not found in cache")
@@ -143,7 +143,7 @@ func (h *handlers) handleStartAiConversationWithLang(ctx context.Context, tgb *b
 		// todo: Add actions in case the user is not found in the cache
 	}
 
-	probe, response, err := langchain.RunNewAgent(user.AiSession.GptKey, user.AiSession.GptModel, h.config.AI_endpoint, langPromt)
+	probe, response, err := langchain.RunNewAgent(user.AiSession.GptKey, user.AiSession.GptModel, h.config.AI_endpoint, langPrompt)
 	if err != nil {
 		msg := &bot.SendMessageParams{ChatID: chatID, Text: msg_AI_client_failure}
 		_, err = tgb.SendMessage(ctx, msg)
@@ -181,14 +181,14 @@ func (h *handlers) handleStartAiConversationWithLang(ctx context.Context, tgb *b
 }
 
 // Returns the initial prompt with the selected language
-func getInitialLangPromt(lang string) string {
+func getInitialLangPrompt(lang string) string {
 	switch lang {
 	case "English":
-		return initialPromt_Lang_EN
+		return initialPrompt_Lang_EN
 	case "Russian":
-		return initialPromt_Lang_RU
+		return initialPrompt_Lang_RU
 	default:
-		return initialPromt_Lang_EN
+		return initialPrompt_Lang_EN
 	}
 }
 
