@@ -12,9 +12,14 @@ import (
 )
 
 func (h *handlers) callbackRouter(ctx context.Context, tgb *bot.Bot, update *models.Update) {
-	// Stub for the user cache structure
-	dialogStatus := status_AIModelSelectionChoice
-	switch dialogStatus {
+	chatID := update.Message.Chat.ID
+	user, ok := h.cache.GetUser(chatID)
+	if !ok {
+		log.Error().Int64("chat_id", chatID).Msg("user not found in cache")
+		return
+		// todo: Add actions in case the user is not found in the cache
+	}
+	switch user.DialogStatus {
 	case status_AIModelSelectionChoice:
 		h.handleAIModelSelectionCallback(ctx, tgb, update)
 	case status_ConnectingToAiWithLang:
@@ -132,12 +137,6 @@ func (h *handlers) handleStartAiConversationWithLang(ctx context.Context, tgb *b
 
 	probe, response, err := langchain.RunNewAgent(user.AiSession.GptKey, user.AiSession.GptModel, h.config.AI_endpoint, langPrompt)
 	if err != nil {
-		msg := &bot.SendMessageParams{ChatID: chatID, Text: msg_AI_client_failure}
-		_, err = tgb.SendMessage(ctx, msg)
-		if err != nil {
-			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
-		}
-
 		videoMsg, err := getErrorMsgWithRandomVideo(chatID)
 		if err != nil {
 			log.Error().Err(err).Caller().Msg("")
@@ -159,7 +158,7 @@ func (h *handlers) handleStartAiConversationWithLang(ctx context.Context, tgb *b
 		return
 	}
 
-	user.DialogStatus = status_MainHandlerAfterUserIdentification
+	user.DialogStatus = status_StartDialogSequence
 	user.AiSession.DialogThread = *probe
 
 	// TODO: Replace with a thread-safe one
