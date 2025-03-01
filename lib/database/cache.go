@@ -38,7 +38,7 @@ func (c *memoryCache) SetUser(id int64, user User) {
 	c.mu.Lock()
 	c.users[id] = user
 	c.mu.Unlock()
-	log.Info().Int64("chat_id", id).Msg("New user added to cache")
+	log.Info().Int64("chat_id", id).Msg("new user added to cache")
 
 }
 

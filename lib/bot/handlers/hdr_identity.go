@@ -31,11 +31,6 @@ func (h *handlers) handleNewUserRegistration(ctx context.Context, tgb *bot.Bot, 
 
 	h.cache.SetUser(chatID, user)
 
-	log.Info().
-		Int64("chat_id", user.ID).
-		Str("username", user.Username).
-		Msg("new user")
-
 	msg := &bot.SendMessageParams{
 		ChatID: chatID,
 		Text:   msg_Hello,
