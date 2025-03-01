@@ -2,26 +2,18 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"os/signal"
 	"time"
 
 	"github.com/JackBekket/hellper/lib/bot/handlers"
+	"github.com/JackBekket/hellper/lib/config"
 	"github.com/JackBekket/hellper/lib/database"
 	"github.com/go-telegram/bot"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
-
-func getEnv(key string) (string, error) {
-	value := os.Getenv(key)
-	if value == "" {
-		return "", fmt.Errorf("missing required environment variable: %s", key)
-	}
-	return value, nil
-}
 
 func main() {
 	log.Logger = log.Output(zerolog.ConsoleWriter{
@@ -30,24 +22,15 @@ func main() {
 		TimeLocation: time.Local,
 	})
 
-	var err error
-	err = godotenv.Load()
+	//In the future, a check for empty variables in the .env file should be implemented
+	err := godotenv.Load()
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to load .env file")
 	}
 	log.Info().Msg(".env file loaded successfully")
 
-	//If at least one environment variable is empty, fatal will be triggered
-	token, err := getEnv("TG_KEY")
-	db_link, err := getEnv("DB_LINK")
-	ai_endpoint, err := getEnv("AI_ENDPOINT")
-	baseURL, err := getEnv("AI_BASEURL")
-	if err != nil {
-		log.Fatal().
-			Str("token", token).Str("db_link", db_link).
-			Str("ai_endpoint", ai_endpoint).Str("baseURL", baseURL).
-			Err(err).Msg("env variable is empty")
-	}
+	token := os.Getenv("TG_KEY")
+	db_link := os.Getenv("DB_LINK")
 
 	dbHandler, err := database.NewHandler(db_link)
 	if err != nil {
@@ -66,7 +49,19 @@ func main() {
 
 	cache := database.NewMemoryCache()
 
-	botHandlers := handlers.NewHandlersBot(cache, db_service, ai_endpoint, baseURL)
+	botHandlers := handlers.NewHandlersBot(
+		cache, db_service,
+		&config.AIConfig{
+			AI_endpoint:            os.Getenv("AI_ENDPOINT"),
+			BaseURL:                os.Getenv("AI_BASEURL"),
+			ImageGenerationModel:   os.Getenv("IMAGE_GENERATION_MODEL"),
+			ImageGenerationSuffix:  os.Getenv("IMAGE_GENERATION_SUFFIX"),
+			ImageRecognitionModel:  os.Getenv("IMAGE_RECOGNITION_MODEL"),
+			ImageRecognitionSuffix: os.Getenv("IMAGE_RECOGNITION_SUFFIX"),
+			VoiceRecognitionModel:  os.Getenv("VOICE_RECOGNITION_MODEL"),
+			VoiceRecognitionSuffix: os.Getenv("VOICE_RECOGNITION_SUFFIX"),
+		},
+	)
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
