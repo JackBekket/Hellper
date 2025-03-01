@@ -17,13 +17,15 @@ func LoadEnv() {
 
 }
 
-// Get vector store from db. ai_url is AI url (localhost or openai or docker), api_token is AI token, db_link is database link
+// Get vector store from db. ai_url is AI url (localhost or openai or docker), api_token is AI token, db_link is database link.
+// WARNING: This function is unsafe! (╯°□°）╯︵ ┻━┻
+// log.Fatal() should NEVER be used outside of main()! It kills the whole application.
+// Even when developing a function prototype
 func GetVectorStore(ai_url string, api_token string, db_link string) (vectorstores.VectorStore, error) {
 
 	base_url := ai_url
 
 	//_ = godotenv.Load()
-
 
 	/*
 		host := os.Getenv("PG_HOST")
@@ -51,7 +53,6 @@ func GetVectorStore(ai_url string, api_token string, db_link string) (vectorstor
 		pgConnURL := fmt.Sprintf(connURLFormat, user, url.QueryEscape(password), host, dbName)
 	*/
 	pgConnURL := db_link
-
 
 	config, err := pgxpool.ParseConfig(pgConnURL)
 	if err != nil {
@@ -98,14 +99,13 @@ func GetVectorStore(ai_url string, api_token string, db_link string) (vectorstor
 	fmt.Println("vector store ready")
 
 	/*
-	defer func() {
-		pgvStore := store
-		pgvStore.Close()
-	  }()
+		defer func() {
+			pgvStore := store
+			pgvStore.Close()
+		  }()
 	*/
 	return store, nil
 
-	
 }
 
 func GetVectorStoreWithOptions(ai_url string, api_token string, db_link string, name string) (vectorstores.VectorStore, error) {
@@ -159,10 +159,10 @@ func GetVectorStoreWithOptions(ai_url string, api_token string, db_link string, 
 	fmt.Println("vector store ready")
 
 	/*
-	defer func() {
-		pgvStore := store
-		pgvStore.Close()
-	  }()
+		defer func() {
+			pgvStore := store
+			pgvStore.Close()
+		  }()
 	*/
 	return store, nil
 }
