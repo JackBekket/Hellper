@@ -36,7 +36,7 @@ func (h *handlers) handleSendAIModelSelectionKeyboard(ctx context.Context, tgb *
 		h.db_service.InsertToken(chatID, 1, gptKey)
 		user.AiSession.GptKey = gptKey
 	}
-	ai_endpoint := h.ai_endpoint
+	ai_endpoint := h.config.AI_endpoint
 	aiModelsList, err := h.db_service.GetModelsList(ai_endpoint, gptKey)
 	if err != nil {
 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error retrieving LLM models list")

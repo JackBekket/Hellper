@@ -25,7 +25,7 @@ func (h *handlers) handleNewUserRegistration(ctx context.Context, tgb *bot.Bot, 
 		DialogStatus: 3, //   status_AIModelSelectionKeyboard
 		Admin:        false,
 		AiSession: database.AiSession{
-			Base_url: h.ai_endpoint,
+			Base_url: h.config.AI_endpoint,
 		},
 	}
 

@@ -128,7 +128,7 @@ func (h *handlers) handleConnectingToAiWithLangCallback(ctx context.Context, tgb
 	// I commented out the line because the context with the value is not used anywhere
 	//ctxWithValue := context.WithValue(ctx, "user", user)
 	langPromt := getInitialLangPromt(lang)
-	log.Info().Int64("chat_id", chatID).Str("language", lang).Str("ai_endpoint", h.ai_endpoint).
+	log.Info().Int64("chat_id", chatID).Str("language", lang).Str("ai_endpoint", h.config.AI_endpoint).
 		Msg("Starting AI conversation")
 
 	go h.handleStartAiConversationWithLang(ctx, tgb, chatID, langPromt)
@@ -143,7 +143,7 @@ func (h *handlers) handleStartAiConversationWithLang(ctx context.Context, tgb *b
 		// todo: Add actions in case the user is not found in the cache
 	}
 
-	probe, response, err := langchain.RunNewAgent(user.AiSession.GptKey, user.AiSession.GptModel, h.ai_endpoint, langPromt)
+	probe, response, err := langchain.RunNewAgent(user.AiSession.GptKey, user.AiSession.GptModel, h.config.AI_endpoint, langPromt)
 	if err != nil {
 		msg := &bot.SendMessageParams{ChatID: chatID, Text: msg_AI_client_failure}
 		_, err = tgb.SendMessage(ctx, msg)
@@ -176,7 +176,7 @@ func (h *handlers) handleStartAiConversationWithLang(ctx context.Context, tgb *b
 	user.AiSession.Usage = usage
 
 	h.cache.UpdateUser(user)
-	log.Info().Int64("chat_id", chatID).Str("username", user.Username).Str("ai_endpoint", h.ai_endpoint).
+	log.Info().Int64("chat_id", chatID).Str("username", user.Username).Str("ai_endpoint", h.config.AI_endpoint).
 		Msg("AI conversation completed successfully")
 }
 
