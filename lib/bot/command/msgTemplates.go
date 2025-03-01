@@ -1,3 +1,5 @@
+//go:build ignore
+
 package command
 
 var msgTemplates = map[string]string{

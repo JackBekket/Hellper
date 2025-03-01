@@ -1,3 +1,5 @@
+//go:build ignore
+
 package command
 
 import (
@@ -9,8 +11,9 @@ import (
 )
 
 // Get list of models from endpoint and render them
-func (c *Commander) RenderModels(chatID int64,db_service *database.Service, user database.User) {
-	models_list,err := c.getModels(db_service,user)
+// done
+func (c *Commander) RenderModels(chatID int64, db_service *database.Service, user database.User) {
+	models_list, err := c.getModels(db_service, user)
 	if err != nil {
 		e_txt := fmt.Sprintf(err.Error())
 		msg := tgbotapi.NewMessage(chatID, e_txt)
@@ -18,23 +21,24 @@ func (c *Commander) RenderModels(chatID int64,db_service *database.Service, user
 	}
 	msg := tgbotapi.NewMessage(chatID, "Choose model")
 	msg.ReplyMarkup = CreateModelsMarkup(models_list)
-	
+
 	c.bot.Send(msg)
 }
 
-func (c *Commander) getModels(db_service *database.Service, user database.User) ([]string,error){
+// done
+func (c *Commander) getModels(db_service *database.Service, user database.User) ([]string, error) {
 	ds := db_service
 	api_key := user.AiSession.GptKey
 	url := user.AiSession.Base_url
-	list,err := ds.GetModelsList(url,api_key)
+	list, err := ds.GetModelsList(url, api_key)
 	if err != nil {
 		return nil, err
 	}
 	return list, nil
 }
 
-
 // Render Language Menu with Inline Keyboard
+// done
 func (c *Commander) RenderLanguage(chatID int64) {
 	msg := tgbotapi.NewMessage(chatID, "Choose a language or send 'Hello' in your desired language.")
 	msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(
@@ -47,6 +51,7 @@ func (c *Commander) RenderLanguage(chatID int64) {
 	c.bot.Send(msg)
 }
 
+// done
 func CreateModelsMarkup(llmModels []string) models.InlineKeyboardMarkup {
 	buttons := [][]models.InlineKeyboardButton{}
 	for _, model := range llmModels {

@@ -1,3 +1,5 @@
+//go:build ignore
+
 package dialog
 
 import (
@@ -6,7 +8,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/JackBekket/hellper/lib/bot/command"
 	"github.com/JackBekket/hellper/lib/database"
 	tgbot "github.com/go-telegram/bot"
 	tgbotapi "github.com/go-telegram/bot/models"

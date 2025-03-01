@@ -1,3 +1,5 @@
+//go:build ignore
+
 package command
 
 import (
@@ -11,7 +13,8 @@ import (
 	tgbotapi "github.com/go-telegram/bot/models"
 )
 
-//old api
+// old api
+// done
 func HandleCommands(message *tgbotapi.Message, comm *Commander, ds *database.Service) {
 	bot := comm.bot
 	chatID := message.Chat.ID
@@ -85,7 +88,6 @@ func HandleCommands(message *tgbotapi.Message, comm *Commander, ds *database.Ser
 
 // in new approach we should delcare and register handler for each sepatare command (?)
 
-
 // example
 func helloHandler(ctx context.Context, b *tgbot.Bot, update *tgbotapi.Update) {
 	b.SendMessage(ctx, &tgbot.SendMessageParams{
@@ -95,7 +97,6 @@ func helloHandler(ctx context.Context, b *tgbot.Bot, update *tgbotapi.Update) {
 	})
 }
 
-
 /*
 func imageHandler (ctx context.Context, b *tgbot.Bot, update *tgbotapi.Update) {
 	chatID := update.Message.Chat.ID
@@ -103,6 +104,6 @@ func imageHandler (ctx context.Context, b *tgbot.Bot, update *tgbotapi.Update) {
 	msg := tgbot.SendMessageParams{ChatID: user_id, Text: "Image link generation..."}
 		bot.SendMessage(context.Background(), &msg)
 		baseUrl := os.Getenv("AI_ENDPOINT")
-		promt := 	
+		promt :=
 }
 */

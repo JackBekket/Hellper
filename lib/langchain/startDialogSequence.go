@@ -1,4 +1,4 @@
-//package main
+//go:build ignore
 
 package langchain
 
@@ -85,6 +85,7 @@ func errorMessage(err error, bot *tgbot.Bot, user db.User) {
 
 }
 
+// done
 func StartDialogSequence(bot *tgbot.Bot, chatID int64, promt string, ctx context.Context, ai_endpoint string, ds *db.Service) {
 	mu.Lock()
 	defer mu.Unlock()

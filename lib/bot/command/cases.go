@@ -1,3 +1,5 @@
+//go:build ignore
+
 package command
 
 import (
@@ -26,6 +28,7 @@ type contextKey string
 const UserKey contextKey = "user"
 
 // update Dialog_Status 3 -> 4
+// done
 func (c *Commander) ChooseModel(updateMessage tgbotapi.Message, db_service *db.Service) {
 	ds := db_service
 	updateMessage.Text = strings.TrimSpace(updateMessage.Text)
@@ -41,6 +44,7 @@ func (c *Commander) ChooseModel(updateMessage tgbotapi.Message, db_service *db.S
 }
 
 // DialogStatus 4 -> 5
+// done
 func (c *Commander) HandleModelChoose(updateMessage *tgbotapi.CallbackQuery) {
 	//chatID := updateMessage.Message.Chat.ID
 	chatID := updateMessage.From.ID
@@ -79,21 +83,22 @@ func (c *Commander) HandleModelChoose(updateMessage *tgbotapi.CallbackQuery) {
 	//callbackResponse := tgbot.SendMessageParams{}
 	callbackResponse := tgbot.AnswerCallbackQueryParams{
 		CallbackQueryID: messageID,
-		Text: "🐈💨",
+		Text:            "🐈💨",
 	}
 	//c.bot.SendMessage(callbackResponse)
 
-	c.bot.AnswerCallbackQuery(context.Background(),&callbackResponse)
+	c.bot.AnswerCallbackQuery(context.Background(), &callbackResponse)
 
 	/*
-	//deleteMsg := tgbotapi.NewDeleteMessage(chatID, messageID)
-	deleteMsg := tgbot.DeleteMessageParams{ChatID: chatID, MessageID: messageID}
-	//c.bot.SendMessage(deleteMsg)
-	c.bot.DeleteMessage(context.Background(),&deleteMsg)
+		//deleteMsg := tgbotapi.NewDeleteMessage(chatID, messageID)
+		deleteMsg := tgbot.DeleteMessageParams{ChatID: chatID, MessageID: messageID}
+		//c.bot.SendMessage(deleteMsg)
+		c.bot.DeleteMessage(context.Background(),&deleteMsg)
 	*/
 }
 
 // low level attach model name to user profile
+// done
 func (c *Commander) attachModel(model_name string, chatID int64) {
 	fmt.Println(model_name)
 	// TODO: Write down user choice
@@ -103,9 +108,9 @@ func (c *Commander) attachModel(model_name string, chatID int64) {
 
 	modelName := model_name
 	user.AiSession.GptModel = modelName
-	msg := tgbot.SendMessageParams{ChatID: user.ID, Text: "your session model: "+modelName}
+	msg := tgbot.SendMessageParams{ChatID: user.ID, Text: "your session model: " + modelName}
 	//msg := tgbotapi.NewMessage(user.ID, "your session model: "+modelName)
-	c.bot.SendMessage(context.Background(),&msg)
+	c.bot.SendMessage(context.Background(), &msg)
 	db.UsersMap[chatID] = user
 }
 
@@ -115,11 +120,12 @@ func (c *Commander) WrongResponse(updateMessage *tgbotapi.Message) {
 
 	//msg := tgbotapi.NewMessage(user.ID, "Please use provided keyboard")
 	msg := tgbot.SendMessageParams{ChatID: user.ID, Text: "Please use provided keyboard"}
-	c.bot.SendMessage(context.Background(),&msg)
+	c.bot.SendMessage(context.Background(), &msg)
 
 }
 
 // update update Dialog_Status 5 -> 6
+// done
 func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.CallbackQuery, ai_endpoint string) {
 	//_ = godotenv.Load()
 	messageID := updateMessage.ID
@@ -129,7 +135,7 @@ func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.CallbackQ
 	log.Println("check gpt key exist:", user.AiSession.GptKey)
 
 	msg := tgbot.SendMessageParams{ChatID: user.ID, Text: "connecting to ai node"}
-	c.bot.SendMessage(context.Background(),&msg)
+	c.bot.SendMessage(context.Background(), &msg)
 
 	ctx := context.WithValue(c.ctx, "user", user)
 	//ai_endpoint = os.Getenv("AI_ENDPOINT")
@@ -138,13 +144,13 @@ func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.CallbackQ
 
 	callbackResponse := tgbot.AnswerCallbackQueryParams{
 		CallbackQueryID: messageID,
-		Text: "🐈💨",
+		Text:            "🐈💨",
 	}
-	c.bot.AnswerCallbackQuery(context.Background(),&callbackResponse)
+	c.bot.AnswerCallbackQuery(context.Background(), &callbackResponse)
 
 	/*
-	deleteMsg := tgbotapi.NewDeleteMessage(chatID, messageID)
-	c.bot.SendMessage(deleteMsg)
+		deleteMsg := tgbotapi.NewDeleteMessage(chatID, messageID)
+		c.bot.SendMessage(deleteMsg)
 	*/
 
 }
@@ -154,22 +160,25 @@ func (c *Commander) ConnectingToAiWithLanguage(updateMessage *tgbotapi.CallbackQ
 // Generates and sends text to the user. This is *main loop*
 //
 // update Dialog_Status 6 -> 6 (loop),
+// done
 func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint string, ds *db.Service) {
 	chatID := updateMessage.Chat.ID
 	user := db.UsersMap[chatID]
 
 	if updateMessage.Command() != "" {
+		//done
 		HandleCommands(updateMessage, c, ds)
 	} else {
 
 		if updateMessage != nil {
 
-			if updateMessage.Text != "" && updateMessage.Photo == nil {
+			if updateMessage.Text != "" && updateMessage.Photo == nil { // handled
 				promt := updateMessage.Text
 				ctx := context.WithValue(c.ctx, "user", user)
 				go langchain.StartDialogSequence(c.bot, chatID, promt, ctx, ai_endpoint, ds) // main call
 			} else if updateMessage.Voice != nil {
-				voicePath, err := stt.HandleVoiceMessage(updateMessage, *c.bot)
+				//done
+				voicePath, err := stt.HandleVoiceMessage(updateMessage, *c.bot) //handled
 				if err != nil {
 					log.Println(err)
 				}
@@ -181,7 +190,8 @@ func (c *Commander) DialogSequence(updateMessage *tgbotapi.Message, ai_endpoint 
 				msg := tgbotapi.NewMessage(chatID, transcription)
 				c.bot.SendMessage(msg)
 				DeleteFile(voicePath)
-			} else if updateMessage.Photo != nil {
+			} else if updateMessage.Photo != nil { // handled
+				//done
 				response, err := imgrec.RecognizeImage(c.bot, updateMessage)
 				if err != nil {
 					log.Println(err)
@@ -204,6 +214,7 @@ func (c *Commander) GetUser(id int64) db.User {
 	return user
 }
 
+// done
 func (c *Commander) RenderModelsForRegisteredUser(updateMessage *tgbotapi.Message, db_service *db.Service) {
 	ds := db_service
 	chatID := updateMessage.Chat.ID
@@ -212,6 +223,7 @@ func (c *Commander) RenderModelsForRegisteredUser(updateMessage *tgbotapi.Messag
 	db.UsersMap[chatID] = user
 }
 
+// done
 func (c *Commander) RecoverUserAfterDrop(ai_endpoint string, chatID int64, update *tgbotapi.Update, ds *database.Service) {
 	fmt.Println("User is registered!")
 	user := database.User{

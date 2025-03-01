@@ -1,3 +1,5 @@
+//go:build ignore
+
 package command
 
 import (
@@ -18,6 +20,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// done
 func (c *Commander) HelpCommandMessage(updateMessage *tgbotapi.Message) {
 	chatID := updateMessage.Chat.ID
 	user := db.UsersMap[chatID]
@@ -25,6 +28,7 @@ func (c *Commander) HelpCommandMessage(updateMessage *tgbotapi.Message) {
 	c.bot.Send(msg)
 }
 
+// done
 func (c *Commander) SearchDocuments(chatID int64, promt string, maxResults int) {
 
 	_ = godotenv.Load()
@@ -65,6 +69,7 @@ func (c *Commander) SearchDocuments(chatID int64, promt string, maxResults int) 
 }
 
 // Get usage for user
+// done
 func (c *Commander) GetUsage(chatID int64) {
 	user := db.UsersMap[chatID]
 	log.Println("user", user)
@@ -84,6 +89,7 @@ func (c *Commander) GetUsage(chatID int64) {
 	c.bot.Send(msg)
 }
 
+// done
 func (c *Commander) SendMediaHelper(chatID int64) {
 
 	// Send helper video error
@@ -127,6 +133,7 @@ func (c *Commander) SendMediaHelper(chatID int64) {
 
 }
 
+// done
 func sendImage(bot *tgbotapi.BotAPI, chatID int64, path string) {
 	auth := os.Getenv("OPENAI_API_KEY")
 
@@ -151,6 +158,7 @@ func sendImage(bot *tgbotapi.BotAPI, chatID int64, path string) {
 	}
 }
 
+// done
 func getImage(imageURL, authHeader string) (string, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", imageURL, nil)
@@ -186,10 +194,12 @@ func getImage(imageURL, authHeader string) (string, error) {
 
 }
 
+// done
 func DeleteFile(fileName string) {
 	os.Remove(fileName)
 }
 
+// done
 func transformURL(inputURL string) string {
 	parsedURL, _ := url.Parse(inputURL)
 	fileName := path.Base(parsedURL.Path)
@@ -197,6 +207,7 @@ func transformURL(inputURL string) string {
 }
 
 // stable diffusion
+// done
 func (c *Commander) GenerateNewImageLAI_SD(promt, url string, chatID int64, bot *tgbotapi.BotAPI) {
 	size := "256x256"
 	model := os.Getenv("IMAGE_GENERATION_MODEL")
@@ -219,8 +230,8 @@ func (c *Commander) GenerateNewImageLAI_SD(promt, url string, chatID int64, bot 
 	sendImage(bot, chatID, filepath)
 }
 
-
+// done
 func (c *Commander) SendMessage(chatID int64, message string) {
-	msg := tgbotapi.NewMessage(chatID,message)
+	msg := tgbotapi.NewMessage(chatID, message)
 	c.bot.Send(msg)
 }
