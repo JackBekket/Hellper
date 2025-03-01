@@ -50,7 +50,7 @@ func main() {
 	cache := database.NewMemoryCache()
 
 	botHandlers := handlers.NewHandlersBot(
-		cache, db_service,
+		cache, db_service, db_link,
 		&config.AIConfig{
 			AI_endpoint:            os.Getenv("AI_ENDPOINT"),
 			BaseURL:                os.Getenv("AI_BASEURL"),
