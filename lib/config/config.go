@@ -4,9 +4,9 @@ package config
 
 // Configuration for working with various AI APIs
 type AIConfig struct {
-	AI_endpoint            string
-	OpenAI_APIKey          string
+	AIEndpoint             string
 	BaseURL                string
+	ModelsListSuffix       string
 	ImageGenerationModel   string
 	ImageGenerationSuffix  string
 	ImageRecognitionModel  string

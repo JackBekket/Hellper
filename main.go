@@ -52,8 +52,8 @@ func main() {
 	botHandlers := handlers.NewHandlersBot(
 		cache, db_service, db_link,
 		&config.AIConfig{
-			AI_endpoint:            os.Getenv("AI_ENDPOINT"),
-			OpenAI_APIKey:          os.Getenv("OPENAI_API_KEY"),
+			AIEndpoint:             os.Getenv("AI_ENDPOINT"),
+			ModelsListSuffix:       os.Getenv("MODELS_LIST_SUFFIX"),
 			BaseURL:                os.Getenv("AI_BASEURL"),
 			ImageGenerationModel:   os.Getenv("IMAGE_GENERATION_MODEL"),
 			ImageGenerationSuffix:  os.Getenv("IMAGE_GENERATION_SUFFIX"),
