@@ -32,7 +32,7 @@ type SessionUsage struct {
 
 // memory
 type AiSession struct {
-	GptKey       string
+	LocalAIToken string
 	GptModel     string
 	AI_Type      int8
 	DialogThread ChatSessionGraph

@@ -112,9 +112,6 @@ func GetModelsList(endpoint, token string) ([]string, error) {
 	return modelsList, nil
 }
 
-
-
-
 func GenerateCompletion(prompt, modelName string, url string) (*ChatResponse, error) {
 
 	//url := "http://localhost:8080/v1/chat/completions"
@@ -166,7 +163,7 @@ func GenerateCompletion(prompt, modelName string, url string) (*ChatResponse, er
 	return &chatResp, nil
 }
 
-func GenerateImageStableDiffusion(prompt, size, url, model string) (string, error) {
+func GenerateImageStableDiffusion(prompt, size, url, model, localAIToken string) (string, error) {
 	fmt.Println("Request URL:", url)
 	payload := struct {
 		Model  string `json:"model"`
@@ -189,12 +186,10 @@ func GenerateImageStableDiffusion(prompt, size, url, model string) (string, erro
 	}
 	req.Header.Set("Content-Type", "application/json")
 
-	// Get the API key from the environment and add it to the Authorization header
-	key := os.Getenv("OPENAI_API_KEY")
-	if key == "" {
-		return "", fmt.Errorf("API key not found in environment variables")
+	if localAIToken == "" {
+		return "", fmt.Errorf("localAIToken not found")
 	}
-	req.Header.Set("Authorization", "Bearer "+key)
+	req.Header.Set("Authorization", "Bearer "+localAIToken)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -225,7 +220,7 @@ func GenerateImageStableDiffusion(prompt, size, url, model string) (string, erro
 	return imageURL, nil
 }
 
-func TranscribeWhisper(url, model, path string) (string, error) {
+func TranscribeWhisper(url, model, path, localAIToken string) (string, error) {
 
 	file, err := os.Open(path)
 	if err != nil {
@@ -268,7 +263,7 @@ func TranscribeWhisper(url, model, path string) (string, error) {
 
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	req.Header.Set("accept", "application/json")
-	req.Header.Set("Authorization", "Bearer "+os.Getenv("OPENAI_API_KEY"))
+	req.Header.Set("Authorization", "Bearer "+localAIToken)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)

@@ -2,8 +2,8 @@ package database
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
-	"net/url"
 )
 
 type OpenAIDataObject struct {
@@ -15,14 +15,13 @@ type OpenAIModelsResponse struct {
 	Data []OpenAIDataObject `json:"data"`
 }
 
-func (s *Service) GetModelsList(endpoint, token string) ([]string, error) {
+func (s *Service) GetModelsList(url, localAIToken string) ([]string, error) {
 	modelsList := []string{}
-	urlPath, err := url.JoinPath(endpoint, "models")
-	if err != nil {
-		return modelsList, err
-	}
-	req, err := http.NewRequest("GET", urlPath, nil)
-	req.Header.Set("Authorization", "Bearer "+token)
+
+	fmt.Println(url)
+
+	req, err := http.NewRequest("GET", url, nil)
+	req.Header.Set("Authorization", "Bearer "+localAIToken)
 	if err != nil {
 		return modelsList, err
 	}
@@ -30,6 +29,8 @@ func (s *Service) GetModelsList(endpoint, token string) ([]string, error) {
 	if err != nil {
 		return modelsList, err
 	}
+
+	fmt.Println(resp.Status)
 
 	modelsResp := OpenAIModelsResponse{}
 	err = json.NewDecoder(resp.Body).Decode(&modelsResp)

@@ -15,12 +15,12 @@ import (
 func (u *User) SetContext(collectionName string) error {
 
 	_ = godotenv.Load()
-	api_token := u.AiSession.GptKey
+	localAIToken := u.AiSession.LocalAIToken
 	ai_endpoint := os.Getenv("AI_ENDPOINT")
 	//log.Println("ai endpoint is: ", ai_endpoint)
 	db_link := os.Getenv("EMBEDDINGS_DB_URL")
 
-	vectorStore, err := e.GetVectorStoreWithOptions(ai_endpoint, api_token, db_link, collectionName)
+	vectorStore, err := e.GetVectorStoreWithOptions(ai_endpoint, localAIToken, db_link, collectionName)
 	if err != nil {
 		log.Println("error getting vectorstore")
 		return err
