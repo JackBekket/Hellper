@@ -4,8 +4,8 @@ go 1.22.3
 
 require (
 	github.com/JackBekket/langgraphgo v0.0.0-20241122181505-95eaa98c53b0
-	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
 	github.com/joho/godotenv v1.5.1
+	github.com/rs/zerolog v1.33.0
 	github.com/tmc/langchaingo v0.1.12
 )
 
@@ -13,7 +13,6 @@ require (
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/rs/zerolog v1.33.0 // indirect
 )
 
 require (
