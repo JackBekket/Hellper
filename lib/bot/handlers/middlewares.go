@@ -5,17 +5,28 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/JackBekket/hellper/lib/database"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 	"github.com/rs/zerolog/log"
 )
 
 // The global middleware checks for the user's presence in the cache and PostgreSQL.
-// If the user is absent, it initiates the registration or data recovery process
+// If the user is absent, it initiates the registration or data recovery process.
+// The retrieval of user has been changed.
+// Now it is passed through the child context to the handlers, and the context key is stored in the database package, in the contextKey.go file.
+// User check in the cache is now performed once in the global middleware
 func (h *handlers) IdentifyUserMiddleware(next bot.HandlerFunc) bot.HandlerFunc {
-	return func(ctx context.Context, tgb *bot.Bot, update *models.Update) {
+	return func(parentCtx context.Context, tgb *bot.Bot, update *models.Update) {
 		var chatID int64
 		var username string
+		var ctxWithUser context.Context
+		user, found := h.cache.GetUser(chatID)
+		if found {
+			ctxWithUser = context.WithValue(parentCtx, database.UserCtxKey, user)
+			next(ctxWithUser, tgb, update)
+			return
+		}
 
 		switch {
 		case update.Message != nil:
@@ -25,47 +36,43 @@ func (h *handlers) IdentifyUserMiddleware(next bot.HandlerFunc) bot.HandlerFunc 
 			chatID = update.CallbackQuery.From.ID
 			username = update.CallbackQuery.From.Username
 		default:
-			next(ctx, tgb, update)
+			//Other message formats are not used, so I am exiting the function
 			return
 		}
 
-		_, found := h.cache.GetUser(chatID)
-		if found {
-			next(ctx, tgb, update)
-			return
-		}
-
-		if h.db_service.CheckSession(chatID) {
-			user, err := restoreUserSessionFromDB(h.db_service, chatID, update.Message.From.Username)
+		if h.dbService.CheckSession(chatID) {
+			user, err := restoreUserSessionFromDB(h.dbService, chatID, update.Message.From.Username)
 			if err != nil {
 				log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("failed to restore user from the database. The user has been sent for registration")
-				h.handleNewUserRegistration(ctx, tgb, update)
+				h.handleNewUserRegistration(parentCtx, tgb, update)
 				return
 			}
 
 			h.cache.SetUser(chatID, *user) // add user from persistent db into cache
 			log.Info().Int64("chat_id", chatID).Msg("User session successfully restored from the database. User added to the cache.")
-			next(ctx, tgb, update)
+			ctxWithUser = context.WithValue(parentCtx, database.UserCtxKey, user)
+			next(ctxWithUser, tgb, update)
 			return
 		}
 
 		//TODO: when we do the endpoints part, remove this hardcode
-		if h.db_service.CheckToken(chatID, 1) {
-			user, err := recoverUserAfterDrop(h.db_service, chatID, username, h.config.AI_endpoint)
+		if h.dbService.CheckToken(chatID, 1) {
+			user, err := recoverUserAfterDrop(h.dbService, chatID, username, h.config.BaseURL)
 			if err != nil {
 				log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("failed to restore user from the database. The user has been sent for registration")
-				h.handleNewUserRegistration(ctx, tgb, update)
+				h.handleNewUserRegistration(ctxWithUser, tgb, update)
 				return
 			}
 
 			h.cache.SetUser(chatID, *user)
 			log.Info().Int64("chat_id", chatID).Msg("User successfully restored after drop")
-			h.handleSendAIModelSelectionKeyboard(ctx, tgb, update)
+			ctxWithUser = context.WithValue(parentCtx, database.UserCtxKey, user)
+			h.handleSendAIModelSelectionKeyboard(ctxWithUser, tgb, update)
 			return
 		}
 
 		log.Warn().Int64("chat_id", chatID).Msg("User not found in cache or database. Redirecting to registration.")
-		h.handleNewUserRegistration(ctx, tgb, update)
+		h.handleNewUserRegistration(ctxWithUser, tgb, update)
 
 	}
 }
@@ -73,14 +80,14 @@ func (h *handlers) IdentifyUserMiddleware(next bot.HandlerFunc) bot.HandlerFunc 
 // this func ensures that a callback query is processed only once at a time per message
 func callbackSingleExecutionMiddleWare(next bot.HandlerFunc) bot.HandlerFunc {
 	sf := sync.Map{}
-	return func(ctx context.Context, tgb *bot.Bot, update *models.Update) {
+	return func(ctxWithUser context.Context, tgb *bot.Bot, update *models.Update) {
 		if update.CallbackQuery != nil {
 			key := update.CallbackQuery.Message.Message.ID
 			if _, loaded := sf.LoadOrStore(key, struct{}{}); loaded {
 				return
 			}
 			defer sf.Delete(key)
-			next(ctx, tgb, update)
+			next(ctxWithUser, tgb, update)
 		}
 	}
 }
