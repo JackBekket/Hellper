@@ -50,7 +50,7 @@ func (s *Service) CreateTables() error {
 	_, err = s.DBHandler.DB.Exec(`
 		CREATE TABLE IF NOT EXISTS auth (
 			id SERIAL PRIMARY KEY,
-			tg_user_id INT NOT NULL,
+			tg_user_id INT NOT NULL UNIQUE,
 			auth_method INT REFERENCES auth_methods(id),
 			token TEXT NOT NULL
 		)`)
@@ -460,43 +460,42 @@ func (s *Service) UpdateEndpoint(userId int64, endpointId *int64) error {
 }
 
 func (s *Service) GetSession(userId int64) (AISession, error) {
-	var model, endpointName, endpointURL sql.NullString
-	var endpointId, endpointAuthMethod sql.NullInt64
-	var session AISession
+	var (
+		model, endpointName, endpointURL sql.NullString
+		endpointId, endpointAuthMethod   sql.NullInt64
+		session                          AISession
+	)
 
-	err := s.DBHandler.DB.QueryRow(`SELECT
-			lt.model,
-			rt.id,
-			rt.name,
-			rt.url,
-			rt.auth_method
-		FROM
-			ai_sessions lt
-		LEFT JOIN
-			endpoints rt ON lt.endpoint = rt.id
+	err := s.DBHandler.DB.QueryRow(`
+		SELECT lt.model,
+		       rt.id,
+		       rt.name,
+		       rt.url,
+		       rt.auth_method
+		FROM ai_sessions lt
+		LEFT JOIN endpoints rt ON lt.endpoint = rt.id
 		WHERE tg_user_id = $1`, userId).Scan(
 		&model, &endpointId, &endpointName,
 		&endpointURL, &endpointAuthMethod,
 	)
+	if err != nil {
+		return session, err
+	}
 
 	if model.Valid {
 		session.Model = &model.String
 	}
-	if endpointId.Valid &&
-		endpointName.Valid &&
-		endpointURL.Valid &&
-		endpointAuthMethod.Valid {
-		var endpoint Endpoint
 
-		endpoint.ID = endpointId.Int64
-		endpoint.Name = endpointName.String
-		endpoint.URL = endpointURL.String
-		endpoint.AuthMethod = endpointAuthMethod.Int64
-
-		session.Endpoint = &endpoint
+	if endpointId.Valid && endpointName.Valid && endpointURL.Valid && endpointAuthMethod.Valid {
+		session.Endpoint = &Endpoint{
+			ID:         endpointId.Int64,
+			Name:       endpointName.String,
+			URL:        endpointURL.String,
+			AuthMethod: endpointAuthMethod.Int64,
+		}
 	}
 
-	return session, err
+	return session, nil
 }
 
 // check if session exists
