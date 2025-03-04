@@ -85,13 +85,11 @@ func (h *handlers) cmdClear(ctx context.Context, tgb *bot.Bot, chatID int64) {
 		return
 	}
 
-	user, ok := h.cache.GetUser(chatID)
+	user, ok := ctx.Value(database.UserCtxKey).(database.User)
 	if !ok {
-		log.Error().Int64("chat_id", chatID).Msg("user not found in cache")
+		log.Error().Int64("chat_id", chatID).Msg("user not found in context")
 		return
-		// todo: Add actions in case the user is not found in the cache
 	}
-
 	user.FlushMemory(h.dbService)
 	h.cache.DeleteUser(chatID)
 }
@@ -105,11 +103,10 @@ func (h *handlers) cmdPurge(ctx context.Context, tgb *bot.Bot, chatID int64) {
 		return
 	}
 
-	user, ok := h.cache.GetUser(chatID)
+	user, ok := ctx.Value(database.UserCtxKey).(database.User)
 	if !ok {
-		log.Error().Int64("chat_id", chatID).Msg("user not found in cache")
+		log.Error().Int64("chat_id", chatID).Msg("user not found in context")
 		return
-		// todo: Add actions in case the user is not found in the cache
 	}
 	user.Kill(h.dbService)
 	h.cache.DeleteUser(chatID)
@@ -122,13 +119,12 @@ func (h *handlers) cmdDrop(ctx context.Context, tgb *bot.Bot, chatID int64) {
 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
 		return
 	}
-	user, ok := h.cache.GetUser(chatID)
-	if !ok {
-		log.Error().Int64("chat_id", chatID).Msg("user not found in cache")
-		return
-		// todo: Add actions in case the user is not found in the cache
-	}
 
+	user, ok := ctx.Value(database.UserCtxKey).(database.User)
+	if !ok {
+		log.Error().Int64("chat_id", chatID).Msg("user not found in context")
+		return
+	}
 	user.DropSession(h.dbService)
 	user.FlushMemory(h.dbService)
 	h.cache.DeleteUser(chatID)
@@ -203,11 +199,10 @@ func (h *handlers) cmdSearchDoc(ctx context.Context, tgb *bot.Bot, chatID int64,
 // TODO
 // this is calling local-ai within base template (and without langhain injections)
 func (h *handlers) cmdInstruct(ctx context.Context, tgb *bot.Bot, chatID int64, prompt string) {
-	user, ok := h.cache.GetUser(chatID)
+	user, ok := ctx.Value(database.UserCtxKey).(database.User)
 	if !ok {
-		log.Error().Int64("chat_id", chatID).Msg("user not found in cache")
+		log.Error().Int64("chat_id", chatID).Msg("user not found in context")
 		return
-		// todo: Add actions in case the user is not found in the cache
 	}
 
 	model := user.AiSession.GptModel
@@ -218,11 +213,10 @@ func (h *handlers) cmdInstruct(ctx context.Context, tgb *bot.Bot, chatID int64, 
 
 // Shows token usage statistics
 func (h *handlers) cmdUsage(ctx context.Context, tgb *bot.Bot, chatID int64) {
-	user, ok := h.cache.GetUser(chatID)
+	user, ok := ctx.Value(database.UserCtxKey).(database.User)
 	if !ok {
-		log.Error().Int64("chat_id", chatID).Msg("user not found in cache")
+		log.Error().Int64("chat_id", chatID).Msg("user not found in context")
 		return
-		// todo: Add actions in case the user is not found in the cache
 	}
 
 	promt_tokens := user.AiSession.Usage[database.Usage_PromptTokens]
@@ -258,11 +252,10 @@ func (h *handlers) cmdHelper(ctx context.Context, tgb *bot.Bot, chatID int64) {
 }
 
 func (h *handlers) cmdSetContext(ctx context.Context, tgb *bot.Bot, chatID int64, name string) {
-	user, ok := h.cache.GetUser(chatID)
+	user, ok := ctx.Value(database.UserCtxKey).(database.User)
 	if !ok {
-		log.Error().Int64("chat_id", chatID).Msg("user not found in cache")
+		log.Error().Int64("chat_id", chatID).Msg("user not found in context")
 		return
-		// todo: Add actions in case the user is not found in the cache
 	}
 	log.Info().
 		Int64("chat_id", chatID).Str("command", "set context").Str("argument", name).Interface("user", user).
@@ -275,11 +268,10 @@ func (h *handlers) cmdSetContext(ctx context.Context, tgb *bot.Bot, chatID int64
 }
 
 func (h *handlers) cmdClearContext(ctx context.Context, tgb *bot.Bot, chatID int64) {
-	user, ok := h.cache.GetUser(chatID)
+	user, ok := ctx.Value(database.UserCtxKey).(database.User)
 	if !ok {
-		log.Error().Int64("chat_id", chatID).Msg("user not found in cache")
+		log.Error().Int64("chat_id", chatID).Msg("user not found in context")
 		return
-		// todo: Add actions in case the user is not found in the cache
 	}
 	user.ClearContext()
 }

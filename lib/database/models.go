@@ -18,7 +18,7 @@ type OpenAIModelsResponse struct {
 func (s *Service) GetModelsList(url, localAIToken string) ([]string, error) {
 	modelsList := []string{}
 
-	fmt.Println(url)
+	fmt.Println(url, localAIToken)
 
 	req, err := http.NewRequest("GET", url, nil)
 	req.Header.Set("Authorization", "Bearer "+localAIToken)

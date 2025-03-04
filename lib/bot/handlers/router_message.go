@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/JackBekket/hellper/lib/agent"
@@ -48,6 +49,8 @@ func (h *handlers) handleSendAIModelSelectionKeyboard(ctx context.Context, tgb *
 		h.dbService.InsertToken(chatID, 1, localAIToken)
 		user.AiSession.LocalAIToken = localAIToken
 	}
+
+	fmt.Println(localAIToken)
 
 	url := getURL(h.config.BaseURL, h.config.ModelsListEndpoint)
 	aiModelsList, err := h.dbService.GetModelsList(url, localAIToken)

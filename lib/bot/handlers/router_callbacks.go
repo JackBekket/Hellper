@@ -13,12 +13,12 @@ import (
 
 func (h *handlers) callbackRouter(ctx context.Context, tgb *bot.Bot, update *models.Update) {
 	chatID := update.CallbackQuery.From.ID
-	user, ok := h.cache.GetUser(chatID)
+	user, ok := ctx.Value(database.UserCtxKey).(database.User)
 	if !ok {
-		log.Error().Int64("chat_id", chatID).Msg("user not found in cache")
+		log.Error().Int64("chat_id", chatID).Msg("user not found in context")
 		return
-		// todo: Add actions in case the user is not found in the cache
 	}
+
 	switch user.DialogStatus {
 	case statusAIModelSelectionChoice:
 		h.handleAIModelSelectionCallback(ctx, tgb, update)
@@ -40,13 +40,6 @@ func (h *handlers) callbackRouter(ctx context.Context, tgb *bot.Bot, update *mod
 		// 	return
 
 		// }
-
-		user, ok := h.cache.GetUser(chatID)
-		if !ok {
-			log.Error().Int64("chat_id", chatID).Msg("user not found in cache")
-			return
-			// todo: Add actions in case the user is not found in the cache
-		}
 
 		if user.AiSession.LocalAIToken == "" {
 			h.handleNewUserRegistration(ctx, tgb, update)
@@ -81,15 +74,8 @@ func (h *handlers) handleAIModelSelectionCallback(ctx context.Context, tgb *bot.
 		log.Error().Int64("chat_id", chatID).Str("content", content).Caller().Msg("invalid callback data format")
 		return
 	}
+
 	aiModelName := parts[1]
-
-	user, ok := h.cache.GetUser(chatID)
-	if !ok {
-		log.Error().Int64("chat_id", chatID).Msg("user not found in cache")
-		return
-		// todo: Add actions in case the user is not found in the cache
-	}
-
 	msg := &bot.SendMessageParams{
 		ChatID: chatID,
 		Text:   msgSessionModel + aiModelName,
@@ -111,7 +97,13 @@ func (h *handlers) handleAIModelSelectionCallback(ctx context.Context, tgb *bot.
 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
 		return
 	}
+
 	// status_ConnectingToAiWithLang
+	user, ok := ctx.Value(database.UserCtxKey).(database.User)
+	if !ok {
+		log.Error().Int64("chat_id", chatID).Msg("user not found in context")
+		return
+	}
 	user.DialogStatus = statusConnectingToAiWithLang
 	user.AiSession.GptModel = aiModelName
 	h.cache.UpdateUser(user)
@@ -156,11 +148,10 @@ func (h *handlers) handleConnectingToAiWithLangCallback(ctx context.Context, tgb
 
 // old name func - SetupSequenceWithKey
 func (h *handlers) handleStartAiConversationWithLang(ctx context.Context, tgb *bot.Bot, chatID int64, langPrompt string) {
-	user, ok := h.cache.GetUser(chatID)
+	user, ok := ctx.Value(database.UserCtxKey).(database.User)
 	if !ok {
-		log.Error().Int64("chat_id", chatID).Msg("user not found in cache")
+		log.Error().Int64("chat_id", chatID).Msg("user not found in context")
 		return
-		// todo: Add actions in case the user is not found in the cache
 	}
 
 	probe, response, err := langchain.RunNewAgent(user.AiSession.LocalAIToken, user.AiSession.GptModel, h.config.BaseURL, langPrompt)

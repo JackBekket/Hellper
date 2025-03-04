@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/JackBekket/hellper/lib/database"
 	"github.com/JackBekket/hellper/lib/localai"
 	stt "github.com/JackBekket/hellper/lib/localai/audioRecognition"
 	"github.com/go-telegram/bot"
@@ -41,8 +42,12 @@ func (h *handlers) handleVoiceTranscriber(ctx context.Context, tgb *bot.Bot, upd
 		msgFailedVoiceFunc()
 		return
 	}
-	//User in the cache is checked in the global middleware IdentifyUserMiddleware
-	user, _ := h.cache.GetUser(chatID)
+
+	user, ok := ctx.Value(database.UserCtxKey).(database.User)
+	if !ok {
+		log.Error().Int64("chat_id", chatID).Msg("user not found in context")
+		return
+	}
 
 	url, model := stt.GetEnvsForSST()
 	transcription, err := localai.TranscribeWhisper(url, model, localFilePath, user.AiSession.LocalAIToken)
