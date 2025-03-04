@@ -15,7 +15,7 @@ The external data and input sources are:
 * `bot` of type `tgbotapi.BotAPI`  
 * Environment variables:  
 	+ `AI_ENDPOINT`  
-	+ `VOICE_RECOGNITION_SUFFIX` (optional, defaults to `/v1/audio/transcriptions`)  
+	+ `VOICE_RECOGNITION_ENDPOINT` (optional, defaults to `/v1/audio/transcriptions`)  
 	+ `VOICE_RECOGNITION_MODEL` (optional, defaults to `whisper-1`)  
   
 ## TODO Comments  

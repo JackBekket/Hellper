@@ -12,23 +12,19 @@ import (
 	"github.com/tmc/langchaingo/vectorstores/pgvector"
 )
 
+func Rag(endpoint string, localAIToken string, question string, numOfResults int, store vectorstores.VectorStore, option ...vectorstores.Option) (result string, err error) {
 
-
-func Rag(ai_url string,api_token string,question string, numOfResults int,store vectorstores.VectorStore, option ...vectorstores.Option) (result string,err error) {
-
-	base_url := ai_url
-
-	// Create an embeddings client using the. 
+	// Create an embeddings client using the.
 	llm, err := openai.New(
 		//openai.WithBaseURL("http://localhost:8080/v1/"),
-		openai.WithBaseURL(base_url),
+		openai.WithBaseURL(endpoint),
 		openai.WithAPIVersion("v1"),
-		openai.WithToken(api_token),
-    	openai.WithModel("tiger-gemma-9b-v1-i1"),
-    	openai.WithEmbeddingModel("text-embedding-ada-002"),
+		openai.WithToken(localAIToken),
+		openai.WithModel("tiger-gemma-9b-v1-i1"),
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
 	)
 	if err != nil {
-		return "",err
+		return "", err
 	}
 
 	result, err = chains.Run(
@@ -41,30 +37,28 @@ func Rag(ai_url string,api_token string,question string, numOfResults int,store 
 		chains.WithMaxTokens(8192),
 	)
 	if err != nil {
-		return "",err
+		return "", err
 	}
 
 	fmt.Println("====final answer====\n", result)
-
 
 	defer func() {
 		var pgvStore pgvector.Store
 		pgvStore, ok := store.(pgvector.Store)
 		if !ok {
-		  log.Fatalf("store does not implement pgvector.Store")
+			log.Fatalf("store does not implement pgvector.Store")
 		}
 		pgvStore.Close()
-	  }()
+	}()
 
-	  
-	return result,nil
+	return result, nil
 }
 
 func SemanticSearch(searchQuery string, maxResults int, store vectorstores.VectorStore, options ...vectorstores.Option) (searchResults []schema.Document, err error) {
 
 	searchResults, err = store.SimilaritySearch(context.Background(), searchQuery, maxResults, options...)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 	fmt.Println("============== similarity search results ==============")
 
@@ -79,10 +73,9 @@ func SemanticSearch(searchQuery string, maxResults int, store vectorstores.Vecto
 		var pgvStore pgvector.Store
 		pgvStore, ok := store.(pgvector.Store)
 		if !ok {
-		  log.Fatalf("store does not implement pgvector.Store")
+			log.Fatalf("store does not implement pgvector.Store")
 		}
 		pgvStore.Close()
-	  }()
-	return searchResults,nil
+	}()
+	return searchResults, nil
 }
-

@@ -10,12 +10,12 @@ import (
 )
 
 func getEnvsForImgRec() (string, string, string) {
-	url := os.Getenv("AI_ENDPOINT")
-	URLSuffix := os.Getenv("IMAGE_RECOGNITION_SUFFIX")
-	if URLSuffix == "" {
-		URLSuffix = "/v1/chat/completions"
+	baseURL := os.Getenv("AI_ENDPOINT")
+	endpoint := os.Getenv("IMAGE_RECOGNITION_ENDPOINT")
+	if endpoint == "" {
+		endpoint = "/v1/chat/completions"
 	}
-	url += URLSuffix
+	baseURL += endpoint
 
 	model := os.Getenv("IMAGE_RECOGNITION_MODEL")
 	if model == "" {
@@ -23,7 +23,7 @@ func getEnvsForImgRec() (string, string, string) {
 	}
 
 	token := os.Getenv("OPENAI_API_KEY")
-	return url, model, token
+	return baseURL, model, token
 
 }
 
@@ -56,9 +56,9 @@ func getEnvsForImgRec() (string, string, string) {
 // 		return "", fmt.Errorf("could not get file info: %v", err)
 // 	}
 
-// 	fileURL := fmt.Sprintf("https://api.telegram.org/file/bot%s/%s", bot.Token, file.FilePath)
+// 	filebaseURL := fmt.Sprintf("https://api.telegram.org/file/bot%s/%s", bot.Token, file.FilePath)
 
-// 	return fileURL, nil
+// 	return filebaseURL, nil
 // }
 
 func ImageRecognitionLAI(url string, model string, token string, imgLink string, prompt string) (string, error) {

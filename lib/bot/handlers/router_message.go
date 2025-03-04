@@ -23,9 +23,9 @@ func (h *handlers) textMessageRouter(ctx context.Context, tgb *bot.Bot, update *
 		// todo: Add actions in case the user is not found in the cache
 	}
 	switch user.DialogStatus {
-	case status_AIModelSelectionKeyboard:
+	case statusAIModelSelectionKeyboard:
 		h.handleSendAIModelSelectionKeyboard(ctx, tgb, update)
-	case status_StartDialogSequence:
+	case statusStartDialogSequence:
 		go h.handleStartDialogSequence(ctx, tgb, update)
 	default: // todo: error msg
 	}
@@ -35,8 +35,7 @@ func (h *handlers) textMessageRouter(ctx context.Context, tgb *bot.Bot, update *
 // 3 - status_AIModelSelectionKeyboard
 func (h *handlers) handleSendAIModelSelectionKeyboard(ctx context.Context, tgb *bot.Bot, update *models.Update) {
 	chatID := update.Message.Chat.ID
-	var gptKey string
-
+	var localAIToken string
 	user, ok := h.cache.GetUser(chatID)
 	if !ok {
 		log.Error().Int64("chat_id", chatID).Msg("user not found in cache")
@@ -44,20 +43,21 @@ func (h *handlers) handleSendAIModelSelectionKeyboard(ctx context.Context, tgb *
 		// todo: Add actions in case the user is not found in the cache
 	}
 
-	if update.Message.Text != "" && user.AiSession.GptKey == "" {
-		gptKey = strings.TrimSpace(update.Message.Text)
-		h.db_service.InsertToken(chatID, 1, gptKey)
-		user.AiSession.GptKey = gptKey
+	if update.Message.Text != "" && user.AiSession.LocalAIToken == "" {
+		localAIToken = strings.TrimSpace(update.Message.Text)
+		h.dbService.InsertToken(chatID, 1, localAIToken)
+		user.AiSession.LocalAIToken = localAIToken
 	}
-	ai_endpoint := h.config.AI_endpoint
-	aiModelsList, err := h.db_service.GetModelsList(ai_endpoint, gptKey)
+
+	url := getURL(h.config.BaseURL, h.config.ModelsListEndpoint)
+	aiModelsList, err := h.dbService.GetModelsList(url, localAIToken)
 	if err != nil {
 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error retrieving LLM models list")
 		h.handleNewUserRegistration(ctx, tgb, update)
 		log.Warn().Int64("chat_id", chatID).Msg("User redirected to registration handler due to LLM models list error")
 		return
 	}
-	user.DialogStatus = status_AIModelSelectionChoice
+	user.DialogStatus = statusAIModelSelectionChoice
 	h.cache.UpdateUser(user)
 
 	msg := &bot.SendMessageParams{
@@ -87,7 +87,7 @@ func (h *handlers) handleStartDialogSequence(ctx context.Context, tgb *bot.Bot, 
 	thread := user.AiSession.DialogThread
 	log.Info().Str("gpt_model", model).Str("prompt", prompt).Msg("processing GPT request")
 
-	post_session, resp, err := langchain.ContinueAgent(user.AiSession.GptKey, model, h.config.AI_endpoint, prompt, &thread)
+	post_session, resp, err := langchain.ContinueAgent(user.AiSession.LocalAIToken, model, h.config.BaseURL, prompt, &thread)
 	if err != nil {
 		videoMsg, err := getErrorMsgWithRandomVideo(chatID)
 		if err != nil {
@@ -111,21 +111,21 @@ func (h *handlers) handleStartDialogSequence(ctx context.Context, tgb *bot.Bot, 
 		return
 	}
 
-	user.DialogStatus = status_StartDialogSequence
+	user.DialogStatus = statusStartDialogSequence
 
-	usage, ok := h.cache.GetUsage(chatID)
-	if !ok {
-		log.Error().Int64("chat_id", chatID).Msg("usage not found in cache")
-		return
-		// todo: Add actions in case the user is not found in the cache
-	}
+	usage := database.GetSessionUsage(chatID)
+	// if !ok {
+	// 	log.Error().Int64("chat_id", chatID).Caller().Msg("usage not found in cache")
+	// 	return
+	// 	// todo: Add actions in case the user is not found in the cache
+	// }
 
-	user.AiSession.Usage = usage.Usage
+	user.AiSession.Usage = usage
 	user.AiSession.DialogThread = *post_session
 	h.cache.UpdateUser(user)
 
 	totalTurns := len(thread.ConversationBuffer)
-	log.Info().Int("total_turns", totalTurns).Caller().Msg("conversation turns counted")
+	log.Info().Int("total_turns", totalTurns).Msg("conversation turns counted")
 
 	// here we save user conversation to the db?
 	// Update the user in the database here. Yes, everything that happens with the "user" should be immediately visible.
@@ -134,7 +134,7 @@ func (h *handlers) handleStartDialogSequence(ctx context.Context, tgb *bot.Bot, 
 	humanType := agent.CreateMessageContentHuman(prompt)
 	threadID := chatID
 
-	if err := updateUserHistoryInDB(h.db_service, chatID, threadID, model, humanType[0], last_msg); err != nil {
+	if err := updateUserHistoryInDB(h.dbService, chatID, threadID, model, humanType[0], last_msg); err != nil {
 		log.Error().Err(err).Int64("chat_id", chatID).Str("model", model).Caller().Msg("failed to update user history")
 		return
 	}

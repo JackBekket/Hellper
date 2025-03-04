@@ -13,7 +13,7 @@ The package name is **imageRecognition**. The imports are:
 The external data and input sources are:  
 * Environment variables:   
   + "AI_ENDPOINT"  
-  + "IMAGE_RECOGNITION_SUFFIX"  
+  + "IMAGE_RECOGNITION_ENDPOINT"  
   + "IMAGE_RECOGNITION_MODEL"  
   + "OPENAI_API_KEY"  
 * Telegram bot API  

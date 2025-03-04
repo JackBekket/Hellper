@@ -25,7 +25,7 @@ func (h *handlers) cmdGenerateImage(ctx context.Context, tgb *bot.Bot, chatID in
 	}
 
 	msgFailedGenerateImageFunc := func() {
-		msg := &bot.SendMessageParams{ChatID: chatID, Text: errorMsg_FailedToGenerateImage}
+		msg := &bot.SendMessageParams{ChatID: chatID, Text: errMsgFailedToGenerateImage}
 		_, err := tgb.SendMessage(ctx, msg)
 		if err != nil {
 			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
@@ -33,14 +33,14 @@ func (h *handlers) cmdGenerateImage(ctx context.Context, tgb *bot.Bot, chatID in
 	}
 
 	if prompt == "" {
-		prompt = basePromt_GenerateImage
+		prompt = basePromptGenerateImage
 	}
 
-	url := getURL(h.config.AIEndpoint, h.config.ImageGenerationSuffix)
+	url := getURL(h.config.BaseURL, h.config.ImageGenerationEndpoint)
 	size := "256x256"
 	model := h.config.ImageGenerationModel
 	if model == "" {
-		model = ai_StableDiffusionModel
+		model = aiStableDiffusionModel
 	}
 
 	user, ok := h.cache.GetUser(chatID)

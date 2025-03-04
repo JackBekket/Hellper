@@ -4,13 +4,12 @@ package config
 
 // Configuration for working with various AI APIs
 type AIConfig struct {
-	AIEndpoint             string
-	BaseURL                string
-	ModelsListSuffix       string
-	ImageGenerationModel   string
-	ImageGenerationSuffix  string
-	ImageRecognitionModel  string
-	ImageRecognitionSuffix string
-	VoiceRecognitionModel  string
-	VoiceRecognitionSuffix string
+	BaseURL                  string
+	ModelsListEndpoint       string
+	ImageGenerationModel     string
+	ImageGenerationEndpoint  string
+	ImageRecognitionModel    string
+	ImageRecognitionEndpoint string
+	VoiceRecognitionModel    string
+	VoiceRecognitionEndpoint string
 }

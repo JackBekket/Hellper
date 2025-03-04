@@ -92,7 +92,7 @@ func (h *handlers) cmdClear(ctx context.Context, tgb *bot.Bot, chatID int64) {
 		// todo: Add actions in case the user is not found in the cache
 	}
 
-	user.FlushMemory(h.db_service)
+	user.FlushMemory(h.dbService)
 	h.cache.DeleteUser(chatID)
 }
 
@@ -111,7 +111,7 @@ func (h *handlers) cmdPurge(ctx context.Context, tgb *bot.Bot, chatID int64) {
 		return
 		// todo: Add actions in case the user is not found in the cache
 	}
-	user.Kill(h.db_service)
+	user.Kill(h.dbService)
 	h.cache.DeleteUser(chatID)
 }
 
@@ -129,15 +129,15 @@ func (h *handlers) cmdDrop(ctx context.Context, tgb *bot.Bot, chatID int64) {
 		// todo: Add actions in case the user is not found in the cache
 	}
 
-	user.DropSession(h.db_service)
-	user.FlushMemory(h.db_service)
+	user.DropSession(h.dbService)
+	user.FlushMemory(h.dbService)
 	h.cache.DeleteUser(chatID)
 
 }
 
 // Sends a message with instructions for working with the bot
 func (h *handlers) cmdHelp(ctx context.Context, tgb *bot.Bot, chatID int64) {
-	msg := &bot.SendMessageParams{ChatID: chatID, Text: msg_Help_command}
+	msg := &bot.SendMessageParams{ChatID: chatID, Text: msgHelpCommand}
 	_, err := tgb.SendMessage(ctx, msg)
 	if err != nil {
 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
@@ -148,7 +148,7 @@ func (h *handlers) cmdHelp(ctx context.Context, tgb *bot.Bot, chatID int64) {
 // Old Func - SearchDocuments.
 // WARNING: The func uses an unsafe function - GetVectorStore
 func (h *handlers) cmdSearchDoc(ctx context.Context, tgb *bot.Bot, chatID int64, prompt string) {
-	db_link := h.db_Link
+	dbLink := h.dbLink
 	baseURL := h.config.BaseURL
 	user, ok := h.cache.GetUser(chatID)
 	if !ok {
@@ -157,8 +157,8 @@ func (h *handlers) cmdSearchDoc(ctx context.Context, tgb *bot.Bot, chatID int64,
 		// todo: Add actions in case the user is not found in the cache
 	}
 
-	api_token := user.AiSession.LocalAIToken
-	store, err := embeddings.GetVectorStore(baseURL, api_token, db_link) // WARNING: This function is unsafe! May call log.Fatal (╯°□°）╯︵ ┻━┻
+	localAIToken := user.AiSession.LocalAIToken
+	store, err := embeddings.GetVectorStore(baseURL, localAIToken, dbLink) // WARNING: This function is unsafe! May call log.Fatal (╯°□°）╯︵ ┻━┻
 	if err != nil {
 		msg := &bot.SendMessageParams{ChatID: chatID, Text: "Something happened... error occured: " + err.Error()}
 		_, err := tgb.SendMessage(ctx, msg)
@@ -211,9 +211,9 @@ func (h *handlers) cmdInstruct(ctx context.Context, tgb *bot.Bot, chatID int64, 
 	}
 
 	model := user.AiSession.GptModel
-	api_token := user.AiSession.LocalAIToken
+	localAIToken := user.AiSession.LocalAIToken
 
-	langchain.GenerateContentInstruction(user.AiSession.Base_url, prompt, model, api_token, user.Network)
+	langchain.GenerateContentInstruction(user.AiSession.Base_url, prompt, model, localAIToken, user.Network)
 }
 
 // Shows token usage statistics

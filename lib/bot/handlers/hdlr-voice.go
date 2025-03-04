@@ -18,9 +18,8 @@ import (
 func (h *handlers) handleVoiceTranscriber(ctx context.Context, tgb *bot.Bot, update *models.Update) {
 	chatID := update.Message.Chat.ID
 	params := &bot.GetFileParams{FileID: update.Message.Voice.FileID}
-
 	msgFailedVoiceFunc := func() {
-		msg := &bot.SendMessageParams{ChatID: chatID, Text: errMsg_FailedTrascribeVoice}
+		msg := &bot.SendMessageParams{ChatID: chatID, Text: errMsgFailedTrascribeVoice}
 		_, err := tgb.SendMessage(ctx, msg)
 		if err != nil {
 			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
@@ -42,9 +41,11 @@ func (h *handlers) handleVoiceTranscriber(ctx context.Context, tgb *bot.Bot, upd
 		msgFailedVoiceFunc()
 		return
 	}
+	//User in the cache is checked in the global middleware IdentifyUserMiddleware
+	user, _ := h.cache.GetUser(chatID)
 
 	url, model := stt.GetEnvsForSST()
-	transcription, err := localai.TranscribeWhisper(url, model, localFilePath)
+	transcription, err := localai.TranscribeWhisper(url, model, localFilePath, user.AiSession.LocalAIToken)
 	if err != nil {
 		msgFailedVoiceFunc()
 		log.Error().Err(err).Str("url", url).Str("model", model).Str("file_path", localFilePath).Caller().Msg("failed to transcribe audio")

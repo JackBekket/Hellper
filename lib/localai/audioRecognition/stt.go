@@ -8,7 +8,7 @@ import (
 // func HandleVoiceMessage(updateMessage *tgbotapi.Message, bot tgbotapi.BotAPI) (string, error) {
 
 // 	fileID := updateMessage.Voice.FileID
-// 	fileURL, err := GetFileURL(fileID, bot)
+// 	filebaseURL, err := GetFileURL(fileID, bot)
 // 	if err != nil {
 // 		log.Println("Error getting file URL:", err)
 // 		return "", err
@@ -57,17 +57,19 @@ import (
 // }
 
 // url, model
+
+// REFACTOR
 func GetEnvsForSST() (string, string) {
-	url := os.Getenv("AI_ENDPOINT")
-	URLSuffix := os.Getenv("VOICE_RECOGNITION_SUFFIX")
-	if URLSuffix == "" {
-		URLSuffix = "/v1/audio/transcriptions"
+	baseURL := os.Getenv("AI_BASEURL")
+	endpoint := os.Getenv("VOICE_RECOGNITION_ENDPOINT")
+	if endpoint == "" {
+		endpoint = "/v1/audio/transcriptions"
 	}
-	url += URLSuffix
+	baseURL += endpoint
 
 	model := os.Getenv("VOICE_RECOGNITION_MODEL")
 	if model == "" {
 		model = "whisper-1"
 	}
-	return url, model
+	return baseURL, model
 }

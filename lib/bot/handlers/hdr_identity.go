@@ -22,10 +22,10 @@ func (h *handlers) handleNewUserRegistration(ctx context.Context, tgb *bot.Bot, 
 	user := database.User{
 		ID:           chatID,
 		Username:     update.Message.From.Username,
-		DialogStatus: status_AIModelSelectionKeyboard,
+		DialogStatus: statusAIModelSelectionKeyboard,
 		Admin:        false,
 		AiSession: database.AiSession{
-			Base_url: h.config.AI_endpoint,
+			Base_url: h.config.BaseURL,
 		},
 	}
 
@@ -33,7 +33,7 @@ func (h *handlers) handleNewUserRegistration(ctx context.Context, tgb *bot.Bot, 
 
 	msg := &bot.SendMessageParams{
 		ChatID: chatID,
-		Text:   msg_Hello,
+		Text:   msgHello,
 	}
 
 	_, err := tgb.SendMessage(ctx, msg)
@@ -49,7 +49,7 @@ func restoreUserSessionFromDB(ds *database.Service, chatID int64, username strin
 		return nil, fmt.Errorf("failed to retrieve session: %w", err)
 	}
 
-	gptKey, err := ds.GetToken(chatID, 1)
+	LocalAIToken, err := ds.GetToken(chatID, 1)
 	if err != nil {
 		return nil, fmt.Errorf("error retrieving user's API key : %w", err)
 	}
@@ -62,12 +62,12 @@ func restoreUserSessionFromDB(ds *database.Service, chatID int64, username strin
 	user := &database.User{
 		ID:           chatID,
 		Username:     username,
-		DialogStatus: status_StartDialogSequence,
+		DialogStatus: statusStartDialogSequence,
 		Admin:        false,
 		AiSession: database.AiSession{
-			GptModel: *ai_session.Model,
-			Base_url: ai_session.Endpoint.URL,
-			GptKey:   gptKey,
+			GptModel:     *ai_session.Model,
+			Base_url:     ai_session.Endpoint.URL,
+			LocalAIToken: LocalAIToken,
 			DialogThread: database.ChatSessionGraph{
 				ConversationBuffer: history,
 			},
@@ -76,7 +76,7 @@ func restoreUserSessionFromDB(ds *database.Service, chatID int64, username strin
 	return user, nil
 
 }
-func recoverUserAfterDrop(ds *database.Service, chatID int64, username string, ai_endpoint string) (*database.User, error) {
+func recoverUserAfterDrop(ds *database.Service, chatID int64, username string, BaseURL string) (*database.User, error) {
 
 	log.Info().
 		Int64("chat_id", chatID).
@@ -86,20 +86,20 @@ func recoverUserAfterDrop(ds *database.Service, chatID int64, username string, a
 	user := &database.User{
 		ID:           chatID,
 		Username:     username,
-		DialogStatus: status_AIModelSelectionChoice,
+		DialogStatus: statusAIModelSelectionChoice,
 		Admin:        false,
 		AiSession: database.AiSession{
-			Base_url: ai_endpoint,
+			Base_url: BaseURL,
 		},
 	}
 
-	gptKey, err := ds.GetToken(chatID, 1)
+	LocalAIToken, err := ds.GetToken(chatID, 1)
 	if err != nil {
 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error retrieving GPT KEY")
 		log.Warn().Int64("chat_id", chatID).Msg("User redirected to registration handler due to GPT KEY error")
 		return &database.User{}, err
 	}
 
-	user.AiSession.GptKey = gptKey
+	user.AiSession.LocalAIToken = LocalAIToken
 	return user, nil
 }

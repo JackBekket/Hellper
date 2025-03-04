@@ -21,15 +21,15 @@ import (
 	    Instruction: {{.Input}}
 	    Response:
 */
-func GenerateContentInstruction(base_url string, promt string, model_name string, localAIToken string, network string, options ...llms.CallOption) (string, error) {
+func GenerateContentInstruction(baseURL string, promt string, model string, localAIToken string, network string, options ...llms.CallOption) (string, error) {
 	ctx := context.Background()
 	var result string
 	if network == "local" {
 		llm, err := openai.New(
 			openai.WithToken(localAIToken),
 			//openai.WithBaseURL("http://localhost:8080"),
-			openai.WithBaseURL(base_url),
-			openai.WithModel(model_name),
+			openai.WithBaseURL(baseURL),
+			openai.WithModel(model),
 			openai.WithAPIVersion("v1"),
 		)
 		if err != nil {
@@ -48,7 +48,7 @@ func GenerateContentInstruction(base_url string, promt string, model_name string
 	if network == "openai" {
 		llm, err := openai.New(
 			openai.WithToken(localAIToken),
-			openai.WithModel(model_name),
+			openai.WithModel(model),
 		)
 		if err != nil {
 			log.Fatal(err)

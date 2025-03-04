@@ -20,9 +20,9 @@ func (h *handlers) callbackRouter(ctx context.Context, tgb *bot.Bot, update *mod
 		// todo: Add actions in case the user is not found in the cache
 	}
 	switch user.DialogStatus {
-	case status_AIModelSelectionChoice:
+	case statusAIModelSelectionChoice:
 		h.handleAIModelSelectionCallback(ctx, tgb, update)
-	case status_ConnectingToAiWithLang:
+	case statusConnectingToAiWithLang:
 		h.handleConnectingToAiWithLangCallback(ctx, tgb, update)
 	default: // todo: error msg
 
@@ -92,7 +92,7 @@ func (h *handlers) handleAIModelSelectionCallback(ctx context.Context, tgb *bot.
 
 	msg := &bot.SendMessageParams{
 		ChatID: chatID,
-		Text:   msg_Session_model + aiModelName,
+		Text:   msgSessionModel + aiModelName,
 	}
 	_, err = tgb.SendMessage(ctx, msg)
 	if err != nil {
@@ -102,7 +102,7 @@ func (h *handlers) handleAIModelSelectionCallback(ctx context.Context, tgb *bot.
 
 	langMsg := &bot.SendMessageParams{
 		ChatID:      chatID,
-		Text:        msg_Choose_lang,
+		Text:        msgChooseLang,
 		ReplyMarkup: renderLangInlineKeyboard(),
 	}
 
@@ -112,7 +112,7 @@ func (h *handlers) handleAIModelSelectionCallback(ctx context.Context, tgb *bot.
 		return
 	}
 	// status_ConnectingToAiWithLang
-	user.DialogStatus = status_ConnectingToAiWithLang
+	user.DialogStatus = statusConnectingToAiWithLang
 	user.AiSession.GptModel = aiModelName
 	h.cache.UpdateUser(user)
 
@@ -137,7 +137,7 @@ func (h *handlers) handleConnectingToAiWithLangCallback(ctx context.Context, tgb
 
 	msg := &bot.SendMessageParams{
 		ChatID: chatID,
-		Text:   msg_Connecting_AI_node,
+		Text:   msgConnectingAINode,
 	}
 	_, err = tgb.SendMessage(ctx, msg)
 	if err != nil {
@@ -148,7 +148,7 @@ func (h *handlers) handleConnectingToAiWithLangCallback(ctx context.Context, tgb
 	// I commented out the line because the context with the value is not used anywhere
 	//ctxWithValue := context.WithValue(ctx, "user", user)
 	langPrompt := getInitialLangPrompt(lang)
-	log.Info().Int64("chat_id", chatID).Str("language", lang).Str("endpoint", h.config.AIEndpoint).
+	log.Info().Int64("chat_id", chatID).Str("language", lang).Str("endpoint", h.config.BaseURL).
 		Msg("Starting AI conversation")
 
 	go h.handleStartAiConversationWithLang(ctx, tgb, chatID, langPrompt)
@@ -163,7 +163,7 @@ func (h *handlers) handleStartAiConversationWithLang(ctx context.Context, tgb *b
 		// todo: Add actions in case the user is not found in the cache
 	}
 
-	probe, response, err := langchain.RunNewAgent(user.AiSession.LocalAIToken, user.AiSession.GptModel, h.config.AIEndpoint, langPrompt)
+	probe, response, err := langchain.RunNewAgent(user.AiSession.LocalAIToken, user.AiSession.GptModel, h.config.BaseURL, langPrompt)
 	if err != nil {
 		videoMsg, err := getErrorMsgWithRandomVideo(chatID)
 		if err != nil {
@@ -186,7 +186,7 @@ func (h *handlers) handleStartAiConversationWithLang(ctx context.Context, tgb *b
 		return
 	}
 
-	user.DialogStatus = status_StartDialogSequence
+	user.DialogStatus = statusStartDialogSequence
 	user.AiSession.DialogThread = *probe
 
 	// TODO: Replace with a thread-safe one
@@ -194,7 +194,7 @@ func (h *handlers) handleStartAiConversationWithLang(ctx context.Context, tgb *b
 	user.AiSession.Usage = usage
 
 	h.cache.UpdateUser(user)
-	log.Info().Int64("chat_id", chatID).Str("username", user.Username).Str("aiEndpoint", h.config.AIEndpoint).
+	log.Info().Int64("chat_id", chatID).Str("username", user.Username).Str("BaseURL", h.config.BaseURL).
 		Msg("AI conversation completed successfully")
 }
 
@@ -202,10 +202,10 @@ func (h *handlers) handleStartAiConversationWithLang(ctx context.Context, tgb *b
 func getInitialLangPrompt(lang string) string {
 	switch lang {
 	case "English":
-		return basePrompt_Lang_EN
+		return basePromptLangEN
 	case "Russian":
-		return basePrompt_Lang_RU
+		return basePromptLangRU
 	default:
-		return basePrompt_Lang_EN
+		return basePromptLangEN
 	}
 }

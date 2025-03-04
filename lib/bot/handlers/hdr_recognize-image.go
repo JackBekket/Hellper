@@ -15,7 +15,7 @@ func (h *handlers) handleRecognizeImage(ctx context.Context, tgb *bot.Bot, updat
 	params := &bot.GetFileParams{FileID: update.Message.Photo[0].FileID}
 
 	msgFailedRecognizeFunc := func() {
-		msg := &bot.SendMessageParams{ChatID: chatID, Text: errMsg_FailedRecognizeImage}
+		msg := &bot.SendMessageParams{ChatID: chatID, Text: errMsgFailedRecognizeImage}
 		_, err := tgb.SendMessage(ctx, msg)
 		if err != nil {
 			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
@@ -31,10 +31,10 @@ func (h *handlers) handleRecognizeImage(ctx context.Context, tgb *bot.Bot, updat
 	fileURL := urlTelegramServeFilesConstructor(tgb.Token(), file.FilePath)
 	prompt := update.Message.Caption
 	if update.Message.Caption == "" {
-		prompt = basePrompt_RecognizeImage
+		prompt = basePromptRecognizeImage
 	}
 
-	url := urlConnectionToAIConstructor(h.config.AI_endpoint, h.config.ImageRecognitionSuffix)
+	url := getURL(h.config.BaseURL, fileURL)
 	model := h.config.ImageRecognitionModel
 	recognize, err := imageRecognition.ImageRecognitionLAI(url, model, tgb.Token(), fileURL, prompt)
 	if err != nil {

@@ -52,16 +52,17 @@ func CreateMessageContentHuman(content string) []llms.MessageContent {
 	return intialState
 }
 
+// refactor
 func CreateGenericLLM() openai.LLM {
 	model_name := "tiger-gemma-9b-v1-i1" // should be settable?
 	_ = godotenv.Load()
-	ai_url := os.Getenv("AI_ENDPOINT") //TODO: should be global?
-	api_token := os.Getenv("AI_ENDPOINT")
+	baseURL := os.Getenv("AI_BASEURL") //TODO: should be global?
+	localAIToken := os.Getenv("AI_BASEURL")
 	//db_link := os.Getenv("EMBEDDINGS_DB_URL")
 	model, err := openai.New(
-		openai.WithToken(api_token),
+		openai.WithToken(localAIToken),
 		//openai.WithBaseURL("http://localhost:8080"),
-		openai.WithBaseURL(ai_url),
+		openai.WithBaseURL(baseURL),
 		openai.WithModel(model_name),
 		openai.WithAPIVersion("v1"),
 	)

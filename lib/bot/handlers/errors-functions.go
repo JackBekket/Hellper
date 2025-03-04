@@ -48,7 +48,7 @@ func getErrorMsgWithRandomVideo(chatID int64) (*bot.SendVideoParams, error) {
 
 	return &bot.SendVideoParams{
 		ChatID:  chatID,
-		Caption: msg_AI_client_failure,
+		Caption: msgAIclientFailure,
 		Video: &models.InputFileUpload{
 			Filename: randomFile.Name(),
 			Data:     videoFile,

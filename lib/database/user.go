@@ -18,9 +18,9 @@ func (u *User) SetContext(collectionName string) error {
 	localAIToken := u.AiSession.LocalAIToken
 	ai_endpoint := os.Getenv("AI_ENDPOINT")
 	//log.Println("ai endpoint is: ", ai_endpoint)
-	db_link := os.Getenv("EMBEDDINGS_DB_URL")
+	dbLink := os.Getenv("EMBEDDINGS_DB_URL")
 
-	vectorStore, err := e.GetVectorStoreWithOptions(ai_endpoint, localAIToken, db_link, collectionName)
+	vectorStore, err := e.GetVectorStoreWithOptions(ai_endpoint, localAIToken, dbLink, collectionName)
 	if err != nil {
 		log.Println("error getting vectorstore")
 		return err

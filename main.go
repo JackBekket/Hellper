@@ -30,9 +30,9 @@ func main() {
 	log.Info().Msg(".env file loaded successfully")
 
 	token := os.Getenv("TG_KEY")
-	db_link := os.Getenv("DB_LINK")
+	dbLink := os.Getenv("DB_LINK")
 
-	dbHandler, err := database.NewHandler(db_link)
+	dbHandler, err := database.NewHandler(dbLink)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to create database service")
 	}
@@ -50,17 +50,16 @@ func main() {
 	cache := database.NewMemoryCache()
 
 	botHandlers := handlers.NewHandlersBot(
-		cache, db_service, db_link,
+		cache, db_service, dbLink,
 		&config.AIConfig{
-			AIEndpoint:             os.Getenv("AI_ENDPOINT"),
-			ModelsListSuffix:       os.Getenv("MODELS_LIST_SUFFIX"),
-			BaseURL:                os.Getenv("AI_BASEURL"),
-			ImageGenerationModel:   os.Getenv("IMAGE_GENERATION_MODEL"),
-			ImageGenerationSuffix:  os.Getenv("IMAGE_GENERATION_SUFFIX"),
-			ImageRecognitionModel:  os.Getenv("IMAGE_RECOGNITION_MODEL"),
-			ImageRecognitionSuffix: os.Getenv("IMAGE_RECOGNITION_SUFFIX"),
-			VoiceRecognitionModel:  os.Getenv("VOICE_RECOGNITION_MODEL"),
-			VoiceRecognitionSuffix: os.Getenv("VOICE_RECOGNITION_SUFFIX"),
+			ModelsListEndpoint:       os.Getenv("MODELS_LIST_ENDPOINT"),
+			BaseURL:                  os.Getenv("AI_BASEURL"),
+			ImageGenerationModel:     os.Getenv("IMAGE_GENERATION_MODEL"),
+			ImageGenerationEndpoint:  os.Getenv("IMAGE_GENERATION_ENDPOINT"),
+			ImageRecognitionModel:    os.Getenv("IMAGE_RECOGNITION_MODEL"),
+			ImageRecognitionEndpoint: os.Getenv("IMAGE_RECOGNITION_ENDPOINT"),
+			VoiceRecognitionModel:    os.Getenv("VOICE_RECOGNITION_MODEL"),
+			VoiceRecognitionEndpoint: os.Getenv("VOICE_RECOGNITION_ENDPOINT"),
 		},
 	)
 

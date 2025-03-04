@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/url"
 	"path"
 )
@@ -11,13 +12,18 @@ func transformURL(inputURL string) string {
 	return fileName
 }
 
-func getURL(endpoint string, suffix string) string {
-	if suffix == "" {
-		suffix = ai_ImageGenerationSuffix
+func getURL(baseURL string, enpoint string) string {
+	if enpoint == "" {
+		enpoint = aiImageGenerationEndpoint
 	}
-	joined, err := url.JoinPath(endpoint, suffix)
+	joined, err := url.JoinPath(baseURL, enpoint)
 	if err != nil {
-		return endpoint + suffix
+		return baseURL + enpoint
 	}
 	return joined
+}
+
+// Constructs a Telegram file URL.
+func urlTelegramServeFilesConstructor(token string, filePath string) string {
+	return fmt.Sprintf("https://api.telegram.org/file/bot%s/%s", token, filePath)
 }

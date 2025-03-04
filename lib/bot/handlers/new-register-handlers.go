@@ -28,21 +28,21 @@ type Bot interface {
 type handlers struct {
 	botUsername string
 	cache       database.Cacher
-	db_Link     string
+	dbLink      string
 	// Postgres database and LLMHandlers
-	db_service *database.Service
-	config     *config.AIConfig
+	dbService *database.Service
+	config    *config.AIConfig
 
 	// Pass dependencies here
 }
 
 // Constructor of the handlers type
-func NewHandlersBot(cache database.Cacher, db_service *database.Service, db_Link string, config *config.AIConfig) Bot {
+func NewHandlersBot(cache database.Cacher, db_service *database.Service, dbLink string, config *config.AIConfig) Bot {
 	return &handlers{
-		cache:      cache,
-		db_service: db_service,
-		db_Link:    db_Link,
-		config:     config,
+		cache:     cache,
+		dbService: db_service,
+		dbLink:    dbLink,
+		config:    config,
 	}
 }
 
