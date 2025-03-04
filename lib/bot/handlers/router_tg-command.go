@@ -39,29 +39,29 @@ func (h *handlers) cmdRouter(ctx context.Context, tgb *bot.Bot, update *models.U
 	log.Info().Int64("chat_id", chatID).Str("command", command).Str("arg", arg).Msg("processing command")
 
 	switch command {
-	case "image":
+	case "/image":
 		h.cmdGenerateImage(ctx, tgb, chatID, arg)
-	case "reload":
+	case "/reload":
 		h.cmdReload(ctx, tgb, chatID)
-	case "clear":
+	case "/clear":
 		h.cmdClear(ctx, tgb, chatID)
-	case "purge":
+	case "/purge":
 		h.cmdPurge(ctx, tgb, chatID)
-	case "drop":
+	case "/drop":
 		h.cmdDrop(ctx, tgb, chatID)
-	case "help":
+	case "/help":
 		h.cmdHelp(ctx, tgb, chatID)
-	case "search_doc":
+	case "/search_doc":
 		h.cmdSearchDoc(ctx, tgb, chatID, arg)
-	case "instruct":
+	case "/instruct":
 		h.cmdInstruct(ctx, tgb, chatID, arg)
-	case "usage":
+	case "/usage":
 		h.cmdUsage(ctx, tgb, chatID)
-	case "helper":
+	case "/helper":
 		h.cmdHelper(ctx, tgb, chatID)
-	case "setContext":
+	case "/setContext":
 		h.cmdSetContext(ctx, tgb, chatID, arg)
-	case "clearContext":
+	case "/clearContext":
 		h.cmdClearContext(ctx, tgb, chatID)
 	}
 }
@@ -157,7 +157,7 @@ func (h *handlers) cmdSearchDoc(ctx context.Context, tgb *bot.Bot, chatID int64,
 		// todo: Add actions in case the user is not found in the cache
 	}
 
-	api_token := user.AiSession.GptKey
+	api_token := user.AiSession.LocalAIToken
 	store, err := embeddings.GetVectorStore(baseURL, api_token, db_link) // WARNING: This function is unsafe! May call log.Fatal (╯°□°）╯︵ ┻━┻
 	if err != nil {
 		msg := &bot.SendMessageParams{ChatID: chatID, Text: "Something happened... error occured: " + err.Error()}
@@ -211,7 +211,7 @@ func (h *handlers) cmdInstruct(ctx context.Context, tgb *bot.Bot, chatID int64, 
 	}
 
 	model := user.AiSession.GptModel
-	api_token := user.AiSession.GptKey
+	api_token := user.AiSession.LocalAIToken
 
 	langchain.GenerateContentInstruction(user.AiSession.Base_url, prompt, model, api_token, user.Network)
 }
