@@ -12,7 +12,7 @@ import (
 )
 
 func (h *handlers) callbackRouter(ctx context.Context, tgb *bot.Bot, update *models.Update) {
-	chatID := update.Message.Chat.ID
+	chatID := update.CallbackQuery.From.ID
 	user, ok := h.cache.GetUser(chatID)
 	if !ok {
 		log.Error().Int64("chat_id", chatID).Msg("user not found in cache")
@@ -24,8 +24,36 @@ func (h *handlers) callbackRouter(ctx context.Context, tgb *bot.Bot, update *mod
 		h.handleAIModelSelectionCallback(ctx, tgb, update)
 	case status_ConnectingToAiWithLang:
 		h.handleConnectingToAiWithLangCallback(ctx, tgb, update)
-
 	default: // todo: error msg
+
+		// проверка языка
+		// chatID := update.CallbackQuery.From.ID
+
+		// messageID := update.CallbackQuery.ID
+		// callbackResponse := &bot.AnswerCallbackQueryParams{
+		// 	CallbackQueryID: messageID,
+		// 	Text:            "Неизвестный Хендлер",
+		// }
+		// _, err := tgb.AnswerCallbackQuery(ctx, callbackResponse)
+		// if err != nil {
+		// 	log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error answering callback query")
+		// 	return
+
+		// }
+
+		user, ok := h.cache.GetUser(chatID)
+		if !ok {
+			log.Error().Int64("chat_id", chatID).Msg("user not found in cache")
+			return
+			// todo: Add actions in case the user is not found in the cache
+		}
+
+		if user.AiSession.LocalAIToken == "" {
+			h.handleNewUserRegistration(ctx, tgb, update)
+		}
+
+		h.handleConnectingToAiWithLangCallback(ctx, tgb, update)
+
 	}
 
 }
@@ -120,7 +148,7 @@ func (h *handlers) handleConnectingToAiWithLangCallback(ctx context.Context, tgb
 	// I commented out the line because the context with the value is not used anywhere
 	//ctxWithValue := context.WithValue(ctx, "user", user)
 	langPrompt := getInitialLangPrompt(lang)
-	log.Info().Int64("chat_id", chatID).Str("language", lang).Str("ai_endpoint", h.config.AI_endpoint).
+	log.Info().Int64("chat_id", chatID).Str("language", lang).Str("endpoint", h.config.AIEndpoint).
 		Msg("Starting AI conversation")
 
 	go h.handleStartAiConversationWithLang(ctx, tgb, chatID, langPrompt)
@@ -135,7 +163,7 @@ func (h *handlers) handleStartAiConversationWithLang(ctx context.Context, tgb *b
 		// todo: Add actions in case the user is not found in the cache
 	}
 
-	probe, response, err := langchain.RunNewAgent(user.AiSession.GptKey, user.AiSession.GptModel, h.config.AI_endpoint, langPrompt)
+	probe, response, err := langchain.RunNewAgent(user.AiSession.LocalAIToken, user.AiSession.GptModel, h.config.AIEndpoint, langPrompt)
 	if err != nil {
 		videoMsg, err := getErrorMsgWithRandomVideo(chatID)
 		if err != nil {
@@ -166,7 +194,7 @@ func (h *handlers) handleStartAiConversationWithLang(ctx context.Context, tgb *b
 	user.AiSession.Usage = usage
 
 	h.cache.UpdateUser(user)
-	log.Info().Int64("chat_id", chatID).Str("username", user.Username).Str("ai_endpoint", h.config.AI_endpoint).
+	log.Info().Int64("chat_id", chatID).Str("username", user.Username).Str("aiEndpoint", h.config.AIEndpoint).
 		Msg("AI conversation completed successfully")
 }
 
