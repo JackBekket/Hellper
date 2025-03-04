@@ -67,7 +67,7 @@ func (h *handlers) cmdRouter(ctx context.Context, tgb *bot.Bot, update *models.U
 }
 
 func (h *handlers) cmdReload(ctx context.Context, tgb *bot.Bot, chatID int64) {
-	msg := &bot.SendMessageParams{ChatID: chatID, Text: "Reloading session..., type any key"}
+	msg := &bot.SendMessageParams{ChatID: chatID, Text: "Reloading session..."}
 	_, err := tgb.SendMessage(ctx, msg)
 	if err != nil {
 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
@@ -75,10 +75,16 @@ func (h *handlers) cmdReload(ctx context.Context, tgb *bot.Bot, chatID int64) {
 	}
 	log.Info().Int64("chat_id", chatID).Msg("User reloaded the session in bot")
 	h.cache.DeleteUser(chatID)
+	msg = &bot.SendMessageParams{ChatID: chatID, Text: "Done. Type any key..."}
+	_, err = tgb.SendMessage(ctx, msg)
+	if err != nil {
+		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
+		return
+	}
 }
 
 func (h *handlers) cmdClear(ctx context.Context, tgb *bot.Bot, chatID int64) {
-	msg := &bot.SendMessageParams{ChatID: chatID, Text: "Deleting dialog thread from database..., type any key"}
+	msg := &bot.SendMessageParams{ChatID: chatID, Text: "Deleting dialog thread from database..."}
 	_, err := tgb.SendMessage(ctx, msg)
 	if err != nil {
 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
@@ -87,16 +93,22 @@ func (h *handlers) cmdClear(ctx context.Context, tgb *bot.Bot, chatID int64) {
 
 	user, ok := ctx.Value(database.UserCtxKey).(database.User)
 	if !ok {
-		log.Error().Int64("chat_id", chatID).Msg("user not found in context")
+		log.Error().Int64("chat_id", chatID).Caller().Msg("user not found in context")
 		return
 	}
 	user.FlushMemory(h.dbService)
 	h.cache.DeleteUser(chatID)
+	msg = &bot.SendMessageParams{ChatID: chatID, Text: "Done. Type any key..."}
+	_, err = tgb.SendMessage(ctx, msg)
+	if err != nil {
+		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
+		return
+	}
 }
 
 // Completely removes all user records from the storage
 func (h *handlers) cmdPurge(ctx context.Context, tgb *bot.Bot, chatID int64) {
-	msg := &bot.SendMessageParams{ChatID: chatID, Text: "Deleting all user data from database and restarting session..., type any key"}
+	msg := &bot.SendMessageParams{ChatID: chatID, Text: "Deleting all user data from database and restarting session..."}
 	_, err := tgb.SendMessage(ctx, msg)
 	if err != nil {
 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
@@ -105,15 +117,21 @@ func (h *handlers) cmdPurge(ctx context.Context, tgb *bot.Bot, chatID int64) {
 
 	user, ok := ctx.Value(database.UserCtxKey).(database.User)
 	if !ok {
-		log.Error().Int64("chat_id", chatID).Msg("user not found in context")
+		log.Error().Int64("chat_id", chatID).Caller().Msg("user not found in context")
 		return
 	}
 	user.Kill(h.dbService)
 	h.cache.DeleteUser(chatID)
+	msg = &bot.SendMessageParams{ChatID: chatID, Text: "Done. Type any key..."}
+	_, err = tgb.SendMessage(ctx, msg)
+	if err != nil {
+		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
+		return
+	}
 }
 
 func (h *handlers) cmdDrop(ctx context.Context, tgb *bot.Bot, chatID int64) {
-	msg := &bot.SendMessageParams{ChatID: chatID, Text: "Dropping session..., type any key"}
+	msg := &bot.SendMessageParams{ChatID: chatID, Text: "Dropping session..."}
 	_, err := tgb.SendMessage(ctx, msg)
 	if err != nil {
 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
@@ -122,12 +140,18 @@ func (h *handlers) cmdDrop(ctx context.Context, tgb *bot.Bot, chatID int64) {
 
 	user, ok := ctx.Value(database.UserCtxKey).(database.User)
 	if !ok {
-		log.Error().Int64("chat_id", chatID).Msg("user not found in context")
+		log.Error().Int64("chat_id", chatID).Caller().Msg("user not found in context")
 		return
 	}
 	user.DropSession(h.dbService)
 	user.FlushMemory(h.dbService)
 	h.cache.DeleteUser(chatID)
+	msg = &bot.SendMessageParams{ChatID: chatID, Text: "Done. Type any key..."}
+	_, err = tgb.SendMessage(ctx, msg)
+	if err != nil {
+		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
+		return
+	}
 
 }
 
@@ -146,11 +170,10 @@ func (h *handlers) cmdHelp(ctx context.Context, tgb *bot.Bot, chatID int64) {
 func (h *handlers) cmdSearchDoc(ctx context.Context, tgb *bot.Bot, chatID int64, prompt string) {
 	dbLink := h.dbLink
 	baseURL := h.config.BaseURL
-	user, ok := h.cache.GetUser(chatID)
+	user, ok := ctx.Value(database.UserCtxKey).(database.User)
 	if !ok {
-		log.Error().Int64("chat_id", chatID).Msg("user not found in cache")
+		log.Error().Int64("chat_id", chatID).Caller().Msg("user not found in context")
 		return
-		// todo: Add actions in case the user is not found in the cache
 	}
 
 	localAIToken := user.AiSession.LocalAIToken
@@ -199,23 +222,50 @@ func (h *handlers) cmdSearchDoc(ctx context.Context, tgb *bot.Bot, chatID int64,
 // TODO
 // this is calling local-ai within base template (and without langhain injections)
 func (h *handlers) cmdInstruct(ctx context.Context, tgb *bot.Bot, chatID int64, prompt string) {
+	if prompt == "" {
+		msg := &bot.SendMessageParams{ChatID: chatID, Text: "You didn't enter a prompt. Format: /instruct prompt"}
+		_, err := tgb.SendMessage(ctx, msg)
+		if err != nil {
+			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
+			return
+		}
+		return
+	}
 	user, ok := ctx.Value(database.UserCtxKey).(database.User)
 	if !ok {
-		log.Error().Int64("chat_id", chatID).Msg("user not found in context")
+		log.Error().Int64("chat_id", chatID).Caller().Msg("user not found in context")
 		return
 	}
 
 	model := user.AiSession.GptModel
 	localAIToken := user.AiSession.LocalAIToken
 
-	langchain.GenerateContentInstruction(user.AiSession.Base_url, prompt, model, localAIToken, user.Network)
+	text, err := langchain.GenerateContentInstruction(user.AiSession.Base_url, prompt, model, localAIToken, user.Network)
+	if err != nil || text == "" {
+		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error generate content instruction")
+		msg := &bot.SendMessageParams{ChatID: chatID, Text: "Error generating content instruction"}
+		_, err = tgb.SendMessage(ctx, msg)
+		if err != nil {
+			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
+			return
+		}
+		return
+	}
+
+	msg := &bot.SendMessageParams{ChatID: chatID, Text: text}
+	_, err = tgb.SendMessage(ctx, msg)
+	if err != nil {
+		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
+		return
+	}
+
 }
 
 // Shows token usage statistics
 func (h *handlers) cmdUsage(ctx context.Context, tgb *bot.Bot, chatID int64) {
 	user, ok := ctx.Value(database.UserCtxKey).(database.User)
 	if !ok {
-		log.Error().Int64("chat_id", chatID).Msg("user not found in context")
+		log.Error().Int64("chat_id", chatID).Caller().Msg("user not found in context")
 		return
 	}
 
@@ -254,7 +304,7 @@ func (h *handlers) cmdHelper(ctx context.Context, tgb *bot.Bot, chatID int64) {
 func (h *handlers) cmdSetContext(ctx context.Context, tgb *bot.Bot, chatID int64, name string) {
 	user, ok := ctx.Value(database.UserCtxKey).(database.User)
 	if !ok {
-		log.Error().Int64("chat_id", chatID).Msg("user not found in context")
+		log.Error().Int64("chat_id", chatID).Caller().Msg("user not found in context")
 		return
 	}
 	log.Info().
@@ -270,8 +320,14 @@ func (h *handlers) cmdSetContext(ctx context.Context, tgb *bot.Bot, chatID int64
 func (h *handlers) cmdClearContext(ctx context.Context, tgb *bot.Bot, chatID int64) {
 	user, ok := ctx.Value(database.UserCtxKey).(database.User)
 	if !ok {
-		log.Error().Int64("chat_id", chatID).Msg("user not found in context")
+		log.Error().Int64("chat_id", chatID).Caller().Msg("user not found in context")
 		return
 	}
 	user.ClearContext()
+	msg := &bot.SendMessageParams{ChatID: chatID, Text: "Done. Type any key..."}
+	_, err := tgb.SendMessage(ctx, msg)
+	if err != nil {
+		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
+		return
+	}
 }
