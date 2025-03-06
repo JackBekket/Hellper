@@ -369,6 +369,25 @@ func (s *Service) GetUsage(
 	return &globalUsage, &sessionUsage, &lastUsage, nil
 }
 
+// Returns a list of service names that the user can use
+func (s *Service) GetAIProviders() ([]string, error) {
+	rows, err := s.DBHandler.DB.Query("SELECT name FROM endpoints")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var names []string
+	for rows.Next() {
+		var name string
+		if err := rows.Scan(&name); err != nil {
+			return nil, err
+		}
+		names = append(names, name)
+	}
+	return names, rows.Err()
+}
+
 func (s *Service) GetHistory(
 	userId, endpointId, chatId, threadId int64, model string,
 ) ([]llms.MessageContent, error) {
