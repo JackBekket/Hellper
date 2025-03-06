@@ -20,14 +20,6 @@ func (h *handlers) IdentifyUserMiddleware(next bot.HandlerFunc) bot.HandlerFunc 
 	return func(parentCtx context.Context, tgb *bot.Bot, update *models.Update) {
 		var chatID int64
 		var username string
-		var ctxWithUser context.Context
-		user, found := h.cache.GetUser(chatID)
-		if found {
-			ctxWithUser = context.WithValue(parentCtx, database.UserCtxKey, user)
-			next(ctxWithUser, tgb, update)
-			return
-		}
-
 		switch {
 		case update.Message != nil:
 			chatID = update.Message.From.ID
@@ -40,6 +32,13 @@ func (h *handlers) IdentifyUserMiddleware(next bot.HandlerFunc) bot.HandlerFunc 
 			return
 		}
 
+		user, found := h.cache.GetUser(chatID)
+		if found {
+			ctxWithUser := context.WithValue(parentCtx, database.UserCtxKey, user)
+			next(ctxWithUser, tgb, update)
+			return
+		}
+
 		if h.dbService.CheckSession(chatID) {
 			user, err := restoreUserSessionFromDB(h.dbService, chatID, update.Message.From.Username)
 			if err != nil {
@@ -48,9 +47,9 @@ func (h *handlers) IdentifyUserMiddleware(next bot.HandlerFunc) bot.HandlerFunc 
 				return
 			}
 
-			h.cache.SetUser(chatID, *user) // add user from persistent db into cache
+			h.cache.SetUser(chatID, user) // add user from persistent db into cache
 			log.Info().Int64("chat_id", chatID).Msg("User session successfully restored from the database. User added to the cache.")
-			ctxWithUser = context.WithValue(parentCtx, database.UserCtxKey, user)
+			ctxWithUser := context.WithValue(parentCtx, database.UserCtxKey, user)
 			next(ctxWithUser, tgb, update)
 			return
 		}
@@ -60,19 +59,19 @@ func (h *handlers) IdentifyUserMiddleware(next bot.HandlerFunc) bot.HandlerFunc 
 			user, err := recoverUserAfterDrop(h.dbService, chatID, username, h.config.BaseURL)
 			if err != nil {
 				log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("failed to restore user from the database. The user has been sent for registration")
-				h.handleNewUserRegistration(ctxWithUser, tgb, update)
+				h.handleNewUserRegistration(parentCtx, tgb, update)
 				return
 			}
 
-			h.cache.SetUser(chatID, *user)
+			h.cache.SetUser(chatID, user)
 			log.Info().Int64("chat_id", chatID).Msg("User successfully restored after drop")
-			ctxWithUser = context.WithValue(parentCtx, database.UserCtxKey, user)
-			h.handleSendAIModelSelectionKeyboard(ctxWithUser, tgb, update)
+			ctxWithUser := context.WithValue(parentCtx, database.UserCtxKey, user)
+			h.handleSendAIModelSelectionKeyboardForExistUser(ctxWithUser, tgb, update)
 			return
 		}
 
 		log.Warn().Int64("chat_id", chatID).Msg("User not found in cache or database. Redirecting to registration.")
-		h.handleNewUserRegistration(ctxWithUser, tgb, update)
+		h.handleNewUserRegistration(parentCtx, tgb, update)
 
 	}
 }
@@ -103,7 +102,6 @@ func (h *handlers) filterGroupMessagesMiddleware(next bot.HandlerFunc) bot.Handl
 			if update.Message.Text != "" && !strings.Contains(update.Message.Text, h.botUsername) {
 				return
 			}
-
 			if update.Message.Photo != nil && (update.Message.Caption == "" || !strings.Contains(update.Message.Caption, h.botUsername)) {
 				return
 			}

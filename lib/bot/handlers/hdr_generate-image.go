@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/JackBekket/hellper/lib/database"
 	"github.com/JackBekket/hellper/lib/localai"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
@@ -43,11 +44,10 @@ func (h *handlers) cmdGenerateImage(ctx context.Context, tgb *bot.Bot, chatID in
 		model = aiStableDiffusionModel
 	}
 
-	user, ok := h.cache.GetUser(chatID)
+	user, ok := ctx.Value(database.UserCtxKey).(database.User)
 	if !ok {
-		log.Error().Int64("chat_id", chatID).Msg("user not found in cache")
+		log.Error().Int64("chat_id", chatID).Caller().Msg("user not found in context")
 		return
-		// todo: Add actions in case the user is not found in the cache
 	}
 
 	localAIToken := user.AiSession.LocalAIToken
@@ -92,10 +92,6 @@ func getMsgWithImage(chatID int64, pathToImage string, localAIToken string) (*bo
 		return &bot.SendPhotoParams{}, err
 	}
 	defer imageFile.Close()
-
-	if err != nil {
-		return &bot.SendPhotoParams{}, err
-	}
 
 	return &bot.SendPhotoParams{
 		ChatID: chatID,
