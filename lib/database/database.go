@@ -9,14 +9,19 @@ import (
 )
 
 type AISession struct {
-	Model    *string
-	Endpoint *Endpoint
+	Model string
+	// AIProvider is a more appropriate name for the information stored in the Endpoint structure.
+	// Read the comment for the Endpoint type
+	AIProvider *Endpoint
 }
 
+// The table in the database was named incorrectly, as it does not store endpoints; it stores the base URLs of different services.
+// It could have been named something like "entrypoints," "providers," or "services," but not "endpoints."
+// Leaving the table name in the structure until the table name is changed
 type Endpoint struct {
 	ID         int64
 	Name       string
-	URL        string
+	BaseURL    string
 	AuthMethod int64
 }
 
@@ -50,8 +55,8 @@ func (s *Service) CreateTables() error {
 	_, err = s.DBHandler.DB.Exec(`
 		CREATE TABLE IF NOT EXISTS auth (
 			id SERIAL PRIMARY KEY,
-			tg_user_id INT NOT NULL UNIQUE,
-			auth_method INT REFERENCES auth_methods(id),
+			tg_user_id BIGINT NOT NULL,
+			auth_method INT UNIQUE REFERENCES auth_methods(id),
 			token TEXT NOT NULL
 		)`)
 	if err != nil {
@@ -59,7 +64,7 @@ func (s *Service) CreateTables() error {
 	}
 	_, err = s.DBHandler.DB.Exec(`
 		CREATE TABLE IF NOT EXISTS ai_sessions (
-			tg_user_id INT PRIMARY KEY,
+			tg_user_id BIGINT PRIMARY KEY,
 			model TEXT,
 			endpoint INT REFERENCES endpoints(id)	
 		)`)
@@ -69,11 +74,11 @@ func (s *Service) CreateTables() error {
 	_, err = s.DBHandler.DB.Exec(`
 		CREATE TABLE IF NOT EXISTS chat_sessions (
 			id SERIAL PRIMARY KEY,
-			tg_user_id INT NOT NULL,
+			tg_user_id BIGINT NOT NULL,
 			model TEXT NOT NULL,
 			endpoint INT NOT NULL REFERENCES endpoints(id),
-			chat_id INT NOT NULL,
-			thread_id INT NOT NULL
+			chat_id BIGINT NOT NULL,
+			thread_id BIGINT NOT NULL
 		)`)
 	if err != nil {
 		return err
@@ -97,7 +102,7 @@ func (s *Service) CreateTables() error {
 		CREATE TABLE IF NOT EXISTS usage (
 			id BIGSERIAL PRIMARY KEY,
 			chat_session INT REFERENCES chat_sessions(id),
-			tg_user_id INT NOT NULL,
+			tg_user_id BIGINT NOT NULL,
 			completion_tokens INT,
 			prompt_tokens INT,
 			total_tokens INT,
@@ -129,8 +134,8 @@ func (s *Service) CreateTables() error {
 		CREATE OR REPLACE FUNCTION upsert_chat_session_and_usage(
 		    p_user_id BIGINT,
 		    p_endpoint_id INT,
-		    p_chat_id INT,
-		    p_thread_id INT,
+		    p_chat_id BIGINT,
+		    p_thread_id BIGINT,
 		    p_model TEXT,
 		    p_usage_completion_tokens INT,
 		    p_usage_prompt_tokens INT,
@@ -483,14 +488,14 @@ func (s *Service) GetSession(userId int64) (AISession, error) {
 	}
 
 	if model.Valid {
-		session.Model = &model.String
+		session.Model = model.String
 	}
 
 	if endpointId.Valid && endpointName.Valid && endpointURL.Valid && endpointAuthMethod.Valid {
-		session.Endpoint = &Endpoint{
+		session.AIProvider = &Endpoint{
 			ID:         endpointId.Int64,
 			Name:       endpointName.String,
-			URL:        endpointURL.String,
+			BaseURL:    endpointURL.String,
 			AuthMethod: endpointAuthMethod.Int64,
 		}
 	}
@@ -594,7 +599,7 @@ func (s *Service) GetEndpoints() ([]Endpoint, error) {
 	for rows.Next() {
 		endpoint := Endpoint{}
 		if err := rows.Scan(
-			&endpoint.ID, &endpoint.Name, &endpoint.URL, &endpoint.AuthMethod,
+			&endpoint.ID, &endpoint.Name, &endpoint.BaseURL, &endpoint.AuthMethod,
 		); err != nil {
 			return nil, err
 		}
