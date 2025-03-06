@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/JackBekket/hellper/lib/database"
@@ -15,9 +16,11 @@ func (h *handlers) callbackRouter(ctx context.Context, tgb *bot.Bot, update *mod
 	chatID := update.CallbackQuery.From.ID
 	user, ok := ctx.Value(database.UserCtxKey).(database.User)
 	if !ok {
-		log.Error().Int64("chat_id", chatID).Msg("user not found in context")
+		log.Error().Int64("chat_id", chatID).Caller().Msg("user not found in context")
 		return
 	}
+
+	fmt.Println("ПОЛУЧЕН КОЛБЕК")
 
 	switch user.DialogStatus {
 	case statusAIModelSelectionChoice:
@@ -27,19 +30,18 @@ func (h *handlers) callbackRouter(ctx context.Context, tgb *bot.Bot, update *mod
 	default: // todo: error msg
 
 		// проверка языка
-		// chatID := update.CallbackQuery.From.ID
 
-		// messageID := update.CallbackQuery.ID
-		// callbackResponse := &bot.AnswerCallbackQueryParams{
-		// 	CallbackQueryID: messageID,
-		// 	Text:            "Неизвестный Хендлер",
-		// }
-		// _, err := tgb.AnswerCallbackQuery(ctx, callbackResponse)
-		// if err != nil {
-		// 	log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error answering callback query")
-		// 	return
+		messageID := update.CallbackQuery.ID
+		callbackResponse := &bot.AnswerCallbackQueryParams{
+			CallbackQueryID: messageID,
+			Text:            "Неизвестный Хендлер",
+		}
+		_, err := tgb.AnswerCallbackQuery(ctx, callbackResponse)
+		if err != nil {
+			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error answering callback query")
+			return
 
-		// }
+		}
 
 		if user.AiSession.LocalAIToken == "" {
 			h.handleNewUserRegistration(ctx, tgb, update)
@@ -101,7 +103,7 @@ func (h *handlers) handleAIModelSelectionCallback(ctx context.Context, tgb *bot.
 	// status_ConnectingToAiWithLang
 	user, ok := ctx.Value(database.UserCtxKey).(database.User)
 	if !ok {
-		log.Error().Int64("chat_id", chatID).Msg("user not found in context")
+		log.Error().Int64("chat_id", chatID).Caller().Msg("user not found in context")
 		return
 	}
 	user.DialogStatus = statusConnectingToAiWithLang
@@ -150,11 +152,12 @@ func (h *handlers) handleConnectingToAiWithLangCallback(ctx context.Context, tgb
 func (h *handlers) handleStartAiConversationWithLang(ctx context.Context, tgb *bot.Bot, chatID int64, langPrompt string) {
 	user, ok := ctx.Value(database.UserCtxKey).(database.User)
 	if !ok {
-		log.Error().Int64("chat_id", chatID).Msg("user not found in context")
+		log.Error().Int64("chat_id", chatID).Caller().Msg("user not found in context")
 		return
 	}
 
-	probe, response, err := langchain.RunNewAgent(user.AiSession.LocalAIToken, user.AiSession.GptModel, h.config.BaseURL, langPrompt)
+	model := user.AiSession.GptModel
+	probe, response, err := langchain.RunNewAgent(user.AiSession.LocalAIToken, model, h.config.BaseURL, langPrompt)
 	if err != nil {
 		videoMsg, err := getErrorMsgWithRandomVideo(chatID)
 		if err != nil {
@@ -183,6 +186,8 @@ func (h *handlers) handleStartAiConversationWithLang(ctx context.Context, tgb *b
 	// TODO: Replace with a thread-safe one
 	usage := database.GetSessionUsage(user.ID)
 	user.AiSession.Usage = usage
+
+	h.dbService.CreateLSession(chatID, model, 1)
 
 	h.cache.UpdateUser(user)
 	log.Info().Int64("chat_id", chatID).Str("username", user.Username).Str("BaseURL", h.config.BaseURL).

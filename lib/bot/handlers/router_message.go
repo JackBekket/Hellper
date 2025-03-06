@@ -17,15 +17,16 @@ import (
 // Router for text message handlers
 func (h *handlers) textMessageRouter(ctx context.Context, tgb *bot.Bot, update *models.Update) {
 	chatID := update.Message.Chat.ID
-	user, ok := h.cache.GetUser(chatID)
+	user, ok := ctx.Value(database.UserCtxKey).(database.User)
 	if !ok {
-		log.Error().Int64("chat_id", chatID).Msg("user not found in cache")
+		log.Error().Int64("chat_id", chatID).Caller().Msg("user not found in context")
 		return
-		// todo: Add actions in case the user is not found in the cache
 	}
 	switch user.DialogStatus {
-	case statusAIModelSelectionKeyboard:
-		h.handleSendAIModelSelectionKeyboard(ctx, tgb, update)
+	case statusAIModelSelectionKeyboardForNewUser:
+		h.handleSendAIModelSelectionKeyboardForNewUser(ctx, tgb, update)
+	case statusAIModelSelectionKeyboardForExistUser:
+		h.handleSendAIModelSelectionKeyboardForNewUser(ctx, tgb, update)
 	case statusStartDialogSequence:
 		go h.handleStartDialogSequence(ctx, tgb, update)
 	default: // todo: error msg
@@ -34,23 +35,83 @@ func (h *handlers) textMessageRouter(ctx context.Context, tgb *bot.Bot, update *
 }
 
 // 3 - status_AIModelSelectionKeyboard
-func (h *handlers) handleSendAIModelSelectionKeyboard(ctx context.Context, tgb *bot.Bot, update *models.Update) {
+func (h *handlers) handleSendAIModelSelectionKeyboardForNewUser(ctx context.Context, tgb *bot.Bot, update *models.Update) {
 	chatID := update.Message.Chat.ID
 	var localAIToken string
-	user, ok := h.cache.GetUser(chatID)
+	user, ok := ctx.Value(database.UserCtxKey).(database.User)
 	if !ok {
-		log.Error().Int64("chat_id", chatID).Msg("user not found in cache")
+		log.Error().Int64("chat_id", chatID).Caller().Msg("user not found in context")
 		return
-		// todo: Add actions in case the user is not found in the cache
 	}
 
-	if update.Message.Text != "" && user.AiSession.LocalAIToken == "" {
-		localAIToken = strings.TrimSpace(update.Message.Text)
-		h.dbService.InsertToken(chatID, 1, localAIToken)
-		user.AiSession.LocalAIToken = localAIToken
+	if update.Message.Text == "" && user.AiSession.LocalAIToken == "" {
+		msg := &bot.SendMessageParams{
+			ChatID: chatID,
+			Text:   "Please input your local-ai API token",
+		}
+
+		_, err := tgb.SendMessage(ctx, msg)
+		if err != nil {
+			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
+		}
+		return
 	}
 
-	fmt.Println(localAIToken)
+	// сделать проверку валидности токена
+	localAIToken = strings.TrimSpace(update.Message.Text)
+	h.dbService.InsertToken(chatID, 1, localAIToken)
+	user.AiSession.LocalAIToken = localAIToken
+
+	url := getURL(h.config.BaseURL, h.config.ModelsListEndpoint)
+	aiModelsList, err := h.dbService.GetModelsList(url, localAIToken)
+	if err != nil {
+		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error retrieving LLM models list")
+		h.handleNewUserRegistration(ctx, tgb, update)
+		log.Warn().Int64("chat_id", chatID).Msg("User redirected to registration handler due to LLM models list error")
+		return
+	}
+	user.DialogStatus = statusAIModelSelectionChoice
+	h.cache.UpdateUser(user)
+
+	msg := &bot.SendMessageParams{
+		ChatID:      chatID,
+		Text:        "Choose model",
+		ReplyMarkup: renderAIModelsInlineKeyboard(aiModelsList),
+	}
+
+	_, err = tgb.SendMessage(ctx, msg)
+	if err != nil {
+		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
+	}
+}
+
+// 3 - status_AIModelSelectionKeyboard
+func (h *handlers) handleSendAIModelSelectionKeyboardForExistUser(ctx context.Context, tgb *bot.Bot, update *models.Update) {
+	chatID := update.Message.Chat.ID
+	user, ok := ctx.Value(database.UserCtxKey).(database.User)
+	if !ok {
+		log.Error().Int64("chat_id", chatID).Caller().Msg("user not found in context")
+		return
+	}
+
+	// сделать проверку валидности токена
+	localAIToken := user.AiSession.LocalAIToken
+	fmt.Println("sendkbexist", user)
+	if localAIToken == "" {
+		msg := &bot.SendMessageParams{
+			ChatID: chatID,
+			Text:   "Your token is invalid. Please enter a new token.",
+		}
+
+		_, err := tgb.SendMessage(ctx, msg)
+		if err != nil {
+			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
+		}
+
+		user.DialogStatus = statusAIModelSelectionChoice
+		h.cache.UpdateUser(user)
+		return
+	}
 
 	url := getURL(h.config.BaseURL, h.config.ModelsListEndpoint)
 	aiModelsList, err := h.dbService.GetModelsList(url, localAIToken)
@@ -78,11 +139,10 @@ func (h *handlers) handleSendAIModelSelectionKeyboard(ctx context.Context, tgb *
 // Dialog_Status 6 -> 6 (loop) - status_StartDialogSequence
 func (h *handlers) handleStartDialogSequence(ctx context.Context, tgb *bot.Bot, update *models.Update) {
 	chatID := update.Message.Chat.ID
-	user, ok := h.cache.GetUser(chatID)
+	user, ok := ctx.Value(database.UserCtxKey).(database.User)
 	if !ok {
-		log.Error().Int64("chat_id", chatID).Msg("user not found in cache")
+		log.Error().Int64("chat_id", chatID).Caller().Msg("user not found in context")
 		return
-		// todo: Add actions in case the user is not found in the cache
 	}
 
 	model := user.AiSession.GptModel
