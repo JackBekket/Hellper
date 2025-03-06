@@ -21,6 +21,23 @@ func renderAIModelsInlineKeyboard(aiModelsList []string) models.InlineKeyboardMa
 	}
 }
 
+// Render AI Providers menu with Inline Keyboard
+func renderAIProvidersInlineKeyboard(aiProviderList []string) models.InlineKeyboardMarkup {
+	buttons := [][]models.InlineKeyboardButton{}
+	for _, provider := range aiProviderList {
+		buttons = append(buttons, []models.InlineKeyboardButton{
+			{
+				Text:         provider,
+				CallbackData: provider,
+			},
+		})
+	}
+
+	return models.InlineKeyboardMarkup{
+		InlineKeyboard: buttons,
+	}
+}
+
 // Render Language menu with Inline Keyboard
 func renderLangInlineKeyboard() models.InlineKeyboardMarkup {
 	return models.InlineKeyboardMarkup{
