@@ -45,7 +45,7 @@ func (h *handlers) handleVoiceTranscriber(ctx context.Context, tgb *bot.Bot, upd
 
 	user, ok := ctx.Value(database.UserCtxKey).(database.User)
 	if !ok {
-		log.Error().Int64("chat_id", chatID).Msg("user not found in context")
+		log.Error().Int64("chat_id", chatID).Caller().Msg("user not found in context")
 		return
 	}
 

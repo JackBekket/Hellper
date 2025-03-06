@@ -39,7 +39,7 @@ func (h *handlers) handleRecognizeImage(ctx context.Context, tgb *bot.Bot, updat
 	recognize, err := imageRecognition.ImageRecognitionLAI(url, model, tgb.Token(), fileURL, prompt)
 	if err != nil {
 		msgFailedRecognizeFunc()
-		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("failed to get file from Telegram API")
+		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("failed recognize image")
 		return
 	}
 

@@ -71,7 +71,7 @@ func (h *handlers) NewRegisterHandlers(ctx context.Context, tgb *bot.Bot) {
 // Rules for calling the handler
 
 func matchTextMessage(update *models.Update) bool {
-	return update.Message != nil && update.Message.Text != ""
+	return update.Message != nil && update.Message.Text != "" && update.CallbackQuery == nil && update.Message.Sticker == nil
 }
 
 func matchCallbackQuery(update *models.Update) bool {
