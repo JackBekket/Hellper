@@ -2,12 +2,12 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/JackBekket/hellper/lib/agent"
 	"github.com/JackBekket/hellper/lib/database"
 	"github.com/JackBekket/hellper/lib/langchain"
+	"github.com/JackBekket/hellper/lib/localai"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 	"github.com/rs/zerolog/log"
@@ -23,70 +23,17 @@ func (h *handlers) textMessageRouter(ctx context.Context, tgb *bot.Bot, update *
 		return
 	}
 	switch user.DialogStatus {
-	case statusAIModelSelectionKeyboardForNewUser:
-		h.handleSendAIModelSelectionKeyboardForNewUser(ctx, tgb, update)
-	case statusAIModelSelectionKeyboardForExistUser:
-		h.handleSendAIModelSelectionKeyboardForNewUser(ctx, tgb, update)
+	case statusAIModelSelectionKeyboard:
+		h.handleSendAIModelIKB(ctx, tgb, update)
+	case statusAPIToken:
+		h.handleAPIToken(ctx, tgb, update)
 	case statusStartDialogSequence:
 		go h.handleStartDialogSequence(ctx, tgb, update)
 	default: // todo: error msg
 	}
-
 }
 
-// 3 - status_AIModelSelectionKeyboard
-func (h *handlers) handleSendAIModelSelectionKeyboardForNewUser(ctx context.Context, tgb *bot.Bot, update *models.Update) {
-	chatID := update.Message.Chat.ID
-	var localAIToken string
-	user, ok := ctx.Value(database.UserCtxKey).(database.User)
-	if !ok {
-		log.Error().Int64("chat_id", chatID).Caller().Msg("user not found in context")
-		return
-	}
-
-	if update.Message.Text == "" && user.AiSession.LocalAIToken == "" {
-		msg := &bot.SendMessageParams{
-			ChatID: chatID,
-			Text:   "Please input your local-ai API token",
-		}
-
-		_, err := tgb.SendMessage(ctx, msg)
-		if err != nil {
-			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
-		}
-		return
-	}
-
-	// сделать проверку валидности токена
-	localAIToken = strings.TrimSpace(update.Message.Text)
-	h.dbService.InsertToken(chatID, 1, localAIToken)
-	user.AiSession.LocalAIToken = localAIToken
-
-	url := getURL(h.config.BaseURL, h.config.ModelsListEndpoint)
-	aiModelsList, err := h.dbService.GetModelsList(url, localAIToken)
-	if err != nil {
-		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error retrieving LLM models list")
-		h.handleNewUserRegistration(ctx, tgb, update)
-		log.Warn().Int64("chat_id", chatID).Msg("User redirected to registration handler due to LLM models list error")
-		return
-	}
-	user.DialogStatus = statusAIModelSelectionChoice
-	h.cache.UpdateUser(user)
-
-	msg := &bot.SendMessageParams{
-		ChatID:      chatID,
-		Text:        "Choose model",
-		ReplyMarkup: renderAIModelsInlineKeyboard(aiModelsList),
-	}
-
-	_, err = tgb.SendMessage(ctx, msg)
-	if err != nil {
-		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
-	}
-}
-
-// 3 - status_AIModelSelectionKeyboard
-func (h *handlers) handleSendAIModelSelectionKeyboardForExistUser(ctx context.Context, tgb *bot.Bot, update *models.Update) {
+func (h *handlers) handleAPIToken(ctx context.Context, tgb *bot.Bot, update *models.Update) {
 	chatID := update.Message.Chat.ID
 	user, ok := ctx.Value(database.UserCtxKey).(database.User)
 	if !ok {
@@ -94,46 +41,68 @@ func (h *handlers) handleSendAIModelSelectionKeyboardForExistUser(ctx context.Co
 		return
 	}
 
-	// сделать проверку валидности токена
-	localAIToken := user.AiSession.LocalAIToken
-	fmt.Println("sendkbexist", user)
-	if localAIToken == "" {
-		msg := &bot.SendMessageParams{
+	localAIToken := strings.TrimSpace(update.Message.Text)
+	url := getURL(user.AiSession.BaseURL, h.config.ModelsListEndpoint)
+	aiModelsList, err := localai.GetModelsList(url, localAIToken)
+	if err != nil {
+		if _, err := tgb.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: chatID,
 			Text:   "Your token is invalid. Please enter a new token.",
-		}
-
-		_, err := tgb.SendMessage(ctx, msg)
-		if err != nil {
+		}); err != nil {
 			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
 		}
-
-		user.DialogStatus = statusAIModelSelectionChoice
-		h.cache.UpdateUser(user)
+		log.Warn().Err(err).Int64("chat_id", chatID).Str("url", url).Caller().Msg("error retrieving LLM models list")
 		return
 	}
-
-	url := getURL(h.config.BaseURL, h.config.ModelsListEndpoint)
-	aiModelsList, err := h.dbService.GetModelsList(url, localAIToken)
-	if err != nil {
-		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error retrieving LLM models list")
-		h.handleNewUserRegistration(ctx, tgb, update)
-		log.Warn().Int64("chat_id", chatID).Msg("User redirected to registration handler due to LLM models list error")
+	if err := h.dbService.InsertToken(chatID, user.AiSession.AuthMethod, localAIToken); err != nil {
+		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error inserting token")
 		return
 	}
-	user.DialogStatus = statusAIModelSelectionChoice
+	user.AiSession.AIToken = localAIToken
+
+	user.DialogStatus = statusAIModelSelectionChoiceCallback
 	h.cache.UpdateUser(user)
 
-	msg := &bot.SendMessageParams{
+	if _, err = tgb.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID:      chatID,
 		Text:        "Choose model",
 		ReplyMarkup: renderAIModelsInlineKeyboard(aiModelsList),
-	}
-
-	_, err = tgb.SendMessage(ctx, msg)
-	if err != nil {
+	}); err != nil {
 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
 	}
+}
+
+func (h *handlers) handleSendAIModelIKB(ctx context.Context, tgb *bot.Bot, update *models.Update) {
+	chatID := update.Message.Chat.ID
+	user, ok := ctx.Value(database.UserCtxKey).(database.User)
+	if !ok {
+		log.Error().Int64("chat_id", chatID).Caller().Msg("user not found in context")
+		return
+	}
+
+	localAIToken, url := user.AiSession.AIToken, getURL(user.AiSession.BaseURL, h.config.ModelsListEndpoint)
+	aiModelsList, err := localai.GetModelsList(url, localAIToken)
+	if err != nil {
+		if _, err := tgb.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: chatID,
+			Text:   "Your token is invalid. Please enter a new token.",
+		}); err != nil {
+			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
+		}
+		log.Warn().Err(err).Int64("chat_id", chatID).Caller().Msg("error retrieving LLM models list")
+		return
+	}
+
+	if _, err = tgb.SendMessage(ctx, &bot.SendMessageParams{
+		ChatID:      chatID,
+		Text:        msgChooseModel,
+		ReplyMarkup: renderAIModelsInlineKeyboard(aiModelsList),
+	}); err != nil {
+		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
+	}
+
+	user.DialogStatus = statusAIModelSelectionChoiceCallback
+	h.cache.UpdateUser(user)
 }
 
 // Dialog_Status 6 -> 6 (loop) - status_StartDialogSequence
@@ -145,21 +114,21 @@ func (h *handlers) handleStartDialogSequence(ctx context.Context, tgb *bot.Bot, 
 		return
 	}
 
-	model := user.AiSession.GptModel
-	prompt := update.Message.Text
+	// Handle the case where the connection is successful, but the user has exhausted their quota for using the model.
+	// error in node agent:
+	// API returned unexpected status code: 429: You exceeded your current quota, please check your plan and billing details.
+	// For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+	model, prompt := user.AiSession.GptModel, update.Message.Text
 	thread := user.AiSession.DialogThread
 	log.Info().Str("gpt_model", model).Str("prompt", prompt).Msg("processing GPT request")
-
-	post_session, resp, err := langchain.ContinueAgent(user.AiSession.LocalAIToken, model, h.config.BaseURL, prompt, &thread)
+	post_session, resp, err := langchain.ContinueAgent(user.AiSession.AIToken, model, user.AiSession.BaseURL, prompt, &thread)
 	if err != nil {
 		videoMsg, err := getErrorMsgWithRandomVideo(chatID)
 		if err != nil {
-			log.Error().Err(err).Caller().Msg("")
+			log.Error().Err(err).Caller().Msg("error generating video message")
 			return
 		}
-
-		_, err = tgb.SendVideo(ctx, videoMsg)
-		if err != nil {
+		if _, err := tgb.SendVideo(ctx, videoMsg); err != nil {
 			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending video message")
 		}
 		log.Warn().Int64("chat_id", chatID).Str("username", user.Username).Msg("The user was removed from the cache due to an authentication issue.")
@@ -167,22 +136,13 @@ func (h *handlers) handleStartDialogSequence(ctx context.Context, tgb *bot.Bot, 
 		return
 	}
 
-	msg := &bot.SendMessageParams{ChatID: chatID, Text: resp, ParseMode: "MARKDOWN"}
-	_, err = tgb.SendMessage(ctx, msg)
-	if err != nil {
+	if _, err = tgb.SendMessage(ctx, &bot.SendMessageParams{ChatID: chatID, Text: resp, ParseMode: "MARKDOWN"}); err != nil {
 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
 		return
 	}
 
 	user.DialogStatus = statusStartDialogSequence
-
 	usage := database.GetSessionUsage(chatID)
-	// if !ok {
-	// 	log.Error().Int64("chat_id", chatID).Caller().Msg("usage not found in cache")
-	// 	return
-	// 	// todo: Add actions in case the user is not found in the cache
-	// }
-
 	user.AiSession.Usage = usage
 	user.AiSession.DialogThread = *post_session
 	h.cache.UpdateUser(user)
@@ -197,18 +157,18 @@ func (h *handlers) handleStartDialogSequence(ctx context.Context, tgb *bot.Bot, 
 	humanType := agent.CreateMessageContentHuman(prompt)
 	threadID := chatID
 
-	if err := updateUserHistoryInDB(h.dbService, chatID, threadID, model, humanType[0], last_msg); err != nil {
+	if err := updateUserHistoryInDB(h.dbService, chatID, user.AiSession.ProviderID, threadID, model, humanType[0], last_msg); err != nil {
 		log.Error().Err(err).Int64("chat_id", chatID).Str("model", model).Caller().Msg("failed to update user history")
 		return
 	}
 
 }
 
-func updateUserHistoryInDB(db *database.Service, chatID, threadID int64, model string, humanType, last_msg llms.MessageContent) error {
-	if err := db.UpdateHistory(chatID, 1, chatID, threadID, model, humanType); err != nil {
+func updateUserHistoryInDB(db *database.Service, chatID, providerID, threadID int64, model string, humanType, last_msg llms.MessageContent) error {
+	if err := db.UpdateHistory(chatID, providerID, chatID, threadID, model, humanType); err != nil {
 		return err
 	} //endpointID is hardcoded and why chatID is threadID?
-	if err := db.UpdateHistory(chatID, 1, chatID, threadID, model, last_msg); err != nil {
+	if err := db.UpdateHistory(chatID, providerID, chatID, threadID, model, last_msg); err != nil {
 		return err
 	}
 	return nil
