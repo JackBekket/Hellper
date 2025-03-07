@@ -18,17 +18,13 @@ import (
 // Makes a request for image generation and sends the user the path where the image is located.
 // Currently, the default model used is Stable Diffusion
 func (h *handlers) cmdGenerateImage(ctx context.Context, tgb *bot.Bot, chatID int64, prompt string) {
-	msg := &bot.SendMessageParams{ChatID: chatID, Text: "Image link generation..."}
-	_, err := tgb.SendMessage(ctx, msg)
-	if err != nil {
+	if _, err := tgb.SendMessage(ctx, &bot.SendMessageParams{ChatID: chatID, Text: "Image link generation..."}); err != nil {
 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
 		return
 	}
 
 	msgFailedGenerateImageFunc := func() {
-		msg := &bot.SendMessageParams{ChatID: chatID, Text: errMsgFailedToGenerateImage}
-		_, err := tgb.SendMessage(ctx, msg)
-		if err != nil {
+		if _, err := tgb.SendMessage(ctx, &bot.SendMessageParams{ChatID: chatID, Text: errMsgFailedToGenerateImage}); err != nil {
 			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
 		}
 	}
@@ -36,22 +32,16 @@ func (h *handlers) cmdGenerateImage(ctx context.Context, tgb *bot.Bot, chatID in
 	if prompt == "" {
 		prompt = basePromptGenerateImage
 	}
-
-	url := getURL(h.config.BaseURL, h.config.ImageGenerationEndpoint)
-	size := "256x256"
-	model := h.config.ImageGenerationModel
-	if model == "" {
-		model = aiStableDiffusionModel
-	}
-
 	user, ok := ctx.Value(database.UserCtxKey).(database.User)
 	if !ok {
 		log.Error().Int64("chat_id", chatID).Caller().Msg("user not found in context")
 		return
 	}
 
-	localAIToken := user.AiSession.LocalAIToken
-
+	url := getURL(user.AiSession.BaseURL, h.config.ImageGenerationEndpoint)
+	size := "256x256"
+	model := h.config.ImageGenerationModel
+	localAIToken := user.AiSession.AIToken
 	pathToImage, err := localai.GenerateImageStableDiffusion(prompt, size, url, model, localAIToken)
 	if err != nil {
 		msgFailedGenerateImageFunc()
@@ -59,6 +49,13 @@ func (h *handlers) cmdGenerateImage(ctx context.Context, tgb *bot.Bot, chatID in
 			Msg("failed to generate image with Stable Diffusion")
 		return
 	}
+
+	defer func() {
+		if err := os.Remove(pathToImage); err != nil {
+			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error deleting image")
+			return
+		}
+	}()
 
 	imageMsg, err := getMsgWithImage(chatID, pathToImage, localAIToken)
 	if err != nil {
@@ -68,14 +65,8 @@ func (h *handlers) cmdGenerateImage(ctx context.Context, tgb *bot.Bot, chatID in
 		return
 	}
 
-	_, err = tgb.SendPhoto(ctx, imageMsg)
-	if err != nil {
+	if _, err = tgb.SendPhoto(ctx, imageMsg); err != nil {
 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
-		return
-	}
-
-	if err := os.Remove(pathToImage); err != nil {
-		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error deleting image")
 		return
 	}
 }
