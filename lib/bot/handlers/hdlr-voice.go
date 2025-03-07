@@ -9,7 +9,6 @@ import (
 
 	"github.com/JackBekket/hellper/lib/database"
 	"github.com/JackBekket/hellper/lib/localai"
-	stt "github.com/JackBekket/hellper/lib/localai/audioRecognition"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 	"github.com/rs/zerolog/log"
@@ -25,6 +24,7 @@ func (h *handlers) handleVoiceTranscriber(ctx context.Context, tgb *bot.Bot, upd
 		if err != nil {
 			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
 		}
+
 	}
 	file, err := tgb.GetFile(ctx, params)
 	if err != nil {
@@ -43,14 +43,21 @@ func (h *handlers) handleVoiceTranscriber(ctx context.Context, tgb *bot.Bot, upd
 		return
 	}
 
+	defer func() {
+		if err := os.Remove(localFilePath); err != nil {
+			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error deleting image")
+			return
+		}
+	}()
+
 	user, ok := ctx.Value(database.UserCtxKey).(database.User)
 	if !ok {
 		log.Error().Int64("chat_id", chatID).Caller().Msg("user not found in context")
 		return
 	}
-
-	url, model := stt.GetEnvsForSST()
-	transcription, err := localai.TranscribeWhisper(url, model, localFilePath, user.AiSession.LocalAIToken)
+	model := h.config.VoiceRecognitionModel
+	url := getURL(user.AiSession.BaseURL, h.config.VoiceRecognitionEndpoint)
+	transcription, err := localai.TranscribeWhisper(url, model, localFilePath, user.AiSession.AIToken)
 	if err != nil {
 		msgFailedVoiceFunc()
 		log.Error().Err(err).Str("url", url).Str("model", model).Str("file_path", localFilePath).Caller().Msg("failed to transcribe audio")
@@ -61,11 +68,6 @@ func (h *handlers) handleVoiceTranscriber(ctx context.Context, tgb *bot.Bot, upd
 	_, err = tgb.SendMessage(ctx, msg)
 	if err != nil {
 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
-		return
-	}
-
-	if err := os.Remove(localFilePath); err != nil {
-		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error deleting image")
 		return
 	}
 }
