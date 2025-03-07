@@ -4,7 +4,6 @@ package config
 
 // Configuration for working with various AI APIs
 type AIConfig struct {
-	BaseURL                  string
 	ModelsListEndpoint       string
 	ImageGenerationModel     string
 	ImageGenerationEndpoint  string

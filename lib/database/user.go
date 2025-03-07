@@ -15,7 +15,7 @@ import (
 func (u *User) SetContext(collectionName string) error {
 
 	_ = godotenv.Load()
-	localAIToken := u.AiSession.LocalAIToken
+	localAIToken := u.AiSession.AIToken
 	ai_endpoint := os.Getenv("AI_ENDPOINT")
 	//log.Println("ai endpoint is: ", ai_endpoint)
 	dbLink := os.Getenv("EMBEDDINGS_DB_URL")
@@ -46,24 +46,25 @@ func (u *User) ClearContext() {
 func (u *User) FlushThread() {
 }
 
-func (u *User) FlushMemory(ds *Service) {
-	err := ds.DropHistory(u.ID, int64(u.AiSession.AI_Type), u.ID, u.ID, u.AiSession.GptModel)
-
-	fmt.Println(err)
+func (u *User) FlushMemory(ds *Service) error {
+	if err := ds.DropHistory(u.ID, int64(u.AiSession.ProviderID), u.ID, u.ID, u.AiSession.GptModel); err != nil {
+		return fmt.Errorf("flushMemory: %w", err)
+	}
+	return nil
 }
 
 func (u *User) Kill(ds *Service) {
 	u.FlushThread()
 	u.FlushMemory(ds) // dublicate
 	ds.DeleteToken(u.ID, 1)
-	ds.DeleteLSession(u.ID)
+	ds.DeleteAISession(u.ID)
 	delete(UsersMap, u.ID)
 }
 
 func (u *User) DropSession(ds *Service) {
-	ds.DeleteLSession(u.ID)
+	ds.DeleteAISession(u.ID)
 	u.FlushThread()
 	u.FlushMemory(ds) // dublicate
 
-	//ds.DropHistory(u.ID,int64(u.AiSession.AI_Type),u.ID,u.ID,u.AiSession.GptModel)
+	//ds.DropHistory(u.ID,int64(u.AiSession.AIType),u.ID,u.ID,u.AiSession.GptModel)
 }

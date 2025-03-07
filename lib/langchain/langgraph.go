@@ -8,12 +8,12 @@ import (
 	"github.com/tmc/langchaingo/llms/openai"
 )
 
-func RunNewAgent(localAIToken string, model string, baseURL string, prompt string) (*db.ChatSessionGraph, string, error) {
+func RunNewAgent(aiToken string, model string, baseURL string, prompt string) (*db.ChatSessionGraph, string, error) {
 	cb := &ChainCallbackHandler{}
 
 	if baseURL == "" {
 		llm, err := openai.New(
-			openai.WithToken(localAIToken),
+			openai.WithToken(aiToken),
 			openai.WithModel(model),
 			openai.WithCallback(cb),
 		)
@@ -28,9 +28,8 @@ func RunNewAgent(localAIToken string, model string, baseURL string, prompt strin
 		}, outputText, nil
 	} else {
 		llm, err := openai.New(
-			openai.WithToken(localAIToken),
+			openai.WithToken(aiToken),
 			openai.WithModel(model),
-			//openai.WithBaseURL("http://localhost:8080"),
 			openai.WithBaseURL(baseURL),
 			openai.WithAPIVersion("v1"),
 			openai.WithCallback(cb),
@@ -46,12 +45,12 @@ func RunNewAgent(localAIToken string, model string, baseURL string, prompt strin
 	}
 }
 
-func ContinueAgent(localAIToken string, model string, baseURL string, prompt string, state *db.ChatSessionGraph) (*db.ChatSessionGraph, string, error) {
+func ContinueAgent(aiToken string, model string, baseURL string, prompt string, state *db.ChatSessionGraph) (*db.ChatSessionGraph, string, error) {
 	cb := &ChainCallbackHandler{}
 
 	if baseURL == "" {
 		llm, err := openai.New(
-			openai.WithToken(localAIToken),
+			openai.WithToken(aiToken),
 			openai.WithModel(model),
 			openai.WithCallback(cb),
 		)
@@ -65,7 +64,7 @@ func ContinueAgent(localAIToken string, model string, baseURL string, prompt str
 		}, outputText, nil
 	} else {
 		llm, err := openai.New(
-			openai.WithToken(localAIToken),
+			openai.WithToken(aiToken),
 			openai.WithModel(model),
 			//openai.WithBaseURL("http://localhost:8080"),
 			openai.WithBaseURL(baseURL),
