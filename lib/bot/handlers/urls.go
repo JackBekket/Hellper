@@ -12,13 +12,10 @@ func transformURL(inputURL string) string {
 	return fileName
 }
 
-func getURL(baseURL string, enpoint string) string {
-	if enpoint == "" {
-		enpoint = aiImageGenerationEndpoint
-	}
-	joined, err := url.JoinPath(baseURL, enpoint)
+func getURL(baseURL string, endpoint string) string {
+	joined, err := url.JoinPath(baseURL, endpoint)
 	if err != nil {
-		return baseURL + enpoint
+		return baseURL + endpoint
 	}
 	return joined
 }
