@@ -1,6 +1,9 @@
 package handlers
 
 import (
+	"strconv"
+
+	"github.com/JackBekket/hellper/lib/database"
 	"github.com/go-telegram/bot/models"
 )
 
@@ -21,8 +24,8 @@ func renderAIModelsInlineKeyboard(aiModelsList []string) models.InlineKeyboardMa
 	}
 }
 
-// Render AI Providers menu with Inline Keyboard
-func renderAIProvidersInlineKeyboard(aiProviderList []string) models.InlineKeyboardMarkup {
+// Render LocalAI Providers menu with Inline Keyboard
+func renderLocalAIProvidersInlineKeyboard(aiProviderList []string) models.InlineKeyboardMarkup {
 	buttons := [][]models.InlineKeyboardButton{}
 	for _, provider := range aiProviderList {
 		buttons = append(buttons, []models.InlineKeyboardButton{
@@ -38,13 +41,24 @@ func renderAIProvidersInlineKeyboard(aiProviderList []string) models.InlineKeybo
 	}
 }
 
+func renderAIServicesInlineKeyboard() models.InlineKeyboardMarkup {
+	return models.InlineKeyboardMarkup{
+		InlineKeyboard: [][]models.InlineKeyboardButton{
+			{
+				{Text: "LocalAI", CallbackData: strconv.Itoa(database.AuthMethodLocalAI)},
+				{Text: "OpenAI", CallbackData: strconv.Itoa(database.AuthMethodOpenAI)},
+			},
+		},
+	}
+}
+
 // Render Language menu with Inline Keyboard
 func renderLangInlineKeyboard() models.InlineKeyboardMarkup {
 	return models.InlineKeyboardMarkup{
 		InlineKeyboard: [][]models.InlineKeyboardButton{
 			{
-				{Text: "English", CallbackData: "English"},
-				{Text: "Russian", CallbackData: "Russian"},
+				{Text: langEnglish, CallbackData: langEnglish},
+				{Text: langRussian, CallbackData: langRussian},
 			},
 		},
 	}
