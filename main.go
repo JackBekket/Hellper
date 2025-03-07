@@ -53,7 +53,6 @@ func main() {
 		cache, db_service, dbLink,
 		&config.AIConfig{
 			ModelsListEndpoint:       os.Getenv("MODELS_LIST_ENDPOINT"),
-			BaseURL:                  os.Getenv("AI_BASEURL"),
 			ImageGenerationModel:     os.Getenv("IMAGE_GENERATION_MODEL"),
 			ImageGenerationEndpoint:  os.Getenv("IMAGE_GENERATION_ENDPOINT"),
 			ImageRecognitionModel:    os.Getenv("IMAGE_RECOGNITION_MODEL"),
