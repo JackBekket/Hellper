@@ -19,14 +19,14 @@ import (
 func (h *handlers) IdentifyUserMiddleware(next bot.HandlerFunc) bot.HandlerFunc {
 	return func(parentCtx context.Context, tgb *bot.Bot, update *models.Update) {
 		var chatID int64
-		var username string
+		//var username string
 		switch {
 		case update.Message != nil:
 			chatID = update.Message.From.ID
-			username = update.Message.From.Username
+			//username = update.Message.From.Username
 		case update.CallbackQuery != nil:
 			chatID = update.CallbackQuery.From.ID
-			username = update.CallbackQuery.From.Username
+			//username = update.CallbackQuery.From.Username
 		default:
 			//Other message formats are not used, so I am exiting the function
 			return
@@ -55,20 +55,25 @@ func (h *handlers) IdentifyUserMiddleware(next bot.HandlerFunc) bot.HandlerFunc 
 		}
 
 		//TODO: when we do the endpoints part, remove this hardcode
-		if h.dbService.CheckToken(chatID, 1) {
-			user, err := recoverUserAfterDrop(h.dbService, chatID, username, h.config.BaseURL)
-			if err != nil {
-				log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("failed to restore user from the database. The user has been sent for registration")
-				h.handleNewUserRegistration(parentCtx, tgb, update)
-				return
-			}
+		// It is necessary to design a recovery scheme.
+		// If there are multiple services (e.g., localAI and OpenAI),
+		// there will be multiple tokens, which means multiple records in the auth table.
+		// How should this be handled?
 
-			h.cache.SetUser(chatID, user)
-			log.Info().Int64("chat_id", chatID).Msg("User successfully restored after drop")
-			ctxWithUser := context.WithValue(parentCtx, database.UserCtxKey, user)
-			h.handleSendAIModelSelectionKeyboardForExistUser(ctxWithUser, tgb, update)
-			return
-		}
+		// if h.dbService.ExistInAuth(chatID) {
+		// 	user, err := recoverUserAfterDrop(h.dbService, chatID, username)
+		// 	if err != nil {
+		// 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("failed to restore user from the database. The user has been sent for registration")
+		// 		h.handleNewUserRegistration(parentCtx, tgb, update)
+		// 		return
+		// 	}
+
+		// 	h.cache.SetUser(chatID, user)
+		// 	log.Info().Int64("chat_id", chatID).Msg("User successfully restored after drop")
+		// 	ctxWithUser := context.WithValue(parentCtx, database.UserCtxKey, user)
+		// 	h.handleSendAIModelIKB(ctxWithUser, tgb, update)
+		// 	return
+		// }
 
 		log.Warn().Int64("chat_id", chatID).Msg("User not found in cache or database. Redirecting to registration.")
 		h.handleNewUserRegistration(parentCtx, tgb, update)
