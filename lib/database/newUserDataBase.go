@@ -32,11 +32,13 @@ type SessionUsage struct {
 
 // memory
 type AiSession struct {
-	LocalAIToken string
+	AIToken      string
 	GptModel     string
-	AI_Type      int8
+	AuthMethod   int64
+	ProviderID   int64
 	DialogThread ChatSessionGraph
-	Base_url     string
+	ProviderName string
+	BaseURL      string
 	Usage        map[string]int
 }
 
