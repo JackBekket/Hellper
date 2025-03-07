@@ -19,7 +19,6 @@ import (
 // At the moment, only one argument is allowed
 func extractCommandAndArg(msg string) (string, string) {
 	msg = strings.TrimSpace(msg)
-
 	if len(msg) == 0 || msg[0] != '/' {
 		return "", ""
 	}
@@ -27,7 +26,6 @@ func extractCommandAndArg(msg string) (string, string) {
 	parts := strings.Fields(msg)
 	command := strings.Split(parts[0], "@")[0]
 	arg := strings.TrimSpace(strings.Join(parts[1:], " "))
-
 	return command, arg
 }
 
@@ -67,26 +65,20 @@ func (h *handlers) cmdRouter(ctx context.Context, tgb *bot.Bot, update *models.U
 }
 
 func (h *handlers) cmdReload(ctx context.Context, tgb *bot.Bot, chatID int64) {
-	msg := &bot.SendMessageParams{ChatID: chatID, Text: "Reloading session..."}
-	_, err := tgb.SendMessage(ctx, msg)
-	if err != nil {
+	if _, err := tgb.SendMessage(ctx, &bot.SendMessageParams{ChatID: chatID, Text: "Reloading session..."}); err != nil {
 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
 		return
 	}
 	log.Info().Int64("chat_id", chatID).Msg("User reloaded the session in bot")
 	h.cache.DeleteUser(chatID)
-	msg = &bot.SendMessageParams{ChatID: chatID, Text: "Done. Type any key..."}
-	_, err = tgb.SendMessage(ctx, msg)
-	if err != nil {
+	if _, err := tgb.SendMessage(ctx, &bot.SendMessageParams{ChatID: chatID, Text: "Done. Type any key..."}); err != nil {
 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
 		return
 	}
 }
 
 func (h *handlers) cmdClear(ctx context.Context, tgb *bot.Bot, chatID int64) {
-	msg := &bot.SendMessageParams{ChatID: chatID, Text: "Deleting dialog thread from database..."}
-	_, err := tgb.SendMessage(ctx, msg)
-	if err != nil {
+	if _, err := tgb.SendMessage(ctx, &bot.SendMessageParams{ChatID: chatID, Text: "Deleting dialog thread from database..."}); err != nil {
 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
 		return
 	}
@@ -98,9 +90,7 @@ func (h *handlers) cmdClear(ctx context.Context, tgb *bot.Bot, chatID int64) {
 	}
 	user.FlushMemory(h.dbService)
 	h.cache.DeleteUser(chatID)
-	msg = &bot.SendMessageParams{ChatID: chatID, Text: "Done. Type any key..."}
-	_, err = tgb.SendMessage(ctx, msg)
-	if err != nil {
+	if _, err := tgb.SendMessage(ctx, &bot.SendMessageParams{ChatID: chatID, Text: "Done. Type any key..."}); err != nil {
 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
 		return
 	}
@@ -108,9 +98,7 @@ func (h *handlers) cmdClear(ctx context.Context, tgb *bot.Bot, chatID int64) {
 
 // Completely removes all user records from the storage
 func (h *handlers) cmdPurge(ctx context.Context, tgb *bot.Bot, chatID int64) {
-	msg := &bot.SendMessageParams{ChatID: chatID, Text: "Deleting all user data from database and restarting session..."}
-	_, err := tgb.SendMessage(ctx, msg)
-	if err != nil {
+	if _, err := tgb.SendMessage(ctx, &bot.SendMessageParams{ChatID: chatID, Text: "Deleting all user data from database and restarting session..."}); err != nil {
 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
 		return
 	}
@@ -122,9 +110,7 @@ func (h *handlers) cmdPurge(ctx context.Context, tgb *bot.Bot, chatID int64) {
 	}
 	user.Kill(h.dbService)
 	h.cache.DeleteUser(chatID)
-	msg = &bot.SendMessageParams{ChatID: chatID, Text: "Done. Type any key..."}
-	_, err = tgb.SendMessage(ctx, msg)
-	if err != nil {
+	if _, err := tgb.SendMessage(ctx, &bot.SendMessageParams{ChatID: chatID, Text: "Done. Type any key..."}); err != nil {
 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
 		return
 	}
@@ -132,8 +118,7 @@ func (h *handlers) cmdPurge(ctx context.Context, tgb *bot.Bot, chatID int64) {
 
 func (h *handlers) cmdDrop(ctx context.Context, tgb *bot.Bot, chatID int64) {
 	msg := &bot.SendMessageParams{ChatID: chatID, Text: "Dropping session..."}
-	_, err := tgb.SendMessage(ctx, msg)
-	if err != nil {
+	if _, err := tgb.SendMessage(ctx, &bot.SendMessageParams{ChatID: chatID, Text: "Dropping session..."}); err != nil {
 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
 		return
 	}
@@ -147,8 +132,7 @@ func (h *handlers) cmdDrop(ctx context.Context, tgb *bot.Bot, chatID int64) {
 	user.FlushMemory(h.dbService)
 	h.cache.DeleteUser(chatID)
 	msg = &bot.SendMessageParams{ChatID: chatID, Text: "Done. Type any key..."}
-	_, err = tgb.SendMessage(ctx, msg)
-	if err != nil {
+	if _, err := tgb.SendMessage(ctx, msg); err != nil {
 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
 		return
 	}
@@ -157,9 +141,7 @@ func (h *handlers) cmdDrop(ctx context.Context, tgb *bot.Bot, chatID int64) {
 
 // Sends a message with instructions for working with the bot
 func (h *handlers) cmdHelp(ctx context.Context, tgb *bot.Bot, chatID int64) {
-	msg := &bot.SendMessageParams{ChatID: chatID, Text: msgHelpCommand}
-	_, err := tgb.SendMessage(ctx, msg)
-	if err != nil {
+	if _, err := tgb.SendMessage(ctx, &bot.SendMessageParams{ChatID: chatID, Text: msgHelpCommand}); err != nil {
 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
 		return
 	}
@@ -168,20 +150,19 @@ func (h *handlers) cmdHelp(ctx context.Context, tgb *bot.Bot, chatID int64) {
 // Old Func - SearchDocuments.
 // WARNING: The func uses an unsafe function - GetVectorStore
 func (h *handlers) cmdSearchDoc(ctx context.Context, tgb *bot.Bot, chatID int64, prompt string) {
-	dbLink := h.dbLink
-	baseURL := h.config.BaseURL
 	user, ok := ctx.Value(database.UserCtxKey).(database.User)
 	if !ok {
 		log.Error().Int64("chat_id", chatID).Caller().Msg("user not found in context")
 		return
 	}
 
-	localAIToken := user.AiSession.LocalAIToken
+	dbLink := h.dbLink
+	baseURL := user.AiSession.BaseURL
+
+	localAIToken := user.AiSession.AIToken
 	store, err := embeddings.GetVectorStore(baseURL, localAIToken, dbLink) // WARNING: This function is unsafe! May call log.Fatal (╯°□°）╯︵ ┻━┻
 	if err != nil {
-		msg := &bot.SendMessageParams{ChatID: chatID, Text: "Something happened... error occured: " + err.Error()}
-		_, err := tgb.SendMessage(ctx, msg)
-		if err != nil {
+		if _, err := tgb.SendMessage(ctx, &bot.SendMessageParams{ChatID: chatID, Text: "Something happened... error occured: " + err.Error()}); err != nil {
 			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
 			return
 		}
@@ -199,20 +180,16 @@ func (h *handlers) cmdSearchDoc(ctx context.Context, tgb *bot.Bot, chatID int64,
 
 	for i, result := range results {
 		content := result.PageContent
-
-		msg := &bot.SendMessageParams{ChatID: chatID, Text: fmt.Sprintf("Result number: %d\nPage content: %s", i, content)}
-		_, err := tgb.SendMessage(ctx, msg)
-		if err != nil {
+		if _, err := tgb.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: chatID,
+			Text:   fmt.Sprintf("Result number: %d\nPage content: %s", i, content)}); err != nil {
 			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
 			return
 		}
 
 		score := result.Score
 		text := fmt.Sprintf("Score: %f", score)
-
-		msg = &bot.SendMessageParams{ChatID: chatID, Text: text}
-		_, err = tgb.SendMessage(ctx, msg)
-		if err != nil {
+		if _, err = tgb.SendMessage(ctx, &bot.SendMessageParams{ChatID: chatID, Text: text}); err != nil {
 			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
 			return
 		}
@@ -223,8 +200,7 @@ func (h *handlers) cmdSearchDoc(ctx context.Context, tgb *bot.Bot, chatID int64,
 // this is calling local-ai within base template (and without langhain injections)
 func (h *handlers) cmdInstruct(ctx context.Context, tgb *bot.Bot, chatID int64, prompt string) {
 	if prompt == "" {
-		msg := &bot.SendMessageParams{ChatID: chatID, Text: "You didn't enter a prompt. Format: /instruct prompt"}
-		_, err := tgb.SendMessage(ctx, msg)
+		_, err := tgb.SendMessage(ctx, &bot.SendMessageParams{ChatID: chatID, Text: "You didn't enter a prompt. Format: /instruct prompt"})
 		if err != nil {
 			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
 			return
@@ -238,27 +214,23 @@ func (h *handlers) cmdInstruct(ctx context.Context, tgb *bot.Bot, chatID int64, 
 	}
 
 	model := user.AiSession.GptModel
-	localAIToken := user.AiSession.LocalAIToken
-
-	text, err := langchain.GenerateContentInstruction(user.AiSession.Base_url, prompt, model, localAIToken, user.Network)
+	localAIToken := user.AiSession.AIToken
+	text, err := langchain.GenerateContentInstruction(user.AiSession.BaseURL, prompt, model, localAIToken, user.Network)
 	if err != nil || text == "" {
 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error generate content instruction")
-		msg := &bot.SendMessageParams{ChatID: chatID, Text: "Error generating content instruction"}
-		_, err = tgb.SendMessage(ctx, msg)
-		if err != nil {
+		if _, err = tgb.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: chatID,
+			Text:   "Error generating content instruction"}); err != nil {
 			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
 			return
 		}
 		return
 	}
 
-	msg := &bot.SendMessageParams{ChatID: chatID, Text: text}
-	_, err = tgb.SendMessage(ctx, msg)
-	if err != nil {
+	if _, err = tgb.SendMessage(ctx, &bot.SendMessageParams{ChatID: chatID, Text: "Error generating content instruction"}); err != nil {
 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
 		return
 	}
-
 }
 
 // Shows token usage statistics
@@ -278,9 +250,7 @@ func (h *handlers) cmdUsage(ctx context.Context, tgb *bot.Bot, chatID int64) {
 		promt_tokens, completion_tokens, total_tokens,
 	)
 
-	msg := &bot.SendMessageParams{ChatID: chatID, Text: text}
-	_, err := tgb.SendMessage(ctx, msg)
-	if err != nil {
+	if _, err := tgb.SendMessage(ctx, &bot.SendMessageParams{ChatID: chatID, Text: text}); err != nil {
 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
 		return
 	}
@@ -324,9 +294,7 @@ func (h *handlers) cmdClearContext(ctx context.Context, tgb *bot.Bot, chatID int
 		return
 	}
 	user.ClearContext()
-	msg := &bot.SendMessageParams{ChatID: chatID, Text: "Done. Type any key..."}
-	_, err := tgb.SendMessage(ctx, msg)
-	if err != nil {
+	if _, err := tgb.SendMessage(ctx, &bot.SendMessageParams{ChatID: chatID, Text: "Done. Type any key..."}); err != nil {
 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
 		return
 	}
