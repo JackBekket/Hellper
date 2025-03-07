@@ -9,7 +9,6 @@ import (
 	"log"
 	"mime/multipart"
 	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -83,25 +82,27 @@ type OpenAIModelsResponse struct {
 	Data []OpenAIDataObject `json:"data"`
 }
 
-func GetModelsList(endpoint, token string) ([]string, error) {
+func GetModelsList(url, token string) ([]string, error) {
 	modelsList := []string{}
-	urlPath, err := url.JoinPath(endpoint, "models")
+
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return modelsList, err
 	}
-	req, err := http.NewRequest("GET", urlPath, nil)
 	req.Header.Set("Authorization", "Bearer "+token)
-	if err != nil {
-		return modelsList, err
-	}
+
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return modelsList, err
 	}
+	defer resp.Body.Close()
 
-	modelsResp := OpenAIModelsResponse{}
-	err = json.NewDecoder(resp.Body).Decode(&modelsResp)
-	if err != nil {
+	if resp.StatusCode != http.StatusOK {
+		return modelsList, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	var modelsResp OpenAIModelsResponse
+	if err := json.NewDecoder(resp.Body).Decode(&modelsResp); err != nil {
 		return modelsList, err
 	}
 
