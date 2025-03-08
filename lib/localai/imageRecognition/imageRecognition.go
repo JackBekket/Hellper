@@ -6,28 +6,28 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 )
 
-func getEnvsForImgRec() (string, string, string) {
-	baseURL := os.Getenv("AI_ENDPOINT")
-	endpoint := os.Getenv("IMAGE_RECOGNITION_ENDPOINT")
-	if endpoint == "" {
-		endpoint = "/v1/chat/completions"
-	}
-	baseURL += endpoint
-
-	model := os.Getenv("IMAGE_RECOGNITION_MODEL")
-	if model == "" {
-		model = "bunny-llama-3-8b-v"
-	}
-
-	token := os.Getenv("OPENAI_API_KEY")
-	return baseURL, model, token
-
-}
-
 // Deprecated, move to handlers
+
+// func getEnvsForImgRec() (string, string, string) {
+// 	baseURL := os.Getenv("AI_ENDPOINT")
+// 	endpoint := os.Getenv("IMAGE_RECOGNITION_ENDPOINT")
+// 	if endpoint == "" {
+// 		endpoint = "/v1/chat/completions"
+// 	}
+// 	baseURL += endpoint
+
+// 	model := os.Getenv("IMAGE_RECOGNITION_MODEL")
+// 	if model == "" {
+// 		model = "bunny-llama-3-8b-v"
+// 	}
+
+// 	token := os.Getenv("OPENAI_API_KEY")
+// 	return baseURL, model, token
+
+// }
+
 // func RecognizeImage(bot *tgbotapi.BotAPI, msg *tgbotapi.Message) (string, error) {
 
 // 	imgLink, err := handleImageMessage(bot, msg)

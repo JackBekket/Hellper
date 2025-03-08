@@ -1,9 +1,5 @@
 package stt
 
-import (
-	"os"
-)
-
 // // Deprecated, move to handlers
 // func HandleVoiceMessage(updateMessage *tgbotapi.Message, bot tgbotapi.BotAPI) (string, error) {
 
@@ -59,17 +55,17 @@ import (
 // url, model
 
 // REFACTOR
-func GetEnvsForSST() (string, string) {
-	baseURL := os.Getenv("AI_BASEURL")
-	endpoint := os.Getenv("VOICE_RECOGNITION_ENDPOINT")
-	if endpoint == "" {
-		endpoint = "/v1/audio/transcriptions"
-	}
-	baseURL += endpoint
+// func GetEnvsForSST() (string, string) {
+// 	baseURL := os.Getenv("AI_BASEURL")
+// 	endpoint := os.Getenv("VOICE_RECOGNITION_ENDPOINT")
+// 	if endpoint == "" {
+// 		endpoint = "/v1/audio/transcriptions"
+// 	}
+// 	baseURL += endpoint
 
-	model := os.Getenv("VOICE_RECOGNITION_MODEL")
-	if model == "" {
-		model = "whisper-1"
-	}
-	return baseURL, model
-}
+// 	model := os.Getenv("VOICE_RECOGNITION_MODEL")
+// 	if model == "" {
+// 		model = "whisper-1"
+// 	}
+// 	return baseURL, model
+// }
