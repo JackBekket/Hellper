@@ -129,7 +129,6 @@ func (h *handlers) cmdDrop(ctx context.Context, tgb *bot.Bot, chatID int64) {
 		return
 	}
 	user.DropSession(h.dbService)
-	user.FlushMemory(h.dbService)
 	h.cache.DeleteUser(chatID)
 	msg = &bot.SendMessageParams{ChatID: chatID, Text: "Done. Type any key..."}
 	if _, err := tgb.SendMessage(ctx, msg); err != nil {
