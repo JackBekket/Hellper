@@ -9,16 +9,17 @@ const (
 	msgChooseModel   = "Сhoose a model"
 	//Message with formatting for the user
 	msgSessionModelFormat = "Your session model: %s"
-	msgChooseLang         = "Choose a language or send 'Hello' in your desired language"
-	msgConnectingAINode   = "Connecting to AI node..."
-	msgHelpCommand        = "Authorize for additional commands: /help -- print this message, /restart -- restart session (if you want to switch between local-ai and openai chatGPT), /searchdoc -- searching documents, /rag -- process Retrival-Augmented Generation, /instruct -- use system promt template instead of langchain (higher priority, see examples), /image -- generate image ....all funcs are experimental so bot can halt and catch fire"
-	msgAIclientFailure    = "An error has occured. In order to proceed we need to recreate client and initialize new session"
+	//msgChooseLang         = "Choose a language or send 'Hello' in your desired language"
+	msgFirstPrompt      = "Just say 'hello' in your language!"
+	msgConnectingAINode = "Connecting to AI node..."
+	msgHelpCommand      = "Authorize for additional commands: /help -- print this message, /restart -- restart session (if you want to switch between local-ai and openai chatGPT), /searchdoc -- searching documents, /rag -- process Retrival-Augmented Generation, /instruct -- use system promt template instead of langchain (higher priority, see examples), /image -- generate image ....all funcs are experimental so bot can halt and catch fire"
+	msgAIclientFailure  = "An error has occured. In order to proceed we need to recreate client and initialize new session"
 )
 
-const (
-	langEnglish = "English"
-	langRussian = "Russian"
-)
+// const (
+// 	langEnglish = "English"
+// 	langRussian = "Russian"
+// )
 
 // Base prompts for the AI
 const (
@@ -34,9 +35,10 @@ const (
 	statusAuthMethodCallback
 	statusLocalAIProviderCallback
 	statusAPIToken
-	statusAIModelSelectionKeyboard
+	//statusAIModelSelectionKeyboard
 	statusAIModelSelectionChoiceCallback
-	statusConnectingToAiWithLangCallback
+	//statusConnectingToAIWithLangCallback
+	statusConnectingToAIWithFirstPrompt
 	statusStartDialogSequence
 )
 

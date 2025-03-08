@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"strings"
 
 	"github.com/JackBekket/hellper/lib/agent"
@@ -23,13 +24,15 @@ func (h *handlers) textMessageRouter(ctx context.Context, tgb *bot.Bot, update *
 		return
 	}
 	switch user.DialogStatus {
-	case statusAIModelSelectionKeyboard:
-		h.handleSendAIModelIKB(ctx, tgb, update)
+	//case statusAIModelSelectionKeyboard:
+	//h.handleSendAIModelIKB(ctx, tgb, update)
 	case statusAPIToken:
 		h.handleAPIToken(ctx, tgb, update)
 	case statusStartDialogSequence:
 		go h.handleStartDialogSequence(ctx, tgb, update)
-	default: // todo: error msg
+	case statusConnectingToAIWithFirstPrompt:
+		h.handleConnectingToAIWithFirstPrompt(ctx, tgb, update)
+	default:
 	}
 }
 
@@ -40,21 +43,48 @@ func (h *handlers) handleAPIToken(ctx context.Context, tgb *bot.Bot, update *mod
 		log.Error().Int64("chat_id", chatID).Caller().Msg("user not found in context")
 		return
 	}
+	if _, err := tgb.SendMessage(ctx, &bot.SendMessageParams{
+		ChatID: chatID,
+		Text:   "Checking the token...",
+	}); err != nil {
+		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
+	}
 
 	localAIToken := strings.TrimSpace(update.Message.Text)
 	url := getURL(user.AiSession.BaseURL, h.config.ModelsListEndpoint)
 	aiModelsList, err := localai.GetModelsList(url, localAIToken)
 	if err != nil {
-		if _, err := tgb.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID: chatID,
-			Text:   "Your token is invalid. Please enter a new token.",
+		var text string
+		if errors.Is(err, localai.ErrConnectionFailure) {
+			text = "Something went wrong, please try entering the token again later :("
+		} else {
+			text = "This token is invalid. Please check the token and enter it again!"
+		}
+		if _, err := tgb.EditMessageText(ctx, &bot.EditMessageTextParams{
+			ChatID:    chatID,
+			MessageID: update.Message.ID + 1,
+			Text:      text,
 		}); err != nil {
+			if _, err := tgb.EditMessageText(ctx, &bot.EditMessageTextParams{
+				ChatID:    chatID,
+				MessageID: update.Message.ID + 1,
+				Text:      text,
+			}); err != nil {
+				log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
+			}
 			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
 		}
 		log.Warn().Err(err).Int64("chat_id", chatID).Str("url", url).Caller().Msg("error retrieving LLM models list")
 		return
 	}
 	if err := h.dbService.InsertToken(chatID, user.AiSession.AuthMethod, localAIToken); err != nil {
+		if _, err := tgb.EditMessageText(ctx, &bot.EditMessageTextParams{
+			ChatID:    chatID,
+			MessageID: update.Message.ID + 1,
+			Text:      "Something went wrong, please try entering the token again later :(",
+		}); err != nil {
+			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
+		}
 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error inserting token")
 		return
 	}
@@ -63,46 +93,105 @@ func (h *handlers) handleAPIToken(ctx context.Context, tgb *bot.Bot, update *mod
 	user.DialogStatus = statusAIModelSelectionChoiceCallback
 	h.cache.UpdateUser(user)
 
-	if _, err = tgb.SendMessage(ctx, &bot.SendMessageParams{
+	if _, err = tgb.EditMessageText(ctx, &bot.EditMessageTextParams{
 		ChatID:      chatID,
-		Text:        "Choose model",
+		MessageID:   update.Message.ID + 1,
+		Text:        "Success! Now, please select the model you'd like to work with",
 		ReplyMarkup: renderAIModelsInlineKeyboard(aiModelsList),
 	}); err != nil {
 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
 	}
 }
 
-func (h *handlers) handleSendAIModelIKB(ctx context.Context, tgb *bot.Bot, update *models.Update) {
-	chatID := update.Message.Chat.ID
+// func (h *handlers) handleSendAIModelIKB(ctx context.Context, tgb *bot.Bot, update *models.Update) {
+// 	chatID := update.Message.Chat.ID
+// 	user, ok := ctx.Value(database.UserCtxKey).(database.User)
+// 	if !ok {
+// 		log.Error().Int64("chat_id", chatID).Caller().Msg("user not found in context")
+// 		return
+// 	}
+
+// 	localAIToken, url := user.AiSession.AIToken, getURL(user.AiSession.BaseURL, h.config.ModelsListEndpoint)
+// 	aiModelsList, err := localai.GetModelsList(url, localAIToken)
+// 	if err != nil {
+// 		if _, err := tgb.SendMessage(ctx, &bot.SendMessageParams{
+// 			ChatID: chatID,
+// 			Text:   "Your token is invalid. Please enter a new token.",
+// 		}); err != nil {
+// 			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
+// 		}
+// 		log.Warn().Err(err).Int64("chat_id", chatID).Caller().Msg("error retrieving LLM models list")
+// 		return
+// 	}
+
+// 	if _, err = tgb.SendMessage(ctx, &bot.SendMessageParams{
+// 		ChatID:      chatID,
+// 		Text:        msgChooseModel,
+// 		ReplyMarkup: renderAIModelsInlineKeyboard(aiModelsList),
+// 	}); err != nil {
+// 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
+// 	}
+
+// 	user.DialogStatus = statusAIModelSelectionChoiceCallback
+// 	h.cache.UpdateUser(user)
+// }
+
+func (h *handlers) handleConnectingToAIWithFirstPrompt(ctx context.Context, tgb *bot.Bot, update *models.Update) {
+	chatID := update.Message.From.ID
+	langPrompt := update.Message.Text
+	if _, err := tgb.SendMessage(ctx, &bot.SendMessageParams{
+		ChatID: chatID,
+		Text:   msgConnectingAINode,
+	}); err != nil {
+		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
+		return
+	}
+
+	go h.handleStartAiConversationWithLang(ctx, tgb, chatID, langPrompt)
+}
+
+// old name func - SetupSequenceWithKey
+func (h *handlers) handleStartAiConversationWithLang(ctx context.Context, tgb *bot.Bot, chatID int64, langPrompt string) {
 	user, ok := ctx.Value(database.UserCtxKey).(database.User)
 	if !ok {
 		log.Error().Int64("chat_id", chatID).Caller().Msg("user not found in context")
 		return
 	}
+	log.Info().Int64("chat_id", chatID).Str("endpoint", user.AiSession.BaseURL).
+		Msg("Starting AI conversation")
 
-	localAIToken, url := user.AiSession.AIToken, getURL(user.AiSession.BaseURL, h.config.ModelsListEndpoint)
-	aiModelsList, err := localai.GetModelsList(url, localAIToken)
+	model := user.AiSession.GptModel
+	probe, response, err := langchain.RunNewAgent(user.AiSession.AIToken, model, user.AiSession.BaseURL, langPrompt)
 	if err != nil {
-		if _, err := tgb.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID: chatID,
-			Text:   "Your token is invalid. Please enter a new token.",
-		}); err != nil {
-			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
+		videoMsg, err := getErrorMsgWithRandomVideo(chatID)
+		if err != nil {
+			log.Error().Err(err).Caller().Msg("error generating video message")
+			return
 		}
-		log.Warn().Err(err).Int64("chat_id", chatID).Caller().Msg("error retrieving LLM models list")
+		if _, err := tgb.SendVideo(ctx, videoMsg); err != nil {
+			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending video message")
+		}
+		log.Warn().Int64("chat_id", chatID).Str("username", user.Username).Msg("The user was removed from the cache due to an authentication issue.")
+		h.cache.DeleteUser(chatID)
 		return
 	}
 
-	if _, err = tgb.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID:      chatID,
-		Text:        msgChooseModel,
-		ReplyMarkup: renderAIModelsInlineKeyboard(aiModelsList),
-	}); err != nil {
+	if _, err := tgb.SendMessage(ctx, &bot.SendMessageParams{ChatID: chatID, Text: response}); err != nil {
 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
+		return
 	}
 
-	user.DialogStatus = statusAIModelSelectionChoiceCallback
+	user.DialogStatus = statusStartDialogSequence
+	user.AiSession.DialogThread = *probe
+
+	// TODO: Replace with a thread-safe one
+	usage := database.GetSessionUsage(user.ID)
+	user.AiSession.Usage = usage
+
+	h.dbService.CreateAISession(chatID, user.AiSession.GptModel, user.AiSession.ProviderID)
 	h.cache.UpdateUser(user)
+	log.Info().Int64("chat_id", chatID).Str("username", user.Username).Str("BaseURL", user.AiSession.BaseURL).
+		Msg("AI conversation completed successfully")
 }
 
 // Dialog_Status 6 -> 6 (loop) - status_StartDialogSequence

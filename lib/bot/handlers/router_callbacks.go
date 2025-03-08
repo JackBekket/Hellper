@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/JackBekket/hellper/lib/database"
-	"github.com/JackBekket/hellper/lib/langchain"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 	"github.com/rs/zerolog/log"
@@ -25,9 +24,9 @@ func (h *handlers) callbackRouter(ctx context.Context, tgb *bot.Bot, update *mod
 	switch user.DialogStatus {
 	case statusAIModelSelectionChoiceCallback:
 		h.handleAIModelSelectionCallback(ctx, tgb, callback)
-	case statusConnectingToAiWithLangCallback:
-		// Can also accept a text message with the first prompt
-		h.handleConnectingToAiWithLangCallback(ctx, tgb, update)
+	//case statusConnectingToAiWithLangCallback:
+	// Can also accept a text message with the first prompt
+	//h.handleConnectingToAiWithLangCallback(ctx, tgb, update)
 	case statusAuthMethodCallback:
 		h.handleAuthMethodCallback(ctx, tgb, callback)
 	case statusLocalAIProviderCallback:
@@ -194,9 +193,9 @@ func (h *handlers) handleAIModelSelectionCallback(ctx context.Context, tgb *bot.
 	}
 
 	if _, err := tgb.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID:      chatID,
-		Text:        msgChooseLang,
-		ReplyMarkup: renderLangInlineKeyboard(),
+		ChatID: chatID,
+		Text:   msgFirstPrompt,
+		//ReplyMarkup: renderLangInlineKeyboard(),
 	}); err != nil {
 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
 		return
@@ -208,94 +207,94 @@ func (h *handlers) handleAIModelSelectionCallback(ctx context.Context, tgb *bot.
 		log.Error().Int64("chat_id", chatID).Caller().Msg("user not found in context")
 		return
 	}
-	user.DialogStatus = statusConnectingToAiWithLangCallback
+	user.DialogStatus = statusConnectingToAIWithFirstPrompt
 	user.AiSession.GptModel = aiModelName
 	h.cache.UpdateUser(user)
 
 }
 
-func (h *handlers) handleConnectingToAiWithLangCallback(ctx context.Context, tgb *bot.Bot, update *models.Update) {
-	var lang, langPrompt string
-	var chatID int64
-	if update.Message == nil {
-		chatID = update.CallbackQuery.From.ID
-		lang = update.CallbackQuery.Data
-		log.Info().Int64("chat_id", chatID).Str("lang", lang).Msg("User initiated AI connection via callback")
-		if _, err := tgb.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
-			CallbackQueryID: update.CallbackQuery.ID,
-			Text:            "🐈💨",
-		}); err != nil {
-			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error answering callback query")
-			return
-		}
-		langPrompt = getInitialLangPrompt(lang)
-	} else {
-		langPrompt = update.Message.Text
-	}
+// func (h *handlers) handleConnectingToAiWithLangCallback(ctx context.Context, tgb *bot.Bot, update *models.Update) {
+// 	var lang, langPrompt string
+// 	var chatID int64
+// 	if update.Message == nil {
+// 		chatID = update.CallbackQuery.From.ID
+// 		lang = update.CallbackQuery.Data
+// 		log.Info().Int64("chat_id", chatID).Str("lang", lang).Msg("User initiated AI connection via callback")
+// 		if _, err := tgb.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
+// 			CallbackQueryID: update.CallbackQuery.ID,
+// 			Text:            "🐈💨",
+// 		}); err != nil {
+// 			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error answering callback query")
+// 			return
+// 		}
+// 		langPrompt = getInitialLangPrompt(lang)
+// 	} else {
+// 		langPrompt = update.Message.Text
+// 	}
 
-	if _, err := tgb.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID: chatID,
-		Text:   msgConnectingAINode,
-	}); err != nil {
-		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
-		return
-	}
+// 	if _, err := tgb.SendMessage(ctx, &bot.SendMessageParams{
+// 		ChatID: chatID,
+// 		Text:   msgConnectingAINode,
+// 	}); err != nil {
+// 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
+// 		return
+// 	}
 
-	go h.handleStartAiConversationWithLang(ctx, tgb, chatID, langPrompt)
-}
+// 	go h.handleStartAiConversationWithLang(ctx, tgb, chatID, langPrompt)
+// }
 
-// old name func - SetupSequenceWithKey
-func (h *handlers) handleStartAiConversationWithLang(ctx context.Context, tgb *bot.Bot, chatID int64, langPrompt string) {
-	user, ok := ctx.Value(database.UserCtxKey).(database.User)
-	if !ok {
-		log.Error().Int64("chat_id", chatID).Caller().Msg("user not found in context")
-		return
-	}
-	log.Info().Int64("chat_id", chatID).Str("endpoint", user.AiSession.BaseURL).
-		Msg("Starting AI conversation")
+// // old name func - SetupSequenceWithKey
+// func (h *handlers) handleStartAiConversationWithLang(ctx context.Context, tgb *bot.Bot, chatID int64, langPrompt string) {
+// 	user, ok := ctx.Value(database.UserCtxKey).(database.User)
+// 	if !ok {
+// 		log.Error().Int64("chat_id", chatID).Caller().Msg("user not found in context")
+// 		return
+// 	}
+// 	log.Info().Int64("chat_id", chatID).Str("endpoint", user.AiSession.BaseURL).
+// 		Msg("Starting AI conversation")
 
-	model := user.AiSession.GptModel
-	probe, response, err := langchain.RunNewAgent(user.AiSession.AIToken, model, user.AiSession.BaseURL, langPrompt)
-	if err != nil {
-		videoMsg, err := getErrorMsgWithRandomVideo(chatID)
-		if err != nil {
-			log.Error().Err(err).Caller().Msg("error generating video message")
-			return
-		}
-		if _, err := tgb.SendVideo(ctx, videoMsg); err != nil {
-			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending video message")
-		}
-		log.Warn().Int64("chat_id", chatID).Str("username", user.Username).Msg("The user was removed from the cache due to an authentication issue.")
-		h.cache.DeleteUser(chatID)
-		return
-	}
+// 	model := user.AiSession.GptModel
+// 	probe, response, err := langchain.RunNewAgent(user.AiSession.AIToken, model, user.AiSession.BaseURL, langPrompt)
+// 	if err != nil {
+// 		videoMsg, err := getErrorMsgWithRandomVideo(chatID)
+// 		if err != nil {
+// 			log.Error().Err(err).Caller().Msg("error generating video message")
+// 			return
+// 		}
+// 		if _, err := tgb.SendVideo(ctx, videoMsg); err != nil {
+// 			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending video message")
+// 		}
+// 		log.Warn().Int64("chat_id", chatID).Str("username", user.Username).Msg("The user was removed from the cache due to an authentication issue.")
+// 		h.cache.DeleteUser(chatID)
+// 		return
+// 	}
 
-	if _, err := tgb.SendMessage(ctx, &bot.SendMessageParams{ChatID: chatID, Text: response}); err != nil {
-		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
-		return
-	}
+// 	if _, err := tgb.SendMessage(ctx, &bot.SendMessageParams{ChatID: chatID, Text: response}); err != nil {
+// 		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending message")
+// 		return
+// 	}
 
-	user.DialogStatus = statusStartDialogSequence
-	user.AiSession.DialogThread = *probe
+// 	user.DialogStatus = statusStartDialogSequence
+// 	user.AiSession.DialogThread = *probe
 
-	// TODO: Replace with a thread-safe one
-	usage := database.GetSessionUsage(user.ID)
-	user.AiSession.Usage = usage
+// 	// TODO: Replace with a thread-safe one
+// 	usage := database.GetSessionUsage(user.ID)
+// 	user.AiSession.Usage = usage
 
-	h.dbService.CreateAISession(chatID, user.AiSession.GptModel, user.AiSession.ProviderID)
-	h.cache.UpdateUser(user)
-	log.Info().Int64("chat_id", chatID).Str("username", user.Username).Str("BaseURL", user.AiSession.BaseURL).
-		Msg("AI conversation completed successfully")
-}
+// 	h.dbService.CreateAISession(chatID, user.AiSession.GptModel, user.AiSession.ProviderID)
+// 	h.cache.UpdateUser(user)
+// 	log.Info().Int64("chat_id", chatID).Str("username", user.Username).Str("BaseURL", user.AiSession.BaseURL).
+// 		Msg("AI conversation completed successfully")
+// }
 
-// Returns the initial prompt with the selected language
-func getInitialLangPrompt(lang string) string {
-	switch lang {
-	case langEnglish:
-		return basePromptLangEN
-	case langRussian:
-		return basePromptLangRU
-	default:
-		return basePromptLangEN
-	}
-}
+// // Returns the initial prompt with the selected language
+// func getInitialLangPrompt(lang string) string {
+// 	switch lang {
+// 	case langEnglish:
+// 		return basePromptLangEN
+// 	case langRussian:
+// 		return basePromptLangRU
+// 	default:
+// 		return basePromptLangEN
+// 	}
+// }

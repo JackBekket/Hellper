@@ -53,13 +53,13 @@ func renderAIServicesInlineKeyboard() models.InlineKeyboardMarkup {
 }
 
 // Render Language menu with Inline Keyboard
-func renderLangInlineKeyboard() models.InlineKeyboardMarkup {
-	return models.InlineKeyboardMarkup{
-		InlineKeyboard: [][]models.InlineKeyboardButton{
-			{
-				{Text: langEnglish, CallbackData: langEnglish},
-				{Text: langRussian, CallbackData: langRussian},
-			},
-		},
-	}
-}
+// func renderLangInlineKeyboard() models.InlineKeyboardMarkup {
+// 	return models.InlineKeyboardMarkup{
+// 		InlineKeyboard: [][]models.InlineKeyboardButton{
+// 			{
+// 				{Text: langEnglish, CallbackData: langEnglish},
+// 				{Text: langRussian, CallbackData: langRussian},
+// 			},
+// 		},
+// 	}
+// }
