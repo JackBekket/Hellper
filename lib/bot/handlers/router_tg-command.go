@@ -259,15 +259,8 @@ func (h *handlers) cmdUsage(ctx context.Context, tgb *bot.Bot, chatID int64) {
 // Get a list of all files in the media directory
 // files, err := os.ReadDir("../../media/")
 func (h *handlers) cmdHelper(ctx context.Context, tgb *bot.Bot, chatID int64) {
-	videoMsg, err := getErrorMsgWithRandomVideo(chatID)
-	if err != nil {
-		log.Error().Err(err).Caller().Msg("")
-		return
-	}
-	_, err = tgb.SendVideo(ctx, videoMsg)
-	if err != nil {
-		log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending video message")
-	}
+	getErrorMsgWithRandomVideo(ctx, tgb, chatID)
+
 }
 
 func (h *handlers) cmdSetContext(ctx context.Context, tgb *bot.Bot, chatID int64, name string) {

@@ -163,14 +163,7 @@ func (h *handlers) handleStartAiConversationWithLang(ctx context.Context, tgb *b
 	model := user.AiSession.GptModel
 	probe, response, err := langchain.RunNewAgent(user.AiSession.AIToken, model, user.AiSession.BaseURL, langPrompt)
 	if err != nil {
-		videoMsg, err := getErrorMsgWithRandomVideo(chatID)
-		if err != nil {
-			log.Error().Err(err).Caller().Msg("error generating video message")
-			return
-		}
-		if _, err := tgb.SendVideo(ctx, videoMsg); err != nil {
-			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending video message")
-		}
+		getErrorMsgWithRandomVideo(ctx, tgb, chatID)
 		log.Warn().Int64("chat_id", chatID).Str("username", user.Username).Msg("The user was removed from the cache due to an authentication issue.")
 		h.cache.DeleteUser(chatID)
 		return
@@ -212,14 +205,7 @@ func (h *handlers) handleStartDialogSequence(ctx context.Context, tgb *bot.Bot, 
 	log.Info().Str("gpt_model", model).Str("prompt", prompt).Msg("processing GPT request")
 	post_session, resp, err := langchain.ContinueAgent(user.AiSession.AIToken, model, user.AiSession.BaseURL, prompt, &thread)
 	if err != nil {
-		videoMsg, err := getErrorMsgWithRandomVideo(chatID)
-		if err != nil {
-			log.Error().Err(err).Caller().Msg("error generating video message")
-			return
-		}
-		if _, err := tgb.SendVideo(ctx, videoMsg); err != nil {
-			log.Error().Err(err).Int64("chat_id", chatID).Caller().Msg("error sending video message")
-		}
+		getErrorMsgWithRandomVideo(ctx, tgb, chatID)
 		log.Warn().Int64("chat_id", chatID).Str("username", user.Username).Msg("The user was removed from the cache due to an authentication issue.")
 		h.cache.DeleteUser(chatID)
 		return
