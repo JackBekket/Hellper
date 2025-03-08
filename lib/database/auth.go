@@ -92,3 +92,11 @@ func (s *Service) DeleteToken(userID, authMethod int64) error {
 		`, userID, authMethod)
 	return err
 }
+
+func (s *Service) DeleteFromAuth(userID int64) error {
+	_, err := s.DBHandler.DB.Exec(`DELETE FROM auth
+		WHERE
+			tg_user_id = $1
+		`, userID)
+	return err
+}
