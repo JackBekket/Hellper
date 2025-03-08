@@ -3,16 +3,19 @@ package localai
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/rs/zerolog/log"
 )
+
+var ErrConnectionFailure = errors.New("сonnection error")
 
 type ChatRequest struct {
 	Model       string    `json:"model"`
@@ -87,13 +90,15 @@ func GetModelsList(url, token string) ([]string, error) {
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return modelsList, err
+		log.Error().Err(err).Caller().Msg("error retrieving the list of models ")
+		return modelsList, ErrConnectionFailure
 	}
 	req.Header.Set("Authorization", "Bearer "+token)
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return modelsList, err
+		log.Error().Err(err).Caller().Msg("Error retrieving the response")
+		return modelsList, ErrConnectionFailure
 	}
 	defer resp.Body.Close()
 
@@ -113,11 +118,7 @@ func GetModelsList(url, token string) ([]string, error) {
 	return modelsList, nil
 }
 
-func GenerateCompletion(prompt, modelName string, url string) (*ChatResponse, error) {
-
-	//url := "http://localhost:8080/v1/chat/completions"
-
-	// Create the request body
+func GenerateCompletion(prompt, modelName, url string) (*ChatResponse, error) {
 	data := ChatRequest{
 		Model: modelName,
 		Messages: []Message{
@@ -129,43 +130,48 @@ func GenerateCompletion(prompt, modelName string, url string) (*ChatResponse, er
 		Temperature: 0.9,
 	}
 
-	// Convert request body to JSON
 	jsonData, err := json.Marshal(data)
 	if err != nil {
+		log.Error().Err(err).Caller().Msg("failed to marshal chat request")
 		return nil, err
 	}
 
-	// Send the request
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonData))
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
 	if err != nil {
-		return nil, err
+		log.Error().Err(err).Caller().Msg("error creating new request for chat completion")
+		return nil, ErrConnectionFailure
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		log.Error().Err(err).Caller().Msg("error sending request for chat completion")
+		return nil, ErrConnectionFailure
 	}
 	defer resp.Body.Close()
 
-	// log raw response
-	log.Println("raw response: ", resp)
+	if resp.StatusCode != http.StatusOK {
+		log.Error().Int("status_code", resp.StatusCode).Caller().Msg("unexpected status code for chat completion")
+		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
 
-	// Read the response body
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
+		log.Error().Err(err).Caller().Msg("failed to read response body")
 		return nil, err
 	}
 
-	// Parse the JSON response
 	var chatResp ChatResponse
-	err = json.Unmarshal(body, &chatResp)
-	if err != nil {
+	if err = json.Unmarshal(body, &chatResp); err != nil {
+		log.Error().Err(err).Caller().Msg("failed to unmarshal chat response")
 		return nil, err
 	}
 
-	// log unmarshalled response
-	log.Println(chatResp)
-
+	log.Info().Msg("chat completion response received successfully")
 	return &chatResp, nil
 }
 
 func GenerateImageStableDiffusion(prompt, size, url, model, localAIToken string) (string, error) {
-	fmt.Println("Request URL:", url)
 	payload := struct {
 		Model  string `json:"model"`
 		Prompt string `json:"prompt"`
@@ -178,54 +184,63 @@ func GenerateImageStableDiffusion(prompt, size, url, model, localAIToken string)
 
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
+		log.Error().Err(err).Caller().Msg("failed to marshal payload")
 		return "", err
 	}
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(payloadBytes))
 	if err != nil {
-		return "", err
+		log.Error().Err(err).Caller().Msg("failed to create new request")
+		return "", ErrConnectionFailure
 	}
 	req.Header.Set("Content-Type", "application/json")
 
 	if localAIToken == "" {
-		return "", fmt.Errorf("localAIToken not found")
+		err := fmt.Errorf("localAIToken not found")
+		log.Error().Err(err).Caller().Msg("authorization token missing")
+		return "", err
 	}
 	req.Header.Set("Authorization", "Bearer "+localAIToken)
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return "", err
+		log.Error().Err(err).Caller().Msg("failed to send request")
+		return "", ErrConnectionFailure
 	}
 	defer resp.Body.Close()
 
-	// Log if the request fails
 	if resp.StatusCode != http.StatusOK {
-		errorBody, _ := ioutil.ReadAll(resp.Body)
+		errorBody, _ := io.ReadAll(resp.Body)
+		log.Error().Int("status_code", resp.StatusCode).Msgf("unexpected status code: %s", string(errorBody))
 		return "", fmt.Errorf("request failed with status code %d: %s", resp.StatusCode, string(errorBody))
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
+		log.Error().Err(err).Caller().Msg("failed to read response body")
 		return "", err
 	}
 
 	var generationResp GenerationResponse
-	err = json.Unmarshal(body, &generationResp)
-	if err != nil {
+	if err = json.Unmarshal(body, &generationResp); err != nil {
+		log.Error().Err(err).Caller().Msg("failed to unmarshal response")
 		return "", err
 	}
-	imageURL := generationResp.Data[0].URL
-	fmt.Println("Image URL from localai pkg:", imageURL)
 
+	if len(generationResp.Data) == 0 {
+		err := fmt.Errorf("no image data returned")
+		log.Error().Err(err).Caller().Msg("empty response data")
+		return "", err
+	}
+
+	imageURL := generationResp.Data[0].URL
+	log.Info().Msgf("Image URL from localai pkg: %s", imageURL)
 	return imageURL, nil
 }
-
 func TranscribeWhisper(url, model, path, localAIToken string) (string, error) {
-
 	file, err := os.Open(path)
 	if err != nil {
-		fmt.Println("Error opening file:", err)
+		log.Error().Err(err).Caller().Msg("error opening file")
 		return "", err
 	}
 	defer file.Close()
@@ -233,65 +248,70 @@ func TranscribeWhisper(url, model, path, localAIToken string) (string, error) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
-	err = writer.WriteField("model", model)
-	if err != nil {
-		fmt.Println("Error adding model field:", err)
+	if err = writer.WriteField("model", model); err != nil {
+		log.Error().Err(err).Caller().Msg("error adding model field")
 		return "", err
 	}
 
 	part, err := writer.CreateFormFile("file", filepath.Base(path))
 	if err != nil {
-		fmt.Println("Error creating file field:", err)
+		log.Error().Err(err).Caller().Msg("error creating form file")
 		return "", err
 	}
-	_, err = io.Copy(part, file)
-	if err != nil {
-		fmt.Println("Error copying file data:", err)
+	if _, err = io.Copy(part, file); err != nil {
+		log.Error().Err(err).Caller().Msg("error copying file data")
 		return "", err
 	}
 
-	err = writer.Close()
-	if err != nil {
-		fmt.Println("Error closing writer:", err)
+	if err = writer.Close(); err != nil {
+		log.Error().Err(err).Caller().Msg("error closing writer")
 		return "", err
 	}
 
 	req, err := http.NewRequest("POST", url, body)
 	if err != nil {
-		fmt.Println("Error creating request:", err)
-		return "", err
+		log.Error().Err(err).Caller().Msg("error creating request")
+		return "", ErrConnectionFailure
 	}
 
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	req.Header.Set("accept", "application/json")
-	req.Header.Set("Authorization", "Bearer "+localAIToken)
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		fmt.Println("Error sending request:", err)
+	if localAIToken == "" {
+		err := fmt.Errorf("localAIToken not found")
+		log.Error().Err(err).Caller().Msg("authorization token missing")
 		return "", err
 	}
+	req.Header.Set("Authorization", "Bearer "+localAIToken)
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		log.Error().Err(err).Caller().Msg("error sending request")
+		return "", ErrConnectionFailure
+	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		errorBody, _ := io.ReadAll(resp.Body)
+		log.Error().Int("status_code", resp.StatusCode).Msgf("unexpected status code: %s", string(errorBody))
+		return "", fmt.Errorf("request failed with status code %d: %s", resp.StatusCode, string(errorBody))
+	}
+
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("Error reading response:", err)
+		log.Error().Err(err).Caller().Msg("error reading response")
 		return "", err
 	}
 
 	var response struct {
 		Text string `json:"text"`
 	}
-	err = json.Unmarshal(respBody, &response)
-	if err != nil {
+	if err = json.Unmarshal(respBody, &response); err != nil {
+		log.Error().Err(err).Caller().Msg("error unmarshalling response")
 		return "", fmt.Errorf("error unmarshalling response: %v", err)
 	}
 
-	text := response.Text
-
-	//uncomment to remove [BLANK_AUDIO] from output.
-	text = cleanText(text)
-
+	text := cleanText(response.Text)
+	log.Info().Msg("transcription completed successfully")
 	return text, nil
 }
 
