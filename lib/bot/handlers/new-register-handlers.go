@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"strings"
 
 	"github.com/JackBekket/hellper/lib/config"
 	"github.com/JackBekket/hellper/lib/database"
@@ -51,7 +52,7 @@ func (h *handlers) NewRegisterHandlers(ctx context.Context, tgb *bot.Bot) {
 	botSelf, _ := tgb.GetMe(ctx)
 	h.botUsername = botSelf.Username
 	// Router for tg bot command handlers
-	tgb.RegisterHandler(bot.HandlerTypeMessageText, "/", bot.MatchTypePrefix, h.cmdRouter)
+	tgb.RegisterHandlerMatchFunc(matchTypePrefix, h.cmdRouter)
 
 	// Router for text message handlers
 	tgb.RegisterHandlerMatchFunc(matchTextMessage, h.textMessageRouter, h.filterGroupMessagesMiddleware)
@@ -69,6 +70,7 @@ func (h *handlers) NewRegisterHandlers(ctx context.Context, tgb *bot.Bot) {
 }
 
 // Rules for calling the handler
+//The telegram file handling moment needs to be processed.
 
 func matchTextMessage(update *models.Update) bool {
 	return update.Message != nil && update.Message.Text != "" && update.CallbackQuery == nil && update.Message.Sticker == nil
@@ -84,4 +86,13 @@ func matchPhoto(update *models.Update) bool {
 
 func matchVoice(update *models.Update) bool {
 	return update.Message != nil && update.Message.Voice != nil
+}
+
+// Stub for the /start command, it needs to be designed.
+func matchTypePrefix(update *models.Update) bool {
+	if update.Message == nil {
+		return false
+	}
+	data := update.Message.Text
+	return strings.HasPrefix(data, "/") && data != "/start"
 }
