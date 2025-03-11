@@ -74,7 +74,7 @@ The external data/input sources are:
 * `base_url`: a string representing the base URL for the API  
 * `promt`: a string representing the prompt for the language model  
 * `model_name`: a string representing the name of the language model  
-* `api_token`: a string representing the API token for authentication  
+* `localAIToken`: a string representing the API token for authentication  
 * `network`: a string representing the network to use (either "local" or "openai")  
 * `options`: a variable number of `llms.CallOption` arguments  
   
@@ -84,10 +84,10 @@ The following TODO comments are found in the code:
   
 ## Code Summary  
 ### Function GenerateContentInstruction  
-The `GenerateContentInstruction` function generates content based on a single prompt without memory and context. It takes in several parameters, including `base_url`, `promt`, `model_name`, `api_token`, `network`, and `options`. The function returns a string result and an error.  
+The `GenerateContentInstruction` function generates content based on a single prompt without memory and context. It takes in several parameters, including `base_url`, `promt`, `model_name`, `localAIToken`, `network`, and `options`. The function returns a string result and an error.  
   
 ### Language Model Initialization  
-The function initializes a language model using the `openai` package, either with a local or openai network. It sets up the model with the provided `api_token`, `base_url`, and `model_name`.  
+The function initializes a language model using the `openai` package, either with a local or openai network. It sets up the model with the provided `localAIToken`, `base_url`, and `model_name`.  
   
 ### Content Generation  
 The function generates content using the `llms.GenerateFromSinglePrompt` function, passing in the context, language model, prompt, and options. The result is then printed to the console and returned as a string.  
@@ -106,7 +106,7 @@ The following imports are used in the code:
   
 ## External Data/Input Sources  
 The external data/input sources are:  
-* **api_token**: a string representing the API token  
+* **localAIToken**: a string representing the API token  
 * **model_name**: a string representing the model name  
 * **base_url**: a string representing the base URL  
 * **user_promt**: a string representing the user prompt  

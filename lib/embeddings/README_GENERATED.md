@@ -11,9 +11,9 @@ The embeddings package provides functions for loading and querying vector stores
 
 ## Command Line Arguments
 The package can be launched with the following command line arguments:
-* `ai_url`: the URL of the AI service
+* `baseURL`: the URL of the AI service
 * `api_token`: the token for the AI service
-* `db_link`: the link to the database
+* `dbLink`: the link to the database
 * `name`: the name of the vector store
 
 ## Edge Cases
@@ -38,5 +38,5 @@ The project package structure is as follows:
 The `common.go` file provides functions for getting a vector store from a database. The `load.go` file provides functions for loading documents into a vector store. The `query.go` file provides functions for querying a vector store.
 
 ## Code Explanation
-The `GetVectorStore` function in `common.go` takes `ai_url`, `api_token`, and `db_link` as parameters and returns a `vectorstores.VectorStore` and an error. The `LoadDocsToStore` function in `load.go` loads a slice of `schema.Document` objects into a `vectorstores.VectorStore` object. The `Rag` function in `query.go` takes in several parameters, including the AI URL, API token, question, number of results, and vector store, and returns the result and an error.
+The `GetVectorStore` function in `common.go` takes `baseURL`, `api_token`, and `dbLink` as parameters and returns a `vectorstores.VectorStore` and an error. The `LoadDocsToStore` function in `load.go` loads a slice of `schema.Document` objects into a `vectorstores.VectorStore` object. The `Rag` function in `query.go` takes in several parameters, including the AI URL, API token, question, number of results, and vector store, and returns the result and an error.
 

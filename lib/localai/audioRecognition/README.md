@@ -16,7 +16,7 @@ github.com/go-telegram-bot-api/telegram-bot-api/v5
 
 1. Environment variables:
     - `AI_ENDPOINT`: URL of the AI endpoint for speech-to-text conversion.
-    - `VOICE_RECOGNITION_SUFFIX`: Suffix to append to the AI endpoint URL for voice recognition. Defaults to `/v1/audio/transcriptions` if not set.
+    - `VOICE_RECOGNITION_ENDPOINT`: endpoint to append to the AI endpoint URL for voice recognition. Defaults to `/v1/audio/transcriptions` if not set.
     - `VOICE_RECOGNITION_MODEL`: Model to use for speech-to-text conversion. Defaults to "whisper-1" if not set.
 
 2. Telegram bot API:
@@ -38,7 +38,7 @@ This function downloads a file from a given URL to a local file path. It first c
 
 #### GetEnvsForSST:
 
-This function retrieves the AI endpoint URL and voice recognition model from environment variables. It first retrieves the AI endpoint URL from the `AI_ENDPOINT` environment variable and appends the voice recognition suffix from the `VOICE_RECOGNITION_SUFFIX` environment variable. If the suffix is not set, it defaults to `/v1/audio/transcriptions`. The function then retrieves the voice recognition model from the `VOICE_RECOGNITION_MODEL` environment variable and defaults to "whisper-1" if not set. Finally, it returns the AI endpoint URL and voice recognition model.
+This function retrieves the AI endpoint URL and voice recognition model from environment variables. It first retrieves the AI endpoint URL from the `AI_ENDPOINT` environment variable and appends the voice recognition endpoint from the `VOICE_RECOGNITION_ENDPOINT` environment variable. If the endpoint is not set, it defaults to `/v1/audio/transcriptions`. The function then retrieves the voice recognition model from the `VOICE_RECOGNITION_MODEL` environment variable and defaults to "whisper-1" if not set. Finally, it returns the AI endpoint URL and voice recognition model.
 
 ```
 audioRecognition/

@@ -40,11 +40,11 @@ func (s *Service) DropHandler(userId int64) {
 	s.LLMHandlers.Delete(userId)
 }
 
-func (s *Service) UpdateHandler(userId int64, token, model, endpointURL string) (*openai.LLM, error) {
+func (s *Service) UpdateHandler(userId int64, localAIToken, model, baseURL string) (*openai.LLM, error) {
 	llm, err := openai.New(
-		openai.WithToken(token),
+		openai.WithToken(localAIToken),
 		openai.WithModel(model),
-		openai.WithBaseURL(endpointURL),
+		openai.WithBaseURL(baseURL),
 	)
 	if err != nil {
 		return nil, err

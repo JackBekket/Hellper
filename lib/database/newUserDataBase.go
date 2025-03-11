@@ -5,6 +5,13 @@ import (
 	"github.com/tmc/langchaingo/vectorstores"
 )
 
+// Constants for retrieving information from the Usage map
+const (
+	Usage_PromptTokens     = "Promt"
+	Usage_CompletionTokens = "Completion"
+	Usage_TotalTokens      = "Total"
+)
+
 // main in-memory struct for dialogs, key (int64) is telegram user id
 type User struct {
 	ID           int64
@@ -14,7 +21,7 @@ type User struct {
 	AiSession    AiSession
 	Network      string
 	Topics       []int
-	VectorStore vectorstores.VectorStore
+	VectorStore  vectorstores.VectorStore
 	//local_ai_pass string
 }
 
@@ -23,16 +30,17 @@ type SessionUsage struct {
 	Usage map[string]int
 }
 
-//memory
+// memory
 type AiSession struct {
-	GptKey       string
+	AIToken      string
 	GptModel     string
-	AI_Type      int8
-	DialogThread ChatSessionGraph		
-	Base_url     string
+	AuthMethod   int64
+	ProviderID   int64
+	DialogThread ChatSessionGraph
+	ProviderName string
+	BaseURL      string
 	Usage        map[string]int
 }
-
 
 // langgraph doesn't work with same types as langchain, so we have to improvise here.
 type ChatSessionGraph struct {
@@ -70,16 +78,12 @@ func GetSessionUsage(id int64) map[string]int {
 	return usage
 }
 
-
-func NewChatSessionGraph(buffer  []llms.MessageContent) *ChatSessionGraph {
+func NewChatSessionGraph(buffer []llms.MessageContent) *ChatSessionGraph {
 	return &ChatSessionGraph{
 		ConversationBuffer: buffer,
 	}
 }
 
-
 func (s *ChatSessionGraph) ClearBuffer() {
-    s.ConversationBuffer = nil
+	s.ConversationBuffer = nil
 }
-
-

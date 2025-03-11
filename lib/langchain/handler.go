@@ -11,10 +11,7 @@ import (
 	//""
 )
 
-
 type ChainCallbackHandler struct{}
-
-
 
 // HandleAgentAction implements callbacks.Handler.
 func (h *ChainCallbackHandler) HandleAgentAction(ctx context.Context, action schema.AgentAction) {
@@ -94,27 +91,26 @@ func (h *ChainCallbackHandler) HandleText(ctx context.Context, text string) {
 
 func (h *ChainCallbackHandler) HandleLLMGenerateContentEnd(ctx context.Context, res *llms.ContentResponse) {
 
-	LogResponseContentChoice(ctx,res)	
+	LogResponseContentChoice(ctx, res)
 }
 
-func LogResponseContentChoice(ctx context.Context,resp *llms.ContentResponse) {
+func LogResponseContentChoice(ctx context.Context, resp *llms.ContentResponse) {
 	//choice *llms.ContentChoice
 	choice := resp.Choices[0]
 	log.Println("Content: ", choice.Content)
 	log.Println("Stop Reason: ", choice.StopReason)
 
 	log.Println("Context: ", ctx)
-	
+
 	//Get user from context
+	//
 	user, ok := ctx.Value("user").(db.User)
 	if !ok {
-	  log.Println("No user in context")
-	  //log.Println
-	  return
+		log.Println("No user in context")
+		//log.Println
+		return
 	}
 	//chatID := user.ID
-
-
 
 	// GenerationInfo is a map that could contain complex/nested structures,
 	// so we'll marshal it into a JSON string for a cleaner log message.
@@ -137,27 +133,24 @@ func LogResponseContentChoice(ctx context.Context,resp *llms.ContentResponse) {
 	completion_tokens_str := choice.GenerationInfo["CompletionTokens"]
 	total_tokens_str := choice.GenerationInfo["TotalTokens"]
 
-
 	// type assertion (string --> int)
 	pt, ok := promt_tokens_str.(int)
 	if !ok {
-  	log.Println("Error: value is not a string")
-  	return
+		log.Println("Error: value is not a string")
+		return
 	}
 	ct, ok := completion_tokens_str.(int)
 	tt, ok := total_tokens_str.(int)
-	
-		  // Update the user's usage information.
-		  usage := map[string]int{
-			"Total": tt,
-			"Promt": pt,
-			"Completion": ct,
-		  }
-		
-		  // Save the user usage back to the database -- it's will not update user info, but stored it in separate structure to avoide race condition
-		  db.UpdateSessionUsage(user.ID,usage)
 
+	// Update the user's usage information.
+	usage := map[string]int{
+		"Total":      tt,
+		"Promt":      pt,
+		"Completion": ct,
+	}
 
+	// Save the user usage back to the database -- it's will not update user info, but stored it in separate structure to avoide race condition
+	db.UpdateSessionUsage(user.ID, usage)
 
 	// Note: Since FuncCall is a pointer to a schema.FunctionCall, ensure you check for nil to avoid panics.
 	if choice.FuncCall != nil {

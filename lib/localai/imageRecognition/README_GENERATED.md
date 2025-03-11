@@ -3,7 +3,7 @@ The provided code is for an image recognition package that uses the Telegram bot
 
 Environment variables:
 * `AI_ENDPOINT`
-* `IMAGE_RECOGNITION_SUFFIX`
+* `IMAGE_RECOGNITION_ENDPOINT`
 * `IMAGE_RECOGNITION_MODEL`
 * `OPENAI_API_KEY`
 
