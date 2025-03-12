@@ -3,17 +3,14 @@ package agent
 
 import (
 	"log"
-	"os"
 
-	"github.com/joho/godotenv"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai"
 )
 
 // This function fire One-Shot agent without history context
-func OnePunch(prompt string) {
-
-	llm := CreateGenericLLM()
+func OnePunch(model, baseURL, localAIToken, prompt string) {
+	llm := CreateGenericLLM(model, baseURL, localAIToken)
 	call := OneShotRun(prompt, llm)
 	log.Println(call)
 }
@@ -52,21 +49,16 @@ func CreateMessageContentHuman(content string) []llms.MessageContent {
 	return intialState
 }
 
-func CreateGenericLLM() openai.LLM {
-	model_name := "tiger-gemma-9b-v1-i1" // should be settable?
-	_ = godotenv.Load()
-	ai_url := os.Getenv("AI_ENDPOINT") //TODO: should be global?
-	api_token := os.Getenv("AI_ENDPOINT")
-	//db_link := os.Getenv("EMBEDDINGS_DB_URL")
-	model, err := openai.New(
-		openai.WithToken(api_token),
-		//openai.WithBaseURL("http://localhost:8080"),
-		openai.WithBaseURL(ai_url),
-		openai.WithModel(model_name),
+// refactor
+func CreateGenericLLM(model, baseURL, localAIToken string) openai.LLM {
+	modelLLM, err := openai.New(
+		openai.WithToken(localAIToken),
+		openai.WithBaseURL(baseURL),
+		openai.WithModel(model),
 		openai.WithAPIVersion("v1"),
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
-	return *model
+	return *modelLLM
 }

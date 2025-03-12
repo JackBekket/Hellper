@@ -4,12 +4,16 @@ go 1.22.3
 
 require (
 	github.com/JackBekket/langgraphgo v0.0.0-20241122181505-95eaa98c53b0
-	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
 	github.com/joho/godotenv v1.5.1
+	github.com/rs/zerolog v1.33.0
 	github.com/tmc/langchaingo v0.1.12
 )
 
-require github.com/jackc/puddle/v2 v2.2.1 // indirect
+require (
+	github.com/jackc/puddle/v2 v2.2.1 // indirect
+	github.com/mattn/go-colorable v0.1.14 // indirect
+	github.com/mattn/go-isatty v0.0.20 // indirect
+)
 
 require (
 	github.com/AssemblyAI/assemblyai-go-sdk v1.5.1 // indirect
@@ -22,7 +26,7 @@ require (
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/dlclark/regexp2 v1.11.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
-	github.com/go-telegram/bot v1.13.3
+	github.com/go-telegram/bot v1.14.0
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/goph/emperror v0.17.2 // indirect
@@ -60,7 +64,7 @@ require (
 	golang.org/x/exp v0.0.0-20240506185415-9bf2ced13842 // indirect
 	golang.org/x/net v0.25.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
-	golang.org/x/sys v0.20.0 // indirect
+	golang.org/x/sys v0.30.0 // indirect
 	golang.org/x/text v0.15.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	nhooyr.io/websocket v1.8.11 // indirect

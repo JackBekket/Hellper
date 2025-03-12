@@ -15,7 +15,7 @@ This package provides functionality for image recognition using an external AI s
 ### External Data, Input Sources
 
 * AI_ENDPOINT: Environment variable containing the URL of the AI service endpoint.
-* IMAGE_RECOGNITION_SUFFIX: Environment variable containing the suffix for the API endpoint. Defaults to "/v1/chat/completions" if not set.
+* IMAGE_RECOGNITION_ENDPOINT: Environment variable containing the endpoint for the API endpoint. Defaults to "/v1/chat/completions" if not set.
 * IMAGE_RECOGNITION_MODEL: Environment variable containing the name of the AI model to use. Defaults to "bunny-llama-3-8b-v" if not set.
 * OPENAI_API_KEY: Environment variable containing the API key for the AI service.
 

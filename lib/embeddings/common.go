@@ -17,13 +17,13 @@ func LoadEnv() {
 
 }
 
-// Get vector store from db. ai_url is AI url (localhost or openai or docker), api_token is AI token, db_link is database link
-func GetVectorStore(ai_url string, api_token string, db_link string) (vectorstores.VectorStore, error) {
-
-	base_url := ai_url
+// Get vector store from db. baseURL is AI url (localhost or openai or docker), localAIToken is AI token, dbLink is database link.
+// WARNING: This function is unsafe! (╯°□°）╯︵ ┻━┻
+// log.Fatal() should NEVER be used outside of main()! It kills the whole application.
+// Even when developing a function prototype
+func GetVectorStore(baseURL string, localAIToken string, dbLink string) (vectorstores.VectorStore, error) {
 
 	//_ = godotenv.Load()
-
 
 	/*
 		host := os.Getenv("PG_HOST")
@@ -50,8 +50,7 @@ func GetVectorStore(ai_url string, api_token string, db_link string) (vectorstor
 
 		pgConnURL := fmt.Sprintf(connURLFormat, user, url.QueryEscape(password), host, dbName)
 	*/
-	pgConnURL := db_link
-
+	pgConnURL := dbLink
 
 	config, err := pgxpool.ParseConfig(pgConnURL)
 	if err != nil {
@@ -66,11 +65,11 @@ func GetVectorStore(ai_url string, api_token string, db_link string) (vectorstor
 	// Create an embeddings client using the OpenAI API. Requires environment variable API_KEY to be set.
 	llm, err := openai.New(
 		//openai.WithBaseURL("http://localhost:8080/v1/"),
-		openai.WithBaseURL(base_url),
+		openai.WithBaseURL(baseURL),
 		openai.WithAPIVersion("v1"),
 		//openai.WithModel("wizard-uncensored-13b"),
 		openai.WithEmbeddingModel("text-embedding-ada-002"),
-		openai.WithToken(api_token),
+		openai.WithToken(localAIToken),
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -98,21 +97,18 @@ func GetVectorStore(ai_url string, api_token string, db_link string) (vectorstor
 	fmt.Println("vector store ready")
 
 	/*
-	defer func() {
-		pgvStore := store
-		pgvStore.Close()
-	  }()
+		defer func() {
+			pgvStore := store
+			pgvStore.Close()
+		  }()
 	*/
 	return store, nil
 
-	
 }
 
-func GetVectorStoreWithOptions(ai_url string, api_token string, db_link string, name string) (vectorstores.VectorStore, error) {
+func GetVectorStoreWithOptions(baseURL string, localAIToken string, dbLink string, name string) (vectorstores.VectorStore, error) {
 
-	base_url := ai_url
-
-	pgConnURL := db_link
+	pgConnURL := dbLink
 
 	config, err := pgxpool.ParseConfig(pgConnURL)
 	if err != nil {
@@ -126,11 +122,11 @@ func GetVectorStoreWithOptions(ai_url string, api_token string, db_link string, 
 
 	llm, err := openai.New(
 		//openai.WithBaseURL("http://localhost:8080/v1/"),
-		openai.WithBaseURL(base_url),
+		openai.WithBaseURL(baseURL),
 		openai.WithAPIVersion("v1"),
 		//openai.WithModel("wizard-uncensored-13b"),
 		openai.WithEmbeddingModel("text-embedding-ada-002"),
-		openai.WithToken(api_token),
+		openai.WithToken(localAIToken),
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -159,10 +155,10 @@ func GetVectorStoreWithOptions(ai_url string, api_token string, db_link string, 
 	fmt.Println("vector store ready")
 
 	/*
-	defer func() {
-		pgvStore := store
-		pgvStore.Close()
-	  }()
+		defer func() {
+			pgvStore := store
+			pgvStore.Close()
+		  }()
 	*/
 	return store, nil
 }

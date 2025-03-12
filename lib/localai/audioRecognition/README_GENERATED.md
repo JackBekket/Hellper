@@ -3,7 +3,7 @@ The provided code is for a package named `stt` that handles voice messages and p
 
 The package uses the following environment variables:
 * `AI_ENDPOINT`
-* `VOICE_RECOGNITION_SUFFIX` (optional, defaults to `/v1/audio/transcriptions`)
+* `VOICE_RECOGNITION_ENDPOINT` (optional, defaults to `/v1/audio/transcriptions`)
 * `VOICE_RECOGNITION_MODEL` (optional, defaults to `whisper-1`)
 
 The package can be launched as a command-line application with the following edge cases:

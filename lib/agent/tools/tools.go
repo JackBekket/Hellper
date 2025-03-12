@@ -13,59 +13,59 @@ import (
 )
 
 type SemanticSearchTool struct {
-    // ... tool-specific implementation
+	// ... tool-specific implementation
 }
 
 type Tool interface {
-    Execute(ctx context.Context, state []llms.MessageContent) ([]llms.MessageContent, error)
+	Execute(ctx context.Context, state []llms.MessageContent) ([]llms.MessageContent, error)
 }
 
-func  GetTools() ([]llms.Tool, error) {
-    // ... tool init logic
-		// toolS definition interfaces
-		tools := []llms.Tool{
-			{
-				Type: "function",
-				Function: &llms.FunctionDefinition{
-					Name:        "search",
-					Description: "Preforms Duck Duck Go web search",
-					Parameters: map[string]any{
-						"type": "object",
-						"properties": map[string]any{
-							"query": map[string]any{
-								"type":        "string",
-								"description": "The search query",
-							},
+func GetTools() ([]llms.Tool, error) {
+	// ... tool init logic
+	// toolS definition interfaces
+	tools := []llms.Tool{
+		{
+			Type: "function",
+			Function: &llms.FunctionDefinition{
+				Name:        "search",
+				Description: "Preforms Duck Duck Go web search",
+				Parameters: map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"query": map[string]any{
+							"type":        "string",
+							"description": "The search query",
 						},
 					},
 				},
 			},
-			{
-				Type: "function",
-				Function: &llms.FunctionDefinition{
-					Name:        "semanticSearch",
-					Description: "Performs semantic search using a vector store",
-					Parameters: map[string]any{
-						"type": "object",
-						"properties": map[string]any{
-							"query": map[string]any{
-								"type":        "string",
-								"description": "The search query",
-							},
-							"collection": map[string]any{ //TODO: there should NOT exist arguments which called NAME cause it cause COLLISION with actual function name.    .....more like confusion then collision so there are no error
-								"type":        "string",
-								"description": "name of collection store in which we perform the search",
-							},
+		},
+		{
+			Type: "function",
+			Function: &llms.FunctionDefinition{
+				Name:        "semanticSearch",
+				Description: "Performs semantic search using a vector store",
+				Parameters: map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"query": map[string]any{
+							"type":        "string",
+							"description": "The search query",
+						},
+						"collection": map[string]any{ //TODO: there should NOT exist arguments which called NAME cause it cause COLLISION with actual function name.    .....more like confusion then collision so there are no error
+							"type":        "string",
+							"description": "name of collection store in which we perform the search",
 						},
 					},
 				},
 			},
-		}
-		return tools,nil
+		},
+	}
+	return tools, nil
 }
-
 
 // Unsure if needed here
+// REFACTOR
 func (s *SemanticSearchTool) Execute(ctx context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
 	lastMsg := state[len(state)-1]
 
@@ -91,15 +91,15 @@ func (s *SemanticSearchTool) Execute(ctx context.Context, state []llms.MessageCo
 
 			//get env
 			_ = godotenv.Load()
-			ai_url := os.Getenv("AI_ENDPOINT") // there are global, there might be resetting.
-			api_token := os.Getenv("OPENAI_API_KEY")
-			db_link := os.Getenv("PG_LINK")
+			endpoint := os.Getenv("AI_ENDPOINT") // there are global, there might be resetting.
+			localAIToken := os.Getenv("OPENAI_API_KEY")
+			dbLink := os.Getenv("DB_LINK")
 
 			log.Println("Collection Name: ", args.Collection)
-			log.Println("db_link: ", db_link)
+			log.Println("dbLink: ", dbLink)
 
 			// Retrieve your vector store based on the store value in the args
-			store, err := embeddings.GetVectorStoreWithOptions(ai_url, api_token, db_link, args.Collection)
+			store, err := embeddings.GetVectorStoreWithOptions(endpoint, localAIToken, dbLink, args.Collection)
 			if err != nil {
 				log.Println("error getting store")
 				return state, err

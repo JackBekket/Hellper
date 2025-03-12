@@ -2,56 +2,96 @@ package main
 
 import (
 	"context"
-	"log"
 	"os"
+	"os/signal"
+	"time"
 
-	"github.com/JackBekket/hellper/lib/bot/command"
-	"github.com/JackBekket/hellper/lib/bot/dialog"
+	"github.com/JackBekket/hellper/lib/bot/handlers"
+	"github.com/JackBekket/hellper/lib/config"
 	"github.com/JackBekket/hellper/lib/database"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/go-telegram/bot"
 	"github.com/joho/godotenv"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 func main() {
+	log.Logger = log.Output(zerolog.ConsoleWriter{
+		Out:          os.Stdout,
+		TimeFormat:   time.DateTime,
+		TimeLocation: time.Local,
+	})
 
-	_ = godotenv.Load()
+	//In the future, a check for empty variables in the .env file should be implemented
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to load .env file")
+	}
+	log.Info().Msg(".env file loaded successfully")
 
 	token := os.Getenv("TG_KEY")
-	db_link := os.Getenv("DB_LINK")
+	dbLink := os.Getenv("DB_LINK")
 
-	bot, err := tgbotapi.NewBotAPI(token)
+	dbHandler, err := database.NewHandler(dbLink)
 	if err != nil {
-		log.Fatalf("tg token missing: %v\n", err)
+		log.Fatal().Err(err).Msg("failed to create database service")
 	}
 
-	// in-memory (cash) db. 
-	usersDatabase := database.UsersMap
+	if err := dbHandler.DB.Ping(); err != nil {
+		log.Fatal().Err(err).Msg("failed to ping database")
+	}
+	log.Info().Msg("database ping successful")
 
-	//
-	db, err := database.NewHandler(db_link)
+	db_service, err := database.NewAIService(dbHandler)
 	if err != nil {
-		log.Fatalf("failed to create database service: %v", err)
-	}
-	db_service, err := database.NewAIService(db)
-
-	ctx := context.Background()
-	comm := command.NewCommander(bot, usersDatabase, ctx)
-
-	log.Printf("Authorized on account %s", bot.Self.UserName)
-
-	u := tgbotapi.NewUpdate(0)
-	u.Timeout = 60
-
-	upd_ch := make(chan tgbotapi.Update)
-
-	//updateHandler :=
-	updates := bot.GetUpdatesChan(u)
-
-	// handling any incoming updates through channel
-	go dialog.HandleUpdates(upd_ch, bot, *comm,db_service)
-
-	for update := range updates {
-		upd_ch <- update
+		log.Fatal().Err(err).Msg("something wrong")
 	}
 
-} // end of main func
+	cache := database.NewMemoryCache()
+
+	botHandlers := handlers.NewHandlersBot(
+		cache, db_service, dbLink,
+		&config.AIConfig{
+			ModelsListEndpoint:       os.Getenv("MODELS_LIST_ENDPOINT"),
+			ImageGenerationModel:     os.Getenv("IMAGE_GENERATION_MODEL"),
+			ImageGenerationEndpoint:  os.Getenv("IMAGE_GENERATION_ENDPOINT"),
+			ImageRecognitionModel:    os.Getenv("IMAGE_RECOGNITION_MODEL"),
+			ImageRecognitionEndpoint: os.Getenv("IMAGE_RECOGNITION_ENDPOINT"),
+			VoiceRecognitionModel:    os.Getenv("VOICE_RECOGNITION_MODEL"),
+			VoiceRecognitionEndpoint: os.Getenv("VOICE_RECOGNITION_ENDPOINT"),
+		},
+	)
+
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer cancel()
+
+	opts := []bot.Option{
+		bot.WithMiddlewares(botHandlers.IdentifyUserMiddleware),
+	}
+
+	tgb, err := bot.New(token, opts...)
+	if err != nil {
+		log.Fatal().Err(err).Msg("token is missing")
+	}
+
+	botHandlers.NewRegisterHandlers(ctx, tgb)
+
+	botSelf, err := tgb.GetMe(ctx)
+	if err != nil {
+		log.Fatal().Err(err).Msg("invalid token")
+	}
+
+	go tgb.Start(ctx)
+	log.Info().Msg("Bot is starting")
+	log.Info().Int64("id", botSelf.ID).Msgf("authorized on account: %s", botSelf.Username)
+
+	<-ctx.Done()
+	log.Info().Msg("Termination signal received. Shutting down...")
+	if err := dbHandler.DB.Close(); err != nil {
+		log.Error().Err(err).Msg("failed to close database connection")
+	} else {
+		log.Info().Msg("database connection closed")
+	}
+	log.Info().Msg("Completed.")
+
+}
