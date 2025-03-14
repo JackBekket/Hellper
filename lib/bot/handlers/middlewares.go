@@ -104,10 +104,10 @@ func (h *handlers) filterGroupMessagesMiddleware(next bot.HandlerFunc) bot.Handl
 			if update.Message.Chat.ID < 0 && update.Message.Voice != nil {
 				return
 			}
-			if update.Message.Text != "" && !strings.Contains(update.Message.Text, h.botUsername) {
+			if update.Message.Text != "" && !strings.Contains(update.Message.Text, botName) {
 				return
 			}
-			if update.Message.Photo != nil && (update.Message.Caption == "" || !strings.Contains(update.Message.Caption, h.botUsername)) {
+			if update.Message.Photo != nil && (update.Message.Caption == "" || !strings.Contains(update.Message.Caption, botName)) {
 				return
 			}
 		}

@@ -25,11 +25,12 @@ type Bot interface {
 	NewRegisterHandlers(ctx context.Context, tgb *bot.Bot)
 }
 
+var botName string
+
 // structure to hold dependencies of other packages: postgres, cache, llmHandlers
 type handlers struct {
-	botUsername string
-	cache       database.Cacher
-	dbLink      string
+	cache  database.Cacher
+	dbLink string
 	// Postgres database and LLMHandlers
 	dbService *database.Service
 	config    *config.AIConfig
@@ -50,7 +51,7 @@ func NewHandlersBot(cache database.Cacher, db_service *database.Service, dbLink 
 // Central function for registering bot handlers. New used commands should be added here
 func (h *handlers) NewRegisterHandlers(ctx context.Context, tgb *bot.Bot) {
 	botSelf, _ := tgb.GetMe(ctx)
-	h.botUsername = botSelf.Username
+	botName = botSelf.Username
 	// Router for tg bot command handlers
 	tgb.RegisterHandlerMatchFunc(matchTypePrefix, h.cmdRouter)
 
@@ -73,7 +74,7 @@ func (h *handlers) NewRegisterHandlers(ctx context.Context, tgb *bot.Bot) {
 //The telegram file handling moment needs to be processed.
 
 func matchTextMessage(update *models.Update) bool {
-	return update.Message != nil && update.Message.Text != "" && update.CallbackQuery == nil && update.Message.Sticker == nil
+	return update.Message != nil && update.Message.Text != "" && update.CallbackQuery == nil && update.Message.Sticker == nil && strings.Contains(update.Message.Text, botName)
 }
 
 func matchCallbackQuery(update *models.Update) bool {
